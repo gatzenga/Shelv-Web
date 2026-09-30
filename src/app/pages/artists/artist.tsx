@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import ImageHeader from '@/app/components/album/image-header'
 import { ArtistAlbumShelf } from '@/app/components/artist/album-shelf'
 import {
   AlbumSortControls,
@@ -13,10 +12,10 @@ import ArtistTopSongs from '@/app/components/artist/artist-top-songs'
 import { ArtistBiography, ArtistInfo } from '@/app/components/artist/info'
 import { LatestReleaseCard } from '@/app/components/artist/latest-release-card'
 import RelatedArtistsList from '@/app/components/artist/related-artists'
-import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
+import { DetailHeader } from '@/app/components/detail/header'
+import { DetailHeaderFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { TopSongsTableFallback } from '@/app/components/fallbacks/table-fallbacks'
-import { BadgesData } from '@/app/components/header-info'
 import ListWrapper from '@/app/components/list-wrapper'
 import {
   useGetArtist,
@@ -71,11 +70,11 @@ export default function Artist() {
     })
   }, [artistInfo?.similarArtist, albumArtistIds])
 
-  if (artistIsLoading) return <AlbumFallback />
+  if (artistIsLoading) return <DetailHeaderFallback round />
   if (isFetched && !artist) {
     return <ErrorPage status={404} statusText="Not Found" />
   }
-  if (!artist) return <AlbumFallback />
+  if (!artist) return <DetailHeaderFallback round />
 
   function getSongCount() {
     if (!artist) return null
@@ -102,36 +101,27 @@ export default function Artist() {
   const albumCount = formatAlbumCount()
   const songCount = getSongCount()
 
-  const badges: BadgesData = [
-    {
-      content: albumCount,
-      type: 'text',
-    },
-    {
-      content: songCount,
-      type: 'text',
-    },
-  ]
+  const details = [albumCount, songCount].filter(Boolean).join(' · ')
 
   return (
     <div className="w-full relative">
-      <ImageHeader
-        type={t('artist.headline')}
-        title={artist.name}
+      <DetailHeader
         coverArtId={artist.coverArt}
         coverArtType="artist"
-        coverArtSize="700"
-        coverArtAlt={artist.name}
-        badges={badges}
-      />
+        title={artist.name}
+        round
+        actions={
+          <ArtistInfo
+            artist={artist}
+            topSongs={topSongs}
+            sortedAlbums={albumSort.sortedAlbums}
+          />
+        }
+      >
+        {details && <p className="text-xs text-muted-foreground">{details}</p>}
+      </DetailHeader>
 
       <ListWrapper>
-        <ArtistInfo
-          artist={artist}
-          topSongs={topSongs}
-          sortedAlbums={albumSort.sortedAlbums}
-        />
-
         {topSongsIsLoading && <TopSongsTableFallback />}
         {topSongs && !topSongsIsLoading && (
           <ArtistTopSongs topSongs={topSongs} />

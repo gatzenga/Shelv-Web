@@ -1,8 +1,9 @@
 import { OptionsButtons } from '@/app/components/options/buttons'
+import { ContextMenuSeparator } from '@/app/components/ui/context-menu'
 import { DropdownMenuSeparator } from '@/app/components/ui/dropdown-menu'
 import { useOptions } from '@/app/hooks/use-options'
 import { subsonic } from '@/service/subsonic'
-import { useIsPlaylistPlaying, usePlayerActions } from '@/store/player.store'
+import { usePlayerActions } from '@/store/player.store'
 import { usePlaylists, useRemovePlaylist } from '@/store/playlists.store'
 import { PlaybackSource } from '@/types/playerContext'
 import { Playlist, PlaylistWithEntries } from '@/types/responses/playlist'
@@ -14,6 +15,7 @@ interface PlaylistOptionsProps {
   playlist: PlaylistWithEntries | Playlist
   variant?: 'context' | 'dropdown'
   showPlay?: boolean
+  hideQueueActions?: boolean
   disablePlayNext?: boolean
   disableAddLast?: boolean
   disableEdit?: boolean
@@ -23,19 +25,20 @@ interface PlaylistOptionsProps {
 export function PlaylistOptions({
   playlist,
   variant = 'dropdown',
-  showPlay = false,
+  showPlay = true,
+  hideQueueActions = false,
   disablePlayNext = false,
   disableAddLast = false,
   disableEdit = false,
   disableDelete = false,
 }: PlaylistOptionsProps) {
   const { setPlaylistDialogState, setData } = usePlaylists()
-  const { play, playNext, playLast } = useOptions()
+  const { playNext, playLast } = useOptions()
   const { setPlaylistId, setConfirmDialogState } = useRemovePlaylist()
-  const { isPlaylistActive, isPlaylistPlaying } = useIsPlaylistPlaying(
-    playlist.id,
-  )
-  const { togglePlayPause } = usePlayerActions()
+  const { setSongList } = usePlayerActions()
+
+  const Separator =
+    variant === 'context' ? ContextMenuSeparator : DropdownMenuSeparator
 
   function handleEdit() {
     setData({
@@ -63,17 +66,15 @@ export function PlaylistOptions({
     type: 'playlist',
   }
 
-  async function handlePlay() {
-    if (isPlaylistActive) {
-      if (!isPlaylistPlaying) togglePlayPause()
+  async function handlePlay(shuffle = false) {
+    if ('entry' in playlist) {
+      setSongList(playlist.entry, 0, shuffle, playbackSource)
       return
     }
 
-    if ('entry' in playlist) {
-      play(playlist.entry, playbackSource)
-    } else {
-      await getSongsToQueue(play, playbackSource)
-    }
+    await getSongsToQueue((songs) =>
+      setSongList(songs, 0, shuffle, playbackSource),
+    )
   }
 
   async function handlePlayNext() {
@@ -101,35 +102,49 @@ export function PlaylistOptions({
               {playlist.name}
             </span>
           </div>
-          <DropdownMenuSeparator />
+          <Separator />
         </>
       )}
       {showPlay && (
-        <OptionsButtons.Play
-          variant={variant}
-          onClick={(e) => {
-            e.stopPropagation()
-            handlePlay()
-          }}
-        />
+        <>
+          <OptionsButtons.Play
+            variant={variant}
+            onClick={(e) => {
+              e.stopPropagation()
+              handlePlay()
+            }}
+          />
+          <OptionsButtons.Shuffle
+            variant={variant}
+            onClick={(e) => {
+              e.stopPropagation()
+              handlePlay(true)
+            }}
+          />
+          <Separator />
+        </>
       )}
-      <OptionsButtons.PlayNext
-        variant={variant}
-        disabled={disablePlayNext}
-        onClick={(e) => {
-          e.stopPropagation()
-          handlePlayNext()
-        }}
-      />
-      <OptionsButtons.PlayLast
-        variant={variant}
-        disabled={disableAddLast}
-        onClick={(e) => {
-          e.stopPropagation()
-          handlePlayLast()
-        }}
-      />
-      <DropdownMenuSeparator />
+      {!hideQueueActions && (
+        <>
+          <OptionsButtons.PlayNext
+            variant={variant}
+            disabled={disablePlayNext}
+            onClick={(e) => {
+              e.stopPropagation()
+              handlePlayNext()
+            }}
+          />
+          <OptionsButtons.PlayLast
+            variant={variant}
+            disabled={disableAddLast}
+            onClick={(e) => {
+              e.stopPropagation()
+              handlePlayLast()
+            }}
+          />
+          <Separator />
+        </>
+      )}
       <OptionsButtons.EditPlaylist
         variant={variant}
         onClick={(e) => {

@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import ImageHeader from '@/app/components/album/image-header'
+import { DetailHeader } from '@/app/components/detail/header'
 import { PlaylistFallback } from '@/app/components/fallbacks/playlist-fallbacks'
-import { BadgesData } from '@/app/components/header-info'
 import ListWrapper from '@/app/components/list-wrapper'
 import { PlaylistButtons } from '@/app/components/playlist/buttons'
 import { RemoveSongFromPlaylistDialog } from '@/app/components/playlist/remove-song-dialog'
-import { PlaylistStickyHeader } from '@/app/components/playlist/sticky-header'
 import { DataTable } from '@/app/components/ui/data-table'
 import ErrorPage from '@/app/pages/error-page'
 import { songsColumns } from '@/app/tables/songs-columns'
@@ -55,35 +53,27 @@ export default function Playlist() {
     ? t('playlist.duration', { duration })
     : null
 
-  const badges: BadgesData = [
-    { content: songCount, type: 'text' },
-    {
-      content: playlistDuration,
-      type: 'text',
-    },
-  ]
+  const details = [songCount, playlistDuration].filter(Boolean).join(' · ')
 
   const coverArt = playlist.songCount > 0 ? playlist.coverArt : undefined
 
   return (
     <div className="w-full relative" key={playlist.id}>
-      <PlaylistStickyHeader playlist={playlist} />
-
-      <ImageHeader
-        type={t('playlist.headline')}
-        title={playlist.name}
-        subtitle={playlist.comment}
+      <DetailHeader
         coverArtId={coverArt}
         coverArtType="album"
-        coverArtSize="700"
-        coverArtAlt={playlist.name}
-        badges={badges}
-        isPlaylist={true}
-      />
+        title={playlist.name}
+        actions={<PlaylistButtons playlist={playlist} />}
+      >
+        {playlist.comment && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {playlist.comment}
+          </p>
+        )}
+        {details && <p className="text-xs text-muted-foreground">{details}</p>}
+      </DetailHeader>
 
       <ListWrapper>
-        <PlaylistButtons playlist={playlist} />
-
         <DataTable
           columns={columns}
           data={playlist.entry ?? []}

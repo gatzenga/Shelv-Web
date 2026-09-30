@@ -1,5 +1,4 @@
-import { ImageHeaderEffect } from '@/app/components/album/header-effect'
-import { AlbumHeaderFallback } from '@/app/components/fallbacks/album-fallbacks'
+import { DetailHeaderFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { SongListFallback } from '@/app/components/fallbacks/song-fallbacks'
 import ListWrapper from '@/app/components/list-wrapper'
 import { MainGrid } from '@/app/components/main-grid'
@@ -12,17 +11,8 @@ export function GenresFallback() {
 export function GenreFallback() {
   return (
     <div className="w-full">
-      <div className="relative">
-        <AlbumHeaderFallback />
-        <ImageHeaderEffect className="bg-muted-foreground" />
-      </div>
-      <ListWrapper>
-        <div className="flex items-center gap-2">
-          <Skeleton className="rounded-full h-9 w-36" />
-          <Skeleton className="rounded-full h-9 w-36" />
-        </div>
-      </ListWrapper>
-      <ListWrapper className="px-8 pt-0">
+      <DetailHeaderFallback />
+      <ListWrapper className="px-8 pt-6">
         <MainGrid>
           {Array.from({ length: 24 }).map((_, index) => (
             <div key={'genre-card-fallback-' + index}>

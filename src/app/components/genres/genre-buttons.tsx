@@ -1,6 +1,6 @@
-import { Disc3, Shuffle } from 'lucide-react'
+import { Disc3Icon, ShuffleIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/app/components/ui/button'
+import { Action } from '@/app/components/album/action-buttons'
 import { subsonic } from '@/service/subsonic'
 import { usePlayerActions } from '@/store/player.store'
 
@@ -29,24 +29,20 @@ export function GenreButtons({ genre }: GenreButtonsProps) {
   }
 
   return (
-    <div className="w-full flex items-center gap-2">
-      <Button
-        variant="default"
-        className="rounded-full gap-2 px-5"
-        onClick={handleShuffleTracks}
-      >
-        <Shuffle className="w-4 h-4" />
-        {t('genres.buttons.shuffleTracks')}
-      </Button>
-
-      <Button
-        variant="ghost"
-        className="rounded-full gap-2 px-5 hover:bg-foreground/10"
-        onClick={handleShuffleAlbums}
-      >
-        <Disc3 className="w-4 h-4" />
-        {t('genres.buttons.shuffleAlbums')}
-      </Button>
+    <div className="@container/actions w-full mb-6">
+      <div className="flex flex-wrap items-center gap-1.5 @[28rem]/actions:gap-2.5">
+        <Action
+          icon={ShuffleIcon}
+          label={t('genres.buttons.shuffleTracks')}
+          onClick={handleShuffleTracks}
+          prominent
+        />
+        <Action
+          icon={Disc3Icon}
+          label={t('genres.buttons.shuffleAlbums')}
+          onClick={handleShuffleAlbums}
+        />
+      </div>
     </div>
   )
 }

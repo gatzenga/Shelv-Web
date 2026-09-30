@@ -1,17 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
-import ImageHeader from '@/app/components/album/image-header'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
+import { DetailHeader } from '@/app/components/detail/header'
 import { GenreFallback } from '@/app/components/fallbacks/genre-fallbacks'
 import { GenreButtons } from '@/app/components/genres/genre-buttons'
 import { GridViewWrapper } from '@/app/components/grid-view-wrapper'
-import { BadgesData } from '@/app/components/header-info'
 import ListWrapper from '@/app/components/list-wrapper'
-import { StickyHeader } from '@/app/components/sticky-header'
-import { useDetectSticky } from '@/app/hooks/use-detect-sticky'
 import ErrorPage from '@/app/pages/error-page'
 import { subsonic } from '@/service/subsonic'
 import { saveGridClickedItem } from '@/utils/gridTools'
@@ -20,8 +16,6 @@ import { queryKeys } from '@/utils/queryKeys'
 export default function Genre() {
   const { genreName } = useParams() as { genreName: string }
   const { t } = useTranslation()
-  const buttonsRef = useRef<HTMLDivElement>(null)
-  const { isSticky } = useDetectSticky(buttonsRef)
 
   const genre = decodeURIComponent(genreName)
 
@@ -55,38 +49,18 @@ export default function Genre() {
     routeKey: location.pathname + location.search,
   })
 
-  const badges: BadgesData = [
-    {
-      content: t('genres.albumCount', { count: albums.length }),
-      type: 'text',
-    },
-  ]
+  const details = t('genres.albumCount', { count: albums.length })
 
   return (
     <div className="w-full relative">
-      <StickyHeader contentClassName="backdrop-blur-lg supports-[backdrop-filter]:bg-background/80 border-b border-border">
-        <GenreButtons genre={genre} />
-      </StickyHeader>
-
-      <ImageHeader
-        type={t('genre.headline')}
-        title={genre}
+      <DetailHeader
         coverArtId={coverArtId}
         coverArtType="album"
-        coverArtSize="700"
-        coverArtAlt={genre}
-        badges={badges}
-      />
-
-      <ListWrapper
-        ref={buttonsRef}
-        className={clsx(
-          'transition-opacity duration-500',
-          isSticky && 'opacity-0',
-        )}
+        title={genre}
+        actions={<GenreButtons genre={genre} />}
       >
-        <GenreButtons genre={genre} />
-      </ListWrapper>
+        <p className="text-xs text-muted-foreground">{details}</p>
+      </DetailHeader>
 
       <ListWrapper className="px-0 pt-0">
         <GridViewWrapper

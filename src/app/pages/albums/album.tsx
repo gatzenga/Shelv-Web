@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { AlbumHeader } from '@/app/components/album/header'
 import { AlbumInfo } from '@/app/components/album/info'
-import { AlbumStickyHeader } from '@/app/components/album/sticky-header'
 import { AlbumTrackList } from '@/app/components/album/track-list'
 import { TrackSummary } from '@/app/components/album/track-summary'
 import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
@@ -37,8 +36,6 @@ export default function Album() {
 
   return (
     <div className="w-full relative">
-      <AlbumStickyHeader album={album} />
-
       <AlbumHeader album={album}>
         <AlbumInfo album={album} />
       </AlbumHeader>
