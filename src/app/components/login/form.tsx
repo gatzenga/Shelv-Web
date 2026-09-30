@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 import { queryServerInfo } from '@/api/queryServerInfo'
+import { AppIcon } from '@/app/components/app-icon'
 import { Button } from '@/app/components/ui/button'
 import {
   Card,
@@ -97,8 +98,9 @@ export function LoginForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit((data) => onSubmit(data))}>
             <CardHeader className="flex">
-              <CardTitle className="flex flex-row justify-between items-center">
-                {t('login.form.server')}
+              <CardTitle className="flex flex-row items-center gap-3">
+                <AppIcon size={32} />
+                Shelv
               </CardTitle>
               <CardDescription>{t('login.form.description')}</CardDescription>
             </CardHeader>
