@@ -1,9 +1,5 @@
 import clsx from 'clsx'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
-import {
-  AlbumArtistInfo,
-  AlbumMultipleArtistsInfo,
-} from '@/app/components/album/artists'
 import { ImageHeaderEffect } from '@/app/components/album/header-effect'
 import { AlbumHeaderFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { BadgesData, HeaderInfoGenerator } from '@/app/components/header-info'
@@ -11,7 +7,6 @@ import { ImageLoader } from '@/app/components/image-loader'
 import { useAlbumColor } from '@/app/hooks/use-album-color'
 import { cn } from '@/lib/utils'
 import { CoverArt } from '@/types/coverArtType'
-import { IFeaturedArtist } from '@/types/responses/artist'
 import { getTextSizeClass } from '@/utils/getTextSizeClass'
 
 // Where the fade below the header starts, the artist header is shorter
@@ -21,8 +16,6 @@ interface ImageHeaderProps {
   type: string
   title: string
   subtitle?: string
-  artistId?: string
-  artists?: IFeaturedArtist[]
   coverArtId?: string
   coverArtType: CoverArt
   coverArtSize: string
@@ -35,8 +28,6 @@ export default function ImageHeader({
   type,
   title,
   subtitle,
-  artistId,
-  artists,
   coverArtId,
   coverArtType,
   coverArtSize,
@@ -47,7 +38,6 @@ export default function ImageHeader({
   const { bgColor, handleLoadImage, handleError } =
     useAlbumColor('cover-art-image')
 
-  const hasMultipleArtists = artists ? artists.length > 1 : false
   const isArtist = coverArtType === 'artist'
 
   return (
@@ -125,26 +115,6 @@ export default function ImageHeader({
               >
                 {title}
               </h1>
-
-              {!isPlaylist && artists && hasMultipleArtists && (
-                <div className="flex items-center mt-2">
-                  <AlbumMultipleArtistsInfo artists={artists} />
-                  <HeaderInfoGenerator badges={badges} />
-                </div>
-              )}
-
-              {!isPlaylist && subtitle && !hasMultipleArtists && (
-                <>
-                  {artistId ? (
-                    <div className="flex items-center mt-2">
-                      <AlbumArtistInfo id={artistId} name={subtitle} />
-                      <HeaderInfoGenerator badges={badges} />
-                    </div>
-                  ) : (
-                    <p className="opacity-80 text-sm font-medium">{subtitle}</p>
-                  )}
-                </>
-              )}
 
               {isPlaylist && subtitle && (
                 <>

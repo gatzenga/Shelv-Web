@@ -7,8 +7,6 @@ const album = {
   all: 'get-all-albums',
   library: 'get-library-albums',
   single: 'get-album',
-  moreAlbums: 'get-artist-albums',
-  genreAlbums: 'get-genre-random-albums',
   recentlyAdded: 'get-recently-added-albums',
   mostPlayed: 'get-most-played-albums',
   recentlyPlayed: 'get-recently-played-albums',

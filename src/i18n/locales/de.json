@@ -82,10 +82,13 @@
     "noSongList": "Diese Wiedergabeliste enthält keine Lieder!"
   },
   "album": {
-    "more": {
-      "discography": "Künstler-Diskografie",
-      "listTitle": "Mehr von diesem Künstler",
-      "genreTitle": "Mehr aus {{genre}}"
+    "disc": "Disc {{number}}",
+    "summary": {
+      "tracks_one": "{{count}} Titel",
+      "tracks_other": "{{count}} Titel",
+      "minutes": "{{minutes}} Min.",
+      "hours": "{{hours}} Std.",
+      "hoursMinutes": "{{hours}} Std. {{minutes}} Min."
     },
     "headline": "Album",
     "buttons": {

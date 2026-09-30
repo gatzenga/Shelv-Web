@@ -160,6 +160,14 @@
     }
   },
   "album": {
+    "disc": "Disc {{number}}",
+    "summary": {
+      "tracks_one": "{{count}} track",
+      "tracks_other": "{{count}} tracks",
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} hr",
+      "hoursMinutes": "{{hours}} hr {{minutes}} min"
+    },
     "headline": "Album",
     "buttons": {
       "play": "Play {{name}}",
@@ -167,11 +175,6 @@
       "shuffle": "Play {{name}} in shuffle mode",
       "like": "Like {{name}}",
       "dislike": "Remove like from {{name}}"
-    },
-    "more": {
-      "listTitle": "More from this artist",
-      "discography": "Artist Discography",
-      "genreTitle": "More from {{genre}}"
     },
     "list": {
       "header": {

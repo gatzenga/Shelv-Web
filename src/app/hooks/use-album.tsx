@@ -8,24 +8,3 @@ export const useGetAlbum = (albumId: string) => {
     queryFn: () => subsonic.albums.getOne(albumId),
   })
 }
-
-export const useGetArtistAlbums = (artistId: string) => {
-  return useQuery({
-    queryKey: [queryKeys.album.moreAlbums, artistId],
-    queryFn: () => subsonic.artists.getOne(artistId),
-    enabled: !!artistId,
-  })
-}
-
-export const useGetGenreAlbums = (genre: string) => {
-  return useQuery({
-    queryKey: [queryKeys.album.genreAlbums, genre],
-    queryFn: () =>
-      subsonic.albums.getAlbumList({
-        type: 'byGenre',
-        genre,
-        size: 16,
-      }),
-    enabled: !!genre,
-  })
-}
