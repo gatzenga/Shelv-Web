@@ -50,15 +50,18 @@ account is made in the app and kept in `config/lastfm.json`.
 
 ## Lyrics
 
-The lyrics of a song are looked up in this order: the cache, Navidrome,
-the lyrics server.
+There is no switch for lyrics. They are there as soon as one of the sources
+below is set up, and without any of them there are no lyrics. Like in the Shelv
+app both switches are off until you turn them on.
+
+The lyrics of a song are looked up in this order, a source that is not set up
+is skipped: the cache, Navidrome, your own server, the public LRCLIB.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `LYRICS_ENABLED` | `true` | Show lyrics at all. |
-| `INCLUDE_NAVIDROME_LYRICS` | `true` | Use the lyrics that are stored in Navidrome first. |
-| `LYRICS_CUSTOM_SERVER` | empty | The address of your own [LRCLIB](https://github.com/tranxuanthang/lrclib) server. Empty: the public LRCLIB. `LYRICS_SERVER` still works as the old name. |
-| `LRCLIB_FALLBACK` | `true` | When your own server has nothing, ask the public LRCLIB. |
+| `INCLUDE_NAVIDROME_LYRICS` | `false` | Look at the lyrics stored in Navidrome first. |
+| `LYRICS_CUSTOM_SERVER` | empty | The address of your own [LRCLIB](https://github.com/tranxuanthang/lrclib) server. `LYRICS_SERVER` still works as the old name. |
+| `LRCLIB_FALLBACK` | `false` | Ask the public LRCLIB (lrclib.net) when the sources before it have nothing. Without a custom server it is the only LRCLIB that is asked. |
 
 ## Cache and folders
 

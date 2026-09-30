@@ -6,10 +6,9 @@ services:
     user: UID:GID
     environment:
       - NAVIDROME_URL=http://NAVIDROME_HOST:4533
-      - LYRICS_ENABLED=true
+      - INCLUDE_NAVIDROME_LYRICS=true
       # - LYRICS_CUSTOM_SERVER=https://custom-lrclib.org
-      # - LRCLIB_FALLBACK=true
-      # - INCLUDE_NAVIDROME_LYRICS=true
+      - LRCLIB_FALLBACK=true
       - LANGUAGE=en
       - SIDEBAR_ARTISTS=true
       - SIDEBAR_ALBUMS=true

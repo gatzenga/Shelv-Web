@@ -1,9 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ComponentPropsWithoutRef, useEffect, useRef, useState } from 'react'
+import {
+  ComponentPropsWithoutRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { isSafari } from 'react-device-detect'
 import { useTranslation } from 'react-i18next'
-import { Lrc } from 'react-lrc'
 import {
   ScrollArea,
   scrollAreaViewportSelector,
@@ -61,51 +67,130 @@ export function LyricsTab() {
   }
 }
 
-function SyncedLyrics({ lyrics }: LyricProps) {
-  const playerRef = usePlayerRef()
-  const { langCode } = useLang()
-  const [progress, setProgress] = useState(0)
-  const resolvedLang = resolveLyricsLang(lyrics.lang, langCode)
+interface LrcLine {
+  time: number
+  text: string
+}
 
-  setTimeout(() => {
-    let newProgress = (playerRef?.currentTime || 0) * 1000
+// "[01:23.45] text", a line can have several times
+function parseLrc(value: string): LrcLine[] {
+  const lines: LrcLine[] = []
 
-    if (newProgress === progress) {
-      newProgress += 1 // Prevents the lyrics from getting stuck when the audio is still loading
-    }
+  for (const raw of value.split(/\r?\n/)) {
+    const stamps = [...raw.matchAll(/\[(\d+):(\d+(?:[.:]\d+)?)\]/g)]
+    if (stamps.length === 0) continue
 
-    setProgress(newProgress)
-  }, 50)
+    const text = raw.replace(/\[[^\]]*\]/g, '').trim()
 
-  const skipToTime = (timeMs: number) => {
-    if (playerRef) {
-      playerRef!.currentTime = timeMs / 1000
+    for (const [, minutes, seconds] of stamps) {
+      lines.push({
+        time: Number(minutes) * 60 + Number(seconds.replace(':', '.')),
+        text,
+      })
     }
   }
 
+  return lines.sort((a, b) => a.time - b.time)
+}
+
+// Where the current line sits in the panel, like the lyrics of the Shelv
+// app: near the top, so the lines to come are visible below it
+const ACTIVE_LINE_ANCHOR = 0.2
+const RESUME_AUTO_SCROLL_MS = 2500
+
+function SyncedLyrics({ lyrics }: LyricProps) {
+  const playerRef = usePlayerRef()
+  const { langCode } = useLang()
+  const resolvedLang = resolveLyricsLang(lyrics.lang, langCode)
+
+  const lines = useMemo(() => parseLrc(lyrics.value ?? ''), [lyrics.value])
+  const [activeIndex, setActiveIndex] = useState(-1)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const lineRefs = useRef<(HTMLParagraphElement | null)[]>([])
+  const pausedUntil = useRef(0)
+  // the scroll callback reads the index from here, it does not change with it
+  const activeIndexRef = useRef(activeIndex)
+  activeIndexRef.current = activeIndex
+  const resumeTimer = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const time = playerRef?.currentTime ?? 0
+
+      let index = -1
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].time <= time) index = i
+        else break
+      }
+
+      setActiveIndex((previous) => (previous === index ? previous : index))
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [playerRef, lines])
+
+  const scrollToActive = useCallback((smooth: boolean) => {
+    const container = containerRef.current
+    const line = lineRefs.current[activeIndexRef.current]
+    if (!container || !line) return
+
+    container.scrollTo({
+      top: Math.max(
+        0,
+        line.offsetTop - container.clientHeight * ACTIVE_LINE_ANCHOR,
+      ),
+      behavior: smooth && !isSafari ? 'smooth' : 'auto',
+    })
+  }, [])
+
+  useEffect(() => {
+    if (activeIndex < 0 || Date.now() < pausedUntil.current) return
+
+    scrollToActive(true)
+  }, [activeIndex, scrollToActive])
+
+  useEffect(() => () => clearTimeout(resumeTimer.current), [])
+
+  // Scrolling by hand pauses the automatic scrolling for a moment
+  function pauseAutoScroll() {
+    pausedUntil.current = Date.now() + RESUME_AUTO_SCROLL_MS
+    clearTimeout(resumeTimer.current)
+    resumeTimer.current = setTimeout(
+      () => scrollToActive(true),
+      RESUME_AUTO_SCROLL_MS,
+    )
+  }
+
+  const skipToTime = (time: number) => {
+    if (playerRef) playerRef.currentTime = time
+  }
+
   return (
-    <div className="w-full h-full text-center font-semibold text-lg px-2 lrc-box maskImage-big-player-lyrics">
-      <Lrc
-        lrc={lyrics.value!}
-        recoverAutoScrollInterval={1500}
-        currentMillisecond={progress}
-        id="sync-lyrics-box"
-        className={clsx('h-full overflow-y-auto', !isSafari && 'scroll-smooth')}
-        verticalSpace={true}
-        lineRenderer={({ active, line }) => (
-          <p
-            onClick={() => skipToTime(line.startMillisecond)}
-            className={clsx(
-              'my-3 cursor-pointer hover:opacity-100 duration-500',
-              'transition-[opacity,transform] motion-reduce:transition-none',
-              active ? 'opacity-100 scale-105' : 'opacity-50',
-            )}
-            lang={resolvedLang}
-          >
-            {line.content}
-          </p>
-        )}
-      />
+    <div
+      ref={containerRef}
+      onWheel={pauseAutoScroll}
+      onTouchMove={pauseAutoScroll}
+      className="relative w-full h-full overflow-y-auto text-center font-semibold text-lg px-2 pt-4 pb-[60%] maskImage-lyrics"
+      id="sync-lyrics-box"
+    >
+      {lines.map((line, index) => (
+        <p
+          key={index}
+          ref={(element) => {
+            lineRefs.current[index] = element
+          }}
+          onClick={() => skipToTime(line.time)}
+          className={clsx(
+            'my-3 cursor-pointer hover:opacity-100 duration-500',
+            'transition-[opacity,transform] motion-reduce:transition-none',
+            index === activeIndex ? 'opacity-100 scale-105' : 'opacity-50',
+          )}
+          lang={resolvedLang}
+        >
+          {line.text || '\u00a0'}
+        </p>
+      ))}
     </div>
   )
 }

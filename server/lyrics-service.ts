@@ -206,35 +206,30 @@ export class LyricsService {
     const { customServer, fallback, defaultServer } = this.config.lyrics
     const queryString = params.toString()
 
-    // Try custom server if configured
-    if (customServer) {
+    // The order of the Shelv app: your own server first, then the public
+    // LRCLIB when the fallback is on. A source that is not set up is skipped.
+    const servers = [
+      ...(customServer ? [customServer] : []),
+      ...(fallback ? [defaultServer] : []),
+    ]
+
+    let allNotFound = servers.length > 0
+
+    for (const server of servers) {
       const outcome = await this.queryLrcLibEndpoint(
-        `${customServer}/api/get?${queryString}`,
+        `${server}/api/get?${queryString}`,
         song,
         serverId,
       )
       if (outcome.status === 'found') return outcome.record
-      if (outcome.status === 'not_found' && !fallback) {
-        // Save 'none' only if fallback is disabled
-        const noneRecord = this.makeEmptyRecord(song, serverId)
-        this.db.saveLyrics(noneRecord)
-        return noneRecord
-      }
+      if (outcome.status !== 'not_found') allNotFound = false
     }
 
-    // Try default server (https://lrclib.net) if custom server wasn't configured or fallback enabled
-    if (!customServer || fallback) {
-      const outcome = await this.queryLrcLibEndpoint(
-        `${defaultServer}/api/get?${queryString}`,
-        song,
-        serverId,
-      )
-      if (outcome.status === 'found') return outcome.record
-      if (outcome.status === 'not_found') {
-        const noneRecord = this.makeEmptyRecord(song, serverId)
-        this.db.saveLyrics(noneRecord)
-        return noneRecord
-      }
+    // Every source answered that it has nothing: remember it
+    if (allNotFound) {
+      const noneRecord = this.makeEmptyRecord(song, serverId)
+      this.db.saveLyrics(noneRecord)
+      return noneRecord
     }
 
     return null
