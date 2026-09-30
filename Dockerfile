@@ -1,5 +1,6 @@
-# Build stage: frontend
-FROM node:24-alpine AS build
+# Build stage: frontend. The result is plain files, so it is built once on
+# the machine doing the build and used for every platform of the image.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build
 
 WORKDIR /app
 

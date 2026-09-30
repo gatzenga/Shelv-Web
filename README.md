@@ -32,7 +32,7 @@ To update: `docker compose pull && docker compose up -d`.
 
 **Folders.** The container runs as the `user:` of the compose file and never changes permissions. Create the `cache`, `config` and `logs` folders for that user once, then mount them, like you would for Navidrome. `config` holds `lastfm.json` and `azuracast.json`.
 
-**HTTPS.** The compose file publishes the port on `127.0.0.1` only. Put a reverse proxy with HTTPS in front of it to use Shelv Web from outside. The image is built for `linux/amd64`.
+**HTTPS.** The compose file publishes the port on `127.0.0.1` only. Put a reverse proxy with HTTPS in front of it to use Shelv Web from outside. The image is built for `linux/amd64` and `linux/arm64`, Docker picks the right one.
 
 ## Run it next to Navidrome
 
