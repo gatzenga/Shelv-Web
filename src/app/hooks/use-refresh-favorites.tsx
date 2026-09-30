@@ -13,7 +13,7 @@ export function useRefreshFavorites() {
     if (!isFavoritesPage) return
 
     queryClient.invalidateQueries({
-      queryKey: [queryKeys.favorites.songs],
+      queryKey: [queryKeys.favorites.all],
     })
   }
 

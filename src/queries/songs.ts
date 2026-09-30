@@ -1,9 +1,11 @@
 import { subsonic } from '@/service/subsonic'
 
-export async function getFavoriteSongs() {
+export async function getFavorites() {
   const response = await subsonic.songs.getFavoriteSongs()
 
-  if (!response || !response.song) return { songs: [] }
-
-  return { songs: response.song }
+  return {
+    songs: response?.song ?? [],
+    albums: response?.album ?? [],
+    artists: response?.artist ?? [],
+  }
 }

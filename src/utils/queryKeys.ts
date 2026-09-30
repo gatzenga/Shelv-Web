@@ -21,7 +21,7 @@ const artist = {
 }
 
 const favorites = {
-  songs: 'get-favorite-songs',
+  all: 'get-favorites',
 }
 
 const song = {

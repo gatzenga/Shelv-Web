@@ -6,6 +6,7 @@ import { ArtistGridCard } from '@/app/components/artist/artist-grid-card'
 import { ArtistsFallback } from '@/app/components/fallbacks/artists.tsx'
 import { GridViewWrapper } from '@/app/components/grid-view-wrapper'
 import { HeaderTitle } from '@/app/components/header-title'
+import { LibraryPage } from '@/app/components/library/page'
 import {
   ArtistSortOption,
   artistSortOptions,
@@ -109,38 +110,45 @@ export default function ArtistsList() {
   if (!artists) return null
 
   return (
-    <div className="w-full h-full">
-      <MemoShadowHeader>
-        <MemoHeaderTitle title={t('sidebar.artists')} count={artists.length} />
-      </MemoShadowHeader>
-
-      <LibraryToolbar>
-        <LibraryFilterInput value={query} onChange={setQuery} />
-
-        <div className="flex items-center gap-2 ml-auto">
-          <LibrarySortMenu
-            options={artistSortOptions}
-            value={sortOption}
-            labelKey={(option) => sortOptionLabelKey[option]}
-            onChange={changeSort}
-          />
-
-          {sortOption !== 'name' && (
-            <LibraryDirectionButton
-              direction={direction}
-              onToggle={() =>
-                setDirection(direction === 'asc' ? 'desc' : 'asc')
-              }
+    <LibraryPage
+      header={
+        <>
+          <MemoShadowHeader fixed={false} showGlassEffect={false}>
+            <MemoHeaderTitle
+              title={t('sidebar.artists')}
+              count={artists.length}
             />
-          )}
+          </MemoShadowHeader>
 
-          <LibraryViewToggle
-            viewType={artistsPageViewType}
-            onChange={setArtistsPageViewType}
-          />
-        </div>
-      </LibraryToolbar>
+          <LibraryToolbar>
+            <LibraryFilterInput value={query} onChange={setQuery} />
 
+            <div className="flex items-center gap-2 ml-auto">
+              <LibrarySortMenu
+                options={artistSortOptions}
+                value={sortOption}
+                labelKey={(option) => sortOptionLabelKey[option]}
+                onChange={changeSort}
+              />
+
+              {sortOption !== 'name' && (
+                <LibraryDirectionButton
+                  direction={direction}
+                  onToggle={() =>
+                    setDirection(direction === 'asc' ? 'desc' : 'asc')
+                  }
+                />
+              )}
+
+              <LibraryViewToggle
+                viewType={artistsPageViewType}
+                onChange={setArtistsPageViewType}
+              />
+            </div>
+          </LibraryToolbar>
+        </>
+      }
+    >
       {isTableView && (
         <MemoListWrapper>
           <MemoDataTable
@@ -168,6 +176,6 @@ export default function ArtistsList() {
           </GridViewWrapper>
         </MemoListWrapper>
       )}
-    </div>
+    </LibraryPage>
   )
 }

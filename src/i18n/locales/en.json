@@ -229,7 +229,13 @@
     }
   },
   "favorites": {
-    "noSongList": "You haven't added any songs to favorites yet!"
+    "tracks": "Tracks",
+    "favoriteSongs": "Favorite Songs",
+    "favoriteAlbums": "Favorite Albums",
+    "favoriteArtists": "Favorite Artists",
+    "showAll": "Show All ({{count}})",
+    "empty": "No Favorites",
+    "emptyInfo": "Mark tracks, albums and artists as favorites."
   },
   "artist": {
     "headline": "Artist",

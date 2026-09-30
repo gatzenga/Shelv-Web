@@ -1,4 +1,5 @@
-import { IFeaturedArtist } from './artist'
+import type { Albums } from './album'
+import { IFeaturedArtist, ISimilarArtist } from './artist'
 import { SubsonicResponse } from './subsonicResponse'
 
 export interface IReplayGain {
@@ -101,8 +102,14 @@ export interface TopSongsResponse
 export interface SongsByGenreResponse
   extends SubsonicResponse<{ songsByGenre: SongList }> {}
 
+export interface Favorites {
+  song?: ISong[]
+  album?: Albums[]
+  artist?: ISimilarArtist[]
+}
+
 export interface FavoritesResponse
-  extends SubsonicResponse<{ starred2: SongList }> {}
+  extends SubsonicResponse<{ starred2: Favorites }> {}
 
 export interface LyricsResponse extends SubsonicResponse<{ lyrics: ILyric }> {}
 export interface StructuredLyricsResponse

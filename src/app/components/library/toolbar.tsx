@@ -48,7 +48,7 @@ export function LibraryToolbar({
   return (
     <div
       className={cn(
-        'sticky top-[--shadow-header-height] z-10 flex items-center gap-2 px-8 py-2.5 border-b bg-background',
+        'flex items-center gap-2 px-8 py-2.5 border-b bg-background',
         className,
       )}
       {...props}
@@ -182,6 +182,8 @@ export function LibraryViewToggle({
 }
 
 interface LibraryPlaybackButtonsProps {
+  // only the shuffle button, for lists that have no order of their own
+  shuffleOnly?: boolean
   disabled: boolean
   loading: 'play' | 'shuffle' | null
   onPlay: () => void
@@ -189,6 +191,7 @@ interface LibraryPlaybackButtonsProps {
 }
 
 export function LibraryPlaybackButtons({
+  shuffleOnly = false,
   disabled,
   loading,
   onPlay,
@@ -225,12 +228,13 @@ export function LibraryPlaybackButtons({
 
   return (
     <>
-      {renderButton(
-        'play',
-        t('options.play'),
-        <PlayIcon className="size-4 fill-current" />,
-        onPlay,
-      )}
+      {!shuffleOnly &&
+        renderButton(
+          'play',
+          t('options.play'),
+          <PlayIcon className="size-4 fill-current" />,
+          onPlay,
+        )}
       {renderButton(
         'shuffle',
         t('album.actions.shuffle'),

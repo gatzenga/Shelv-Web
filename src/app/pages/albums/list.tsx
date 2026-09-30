@@ -8,6 +8,7 @@ import { EmptyAlbums } from '@/app/components/albums/empty-page'
 import { AlbumsFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { GridViewWrapper } from '@/app/components/grid-view-wrapper'
 import { HeaderTitle } from '@/app/components/header-title'
+import { LibraryPage } from '@/app/components/library/page'
 import {
   AlbumSortOption,
   albumSortOptions,
@@ -38,13 +39,9 @@ import { albumsColumns } from '@/app/tables/albums-columns'
 import { useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
 import { Albums } from '@/types/responses/album'
-import { ISong } from '@/types/responses/song'
 import { PageViewType } from '@/types/serverConfig'
 import { AlbumsFilters, AlbumsSearchParams } from '@/utils/albumsFilter'
-
-// At most as many songs as the Shelv app queues when playing a whole list
-const MAX_QUEUE_SONGS = 500
-const CONCURRENT_ALBUM_LOADS = 8
+import { buildLibraryQueue } from '@/utils/libraryPlayback'
 
 const isSortOption = (value: unknown): value is AlbumSortOption =>
   albumSortOptions.includes(value as AlbumSortOption)
@@ -60,15 +57,6 @@ const linkedSortOptions: Record<string, AlbumSortOption> = {
   [AlbumsFilters.MostPlayed]: 'mostPlayed',
   [AlbumsFilters.RecentlyAdded]: 'recentlyAdded',
   [AlbumsFilters.ByYear]: 'year',
-}
-
-function shuffle<T>(list: T[]) {
-  const result = [...list]
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[result[i], result[j]] = [result[j], result[i]]
-  }
-  return result
 }
 
 export default function AlbumsList() {
@@ -135,31 +123,15 @@ export default function AlbumsList() {
     setDirection(naturalDirection(option))
   }
 
-  async function loadSongs(list: Albums[], randomOrder: boolean) {
-    const order = randomOrder ? shuffle(list) : list
-    const songs: ISong[] = []
-
-    for (
-      let start = 0;
-      start < order.length && songs.length < MAX_QUEUE_SONGS;
-      start += CONCURRENT_ALBUM_LOADS
-    ) {
-      const batch = order.slice(start, start + CONCURRENT_ALBUM_LOADS)
-      const loaded = await Promise.all(
-        batch.map((album) => getAlbumSongs(album.id)),
-      )
-      songs.push(...loaded.flatMap((albumSongs) => albumSongs ?? []))
-    }
-
-    const queue = randomOrder ? shuffle(songs) : songs
-    return queue.slice(0, MAX_QUEUE_SONGS)
-  }
-
   async function playAlbums(randomOrder: boolean) {
     setPlaying(randomOrder ? 'shuffle' : 'play')
 
     try {
-      const songs = await loadSongs(albums, randomOrder)
+      const songs = await buildLibraryQueue({
+        albums,
+        shuffle: randomOrder,
+        loadAlbumSongs: getAlbumSongs,
+      })
       if (songs.length === 0) {
         toast.error(t('toast.server.error'))
         return
@@ -190,50 +162,54 @@ export default function AlbumsList() {
   if (!allAlbums || allAlbums.length === 0) return <EmptyAlbums />
 
   return (
-    <div className="w-full h-full">
-      <ShadowHeader>
-        <HeaderTitle title={t('sidebar.albums')} count={albums.length} />
-      </ShadowHeader>
+    <LibraryPage
+      header={
+        <>
+          <ShadowHeader fixed={false} showGlassEffect={false}>
+            <HeaderTitle title={t('sidebar.albums')} count={albums.length} />
+          </ShadowHeader>
 
-      <LibraryToolbar>
-        <LibraryFilterInput value={query} onChange={setQuery} />
+          <LibraryToolbar>
+            <LibraryFilterInput value={query} onChange={setQuery} />
 
-        <div className="flex items-center gap-2 ml-auto">
-          {!hideGenres && (
-            <LibraryGenreSelect
-              genres={genres}
-              value={selectedGenre}
-              onChange={setGenre}
-            />
-          )}
+            <div className="flex items-center gap-2 ml-auto">
+              {!hideGenres && (
+                <LibraryGenreSelect
+                  genres={genres}
+                  value={selectedGenre}
+                  onChange={setGenre}
+                />
+              )}
 
-          <LibrarySortMenu
-            options={albumSortOptions}
-            value={sortOption}
-            labelKey={(option) => sortOptionLabelKey[option]}
-            onChange={changeSort}
-          />
+              <LibrarySortMenu
+                options={albumSortOptions}
+                value={sortOption}
+                labelKey={(option) => sortOptionLabelKey[option]}
+                onChange={changeSort}
+              />
 
-          {allowsDirection(sortOption) && (
-            <LibraryDirectionButton
-              direction={direction}
-              onToggle={() =>
-                setDirection(direction === 'asc' ? 'desc' : 'asc')
-              }
-            />
-          )}
+              {allowsDirection(sortOption) && (
+                <LibraryDirectionButton
+                  direction={direction}
+                  onToggle={() =>
+                    setDirection(direction === 'asc' ? 'desc' : 'asc')
+                  }
+                />
+              )}
 
-          <LibraryViewToggle viewType={viewType} onChange={setViewType} />
+              <LibraryViewToggle viewType={viewType} onChange={setViewType} />
 
-          <LibraryPlaybackButtons
-            disabled={albums.length === 0}
-            loading={playing}
-            onPlay={() => playAlbums(false)}
-            onShuffle={() => playAlbums(true)}
-          />
-        </div>
-      </LibraryToolbar>
-
+              <LibraryPlaybackButtons
+                disabled={albums.length === 0}
+                loading={playing}
+                onPlay={() => playAlbums(false)}
+                onShuffle={() => playAlbums(true)}
+              />
+            </div>
+          </LibraryToolbar>
+        </>
+      }
+    >
       {albums.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
           <p className="text-sm">{t('album.empty.notFound')}</p>
@@ -262,6 +238,6 @@ export default function AlbumsList() {
           />
         </ListWrapper>
       )}
-    </div>
+    </LibraryPage>
   )
 }

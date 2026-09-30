@@ -390,7 +390,13 @@
     }
   },
   "favorites": {
-    "noSongList": "Du hast noch keine Lieder zu den Favoriten hinzugefügt!"
+    "tracks": "Titel",
+    "favoriteSongs": "Lieblingstitel",
+    "favoriteAlbums": "Lieblingsalben",
+    "favoriteArtists": "Lieblingskünstler",
+    "showAll": "Alle anzeigen ({{count}})",
+    "empty": "Keine Favoriten",
+    "emptyInfo": "Markiere Titel, Alben und Künstler als Favoriten."
   },
   "artist": {
     "headline": "Künstler",

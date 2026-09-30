@@ -42,6 +42,8 @@ const ALBUMS = {
 
 const FAVORITES = {
   PAGE: LIBRARY.FAVORITES,
+  SCOPE: (scope: 'songs' | 'albums' | 'artists') =>
+    `${LIBRARY.FAVORITES}?scope=${scope}`,
 }
 
 const PLAYLIST = {

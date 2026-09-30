@@ -20,9 +20,16 @@ const MemoPlaylistOptions = memo(PlaylistOptions)
 
 interface SidebarPlaylistItemProps {
   playlist: Playlist
+  // what is shown, the name without its folders
+  title?: string
+  depth?: number
 }
 
-export function SidebarPlaylistItem({ playlist }: SidebarPlaylistItemProps) {
+export function SidebarPlaylistItem({
+  playlist,
+  title,
+  depth = 0,
+}: SidebarPlaylistItemProps) {
   const { isOnPlaylist } = useRouteIsActive()
   const { isPlaylistPlaying } = useIsPlaylistPlaying(playlist.id)
 
@@ -39,6 +46,7 @@ export function SidebarPlaylistItem({ playlist }: SidebarPlaylistItemProps) {
       >
         <MainSidebarMenuButton
           asChild
+          style={depth > 0 ? { paddingLeft: `${8 + depth * 14}px` } : undefined}
           className={clsx(
             isOnPlaylist(playlist.id) && 'cursor-default',
             isOnPlaylist(playlist.id) && !isPlaylistPlaying && 'bg-accent',
@@ -59,7 +67,7 @@ export function SidebarPlaylistItem({ playlist }: SidebarPlaylistItemProps) {
             ) : (
               <ListMusic />
             )}
-            <span className="truncate">{playlist.name}</span>
+            <span className="truncate">{title ?? playlist.name}</span>
           </Link>
         </MainSidebarMenuButton>
       </MemoContextMenuProvider>
