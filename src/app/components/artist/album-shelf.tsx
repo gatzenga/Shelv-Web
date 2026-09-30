@@ -19,8 +19,8 @@ interface ArtistAlbumShelfProps {
   controls?: React.ReactNode
 }
 
-// One row of albums. The title opens the full list, the scroll buttons sit on
-// the row with the sort controls, like the shelves in the Shelv app.
+// One row of albums. The title opens the full list, below it the sort controls
+// with the scroll buttons, then the albums, like the shelves in the Shelv app.
 export function ArtistAlbumShelf({
   title,
   titleRoute,
@@ -51,6 +51,19 @@ export function ArtistAlbumShelf({
 
   return (
     <div className="w-full flex flex-col gap-4" data-testid="artist-albums">
+      <Link
+        to={titleRoute}
+        className="flex items-center gap-1 w-fit hover:text-primary transition-colors"
+      >
+        <h3
+          className="scroll-m-20 text-2xl font-semibold tracking-tight"
+          data-testid="preview-list-title"
+        >
+          {title}
+        </h3>
+        <ChevronRightIcon className="size-6 text-muted-foreground" />
+      </Link>
+
       <div className="flex items-center justify-between gap-4">
         <div>{controls}</div>
         <div className="flex gap-2">
@@ -68,19 +81,6 @@ export function ArtistAlbumShelf({
           />
         </div>
       </div>
-
-      <Link
-        to={titleRoute}
-        className="flex items-center gap-1 w-fit hover:text-primary transition-colors"
-      >
-        <h3
-          className="scroll-m-20 text-2xl font-semibold tracking-tight"
-          data-testid="preview-list-title"
-        >
-          {title}
-        </h3>
-        <ChevronRightIcon className="size-6 text-muted-foreground" />
-      </Link>
 
       <div className="transform-gpu @container">
         <Carousel
