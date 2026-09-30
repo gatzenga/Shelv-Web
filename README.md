@@ -14,6 +14,10 @@ docker compose up -d
 
 Every setting is an environment variable in that file.
 
+## Icons
+
+Some icons are from [Phosphor Icons](https://phosphoricons.com) (MIT), see [LICENSE-PHOSPHOR.txt](LICENSE-PHOSPHOR.txt).
+
 ## License
 
 Copyright (c) 2026 gatzenga. Licensed under the [GNU General Public License v3.0](LICENSE).

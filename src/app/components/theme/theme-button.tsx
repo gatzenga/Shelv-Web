@@ -24,7 +24,7 @@ export function ThemeButton() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 rounded-md"
+            className="h-8 w-8 p-0 rounded-full"
             data-testid="theme-button"
           >
             <Palette className="w-4 h-4" />

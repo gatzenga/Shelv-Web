@@ -1,8 +1,9 @@
-import { DicesIcon, RefreshCwIcon } from 'lucide-react'
+import { RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
+import { DiceIcon } from '@/app/components/icons/phosphor-icons'
 import {
   Carousel,
   type CarouselApi,
@@ -97,7 +98,7 @@ export default function PreviewList({
                 {isRefreshing ? (
                   <RefreshCwIcon className="h-5 w-5 animate-spin" />
                 ) : (
-                  <DicesIcon className="h-5 w-5" />
+                  <DiceIcon className="h-5 w-5" />
                 )}
                 <span className="sr-only">Refresh</span>
               </button>

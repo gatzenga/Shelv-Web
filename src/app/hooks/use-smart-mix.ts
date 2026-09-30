@@ -7,7 +7,7 @@ import {
   MixClockIcon,
   MixShuffleIcon,
   MixSparklesIcon,
-} from '@/app/components/icons/mix-icons'
+} from '@/app/components/icons/phosphor-icons'
 import { getLastFMOptions } from '@/store/lastfm-options.store'
 import { usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
