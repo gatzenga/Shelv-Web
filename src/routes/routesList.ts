@@ -9,6 +9,7 @@ const LIBRARY = {
   PLAYLISTS: '/library/playlists',
   RADIOS: '/library/radios',
   GENRES: '/library/genres',
+  SEARCH: '/library/search',
 }
 
 const ARTIST = {

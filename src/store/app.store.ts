@@ -72,14 +72,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
               )
             },
           },
-          command: {
-            open: false,
-            setOpen: (value) => {
-              set((state) => {
-                state.command.open = value
-              })
-            },
-          },
           actions: {
             setOsType: (value) => {
               set((state) => {
@@ -183,7 +175,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
           }
         },
         partialize: (state) => {
-          const appStore = omit(state, 'data.logoutDialogState', 'command.open')
+          const appStore = omit(state, 'data.logoutDialogState')
 
           return appStore
         },

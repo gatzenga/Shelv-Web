@@ -7,7 +7,6 @@ import { ShadowHeader } from '@/app/components/album/shadow-header'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
 import { ArtistGridCard } from '@/app/components/artist/artist-grid-card'
 import { InfinitySongListFallback } from '@/app/components/fallbacks/song-fallbacks'
-import { FavoriteSongRow } from '@/app/components/favorites/song-row'
 import { HeaderTitle } from '@/app/components/header-title'
 import { LibraryPage } from '@/app/components/library/page'
 import {
@@ -16,6 +15,7 @@ import {
   LibraryToolbar,
 } from '@/app/components/library/toolbar'
 import ListWrapper from '@/app/components/list-wrapper'
+import { SongListRow } from '@/app/components/song/list-row'
 import { useFavorites } from '@/app/hooks/use-favorites'
 import { useSongList } from '@/app/hooks/use-song-list'
 import { useUrlParam } from '@/app/hooks/use-url-param'
@@ -122,7 +122,7 @@ export default function Favorites() {
       return (
         <div className="flex flex-col">
           {songs.map((song, index) => (
-            <FavoriteSongRow
+            <SongListRow
               key={song.id}
               song={song}
               index={index}
@@ -227,7 +227,7 @@ export default function Favorites() {
               >
                 <div className="flex flex-col">
                   {songs.slice(0, PREVIEW_LIMIT).map((song, index) => (
-                    <FavoriteSongRow
+                    <SongListRow
                       key={song.id}
                       song={song}
                       index={index}

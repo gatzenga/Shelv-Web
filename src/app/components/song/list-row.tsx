@@ -11,15 +11,15 @@ import { usePlayerCurrentSong, usePlayerIsPlaying } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 
-interface FavoriteSongRowProps {
+interface SongListRowProps {
   song: ISong
   index: number
   onPlay: () => void
 }
 
-// A favorite song like in the Shelv app: cover, title with the artist, the
+// A song in a list like in the Shelv app: cover, title with the artist, the
 // album and the time
-export function FavoriteSongRow({ song, index, onPlay }: FavoriteSongRowProps) {
+export function SongListRow({ song, index, onPlay }: SongListRowProps) {
   const currentSong = usePlayerCurrentSong()
   const isPlayerPlaying = usePlayerIsPlaying()
   const isCurrent = currentSong?.id === song.id
@@ -31,7 +31,7 @@ export function FavoriteSongRow({ song, index, onPlay }: FavoriteSongRowProps) {
       <div
         className="group flex items-center gap-3 h-16 px-3 rounded-lg select-none hover:bg-foreground/10 transition-colors"
         onDoubleClick={onPlay}
-        data-testid="favorite-song"
+        data-testid="song-list-row"
       >
         <button
           type="button"

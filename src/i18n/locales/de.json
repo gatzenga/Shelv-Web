@@ -2,8 +2,7 @@
   "sidebar": {
     "radios": "Radios",
     "home": "Entdecken",
-    "search": "Suche…",
-    "miniSearch": "Suchen",
+    "search": "Suche",
     "library": "Bibliothek",
     "artists": "Künstler",
     "songs": "Lieder",
@@ -527,6 +526,15 @@
     "started": "Download gestartet.",
     "failed": "Beim Herunterladen Ihrer Datei ist ein Fehler aufgetreten.",
     "completed": "Ihre Datei wurde heruntergeladen."
+  },
+  "search": {
+    "placeholder": "Künstler, Alben, Titel suchen…",
+    "recent": "Letzte Suchanfragen",
+    "clear": "Leeren",
+    "clearHistory": "Suchverlauf leeren",
+    "searching": "Suchen…",
+    "enterTerm": "Suchbegriff eingeben",
+    "failed": "Suche fehlgeschlagen"
   },
   "library": {
     "filter": "Filtern…",

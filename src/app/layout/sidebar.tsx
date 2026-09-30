@@ -3,6 +3,7 @@ import {
   LibraryIcon,
   Mic2Icon,
   RadioIcon,
+  SearchIcon,
   SparklesIcon,
   TagsIcon,
 } from 'lucide-react'
@@ -11,6 +12,7 @@ import { ROUTES } from '@/routes/routesList'
 
 const Mic2 = memo(Mic2Icon)
 const Radio = memo(RadioIcon)
+const Search = memo(SearchIcon)
 const Discover = memo(SparklesIcon)
 const Library = memo(LibraryIcon)
 const Heart = memo(HeartIcon)
@@ -31,6 +33,7 @@ export enum SidebarItems {
   Favorites = 'favorites',
   Playlists = 'playlists',
   Radios = 'radios',
+  Search = 'search',
 }
 
 export const mainNavItems = [
@@ -72,5 +75,11 @@ export const libraryItems = [
     title: 'sidebar.radios',
     route: ROUTES.LIBRARY.RADIOS,
     icon: Radio,
+  },
+  {
+    id: SidebarItems.Search,
+    title: 'sidebar.search',
+    route: ROUTES.LIBRARY.SEARCH,
+    icon: Search,
   },
 ]
