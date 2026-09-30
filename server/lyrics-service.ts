@@ -206,11 +206,10 @@ export class LyricsService {
     const { customServer, fallback, defaultServer } = this.config.lyrics
     const queryString = params.toString()
 
-    // Your own server first. The public LRCLIB is asked when there is no own
-    // server, or after it when the fallback is on.
+    // Your own server first, then the public LRCLIB, each only when turned on
     const servers = [
       ...(customServer ? [customServer] : []),
-      ...(!customServer || fallback ? [defaultServer] : []),
+      ...(fallback ? [defaultServer] : []),
     ]
 
     let allNotFound = servers.length > 0

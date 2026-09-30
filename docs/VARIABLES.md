@@ -50,17 +50,15 @@ account is made in the app and kept in `config/lastfm.json`.
 
 ## Lyrics
 
-Lyrics are always on, there is no switch for them. Without any of the
-variables below the public LRCLIB (lrclib.net) is asked.
-
-The lyrics of a song are looked up in this order, a source that is not turned
-on is skipped: the cache, Navidrome, your own server, the public LRCLIB.
+Each source is turned on by its own variable. The order is always the same:
+the cache, Navidrome, your own server, the public LRCLIB. Only the turned on
+sources are asked. With none turned on, the public LRCLIB (lrclib.net) is used.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `INCLUDE_NAVIDROME_LYRICS` | `false` | Look at the lyrics stored in Navidrome first. |
-| `LYRICS_CUSTOM_SERVER` | empty | The address of your own [LRCLIB](https://github.com/tranxuanthang/lrclib) server. With it the public LRCLIB is no longer asked, unless the fallback is on. `LYRICS_SERVER` still works as the old name. |
-| `LRCLIB_FALLBACK` | `false` | Only with a custom server: ask the public LRCLIB when your own server has nothing. Without a custom server it makes no difference, the public LRCLIB is asked anyway. |
+| `LYRICS_NAVIDROME` | `false` | Use the lyrics stored in Navidrome. |
+| `LYRICS_CUSTOM_SERVER` | empty | The address of your own [LRCLIB](https://github.com/tranxuanthang/lrclib) server. Setting it turns it on. `LYRICS_SERVER` still works as the old name. |
+| `LYRICS_LRCLIB` | `false` | Use the public LRCLIB (lrclib.net). |
 
 ## Cache and folders
 

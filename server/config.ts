@@ -166,8 +166,11 @@ export function loadConfig(): ServerConfig {
   const lyricsCustomServer =
     readUrl('LYRICS_CUSTOM_SERVER', null) ?? readUrl('LYRICS_SERVER', null)
   // Like the lyrics settings of the Shelv app: both are off until switched on
-  const lrclibFallback = readBoolean('LRCLIB_FALLBACK', false)
-  const includeNavidromeLyrics = readBoolean('INCLUDE_NAVIDROME_LYRICS', false)
+  const includeNavidromeLyrics = readBoolean('LYRICS_NAVIDROME', false)
+  // Nothing turned on means the public LRCLIB, it is the default source
+  const lrclibFallback =
+    readBoolean('LYRICS_LRCLIB', false) ||
+    (!includeNavidromeLyrics && lyricsCustomServer === null)
   const lastfmApiKey =
     readString('LASTFM_API', '') || readString('LASTFM_API_KEY', '')
   const lastfmSecret = readString('LASTFM_SECRET', '')
