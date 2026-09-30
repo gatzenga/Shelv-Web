@@ -660,7 +660,6 @@
       "audio": "Player & Audio",
       "content": "Content",
       "accounts": "Accounts",
-      "desktop": "Desktop Application",
       "privacy": "Privacy & Security"
     },
     "appearance": {
@@ -827,16 +826,6 @@
         "description": "Share your currently playing song with friends on Discord.",
         "enabled": {
           "label": "Enable Integration"
-        }
-      }
-    },
-    "desktop": {
-      "general": {
-        "group": "General",
-        "description": "Customize preferences for the desktop application.",
-        "tray": {
-          "label": "Minimize to Tray",
-          "info": "When enabled, the app will minimize to the system tray instead of closing when you click the close button."
         }
       }
     }

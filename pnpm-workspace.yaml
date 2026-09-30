@@ -8,8 +8,5 @@ blockExoticSubdeps: false
 
 allowBuilds:
   bufferutil: set this to true or false
-  cypress: set this to true or false
-  electron: set this to true or false
-  electron-winstaller: set this to true or false
   esbuild: true
   utf-8-validate: set this to true or false

@@ -51,17 +51,7 @@
 
     --toastify-color-progress-light: hsl(var(--primary));
     --toastify-color-progress-dark: hsl(var(--primary));
-
-    --windows-red: 5 75% 44%;
   }
-}
-
-.electron-drag {
-  app-region: drag;
-}
-
-button {
-  app-region: no-drag;
 }
 
 .Toastify__toast-container {

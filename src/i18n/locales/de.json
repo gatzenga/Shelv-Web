@@ -607,8 +607,7 @@
       "audio": "Player & Audio",
       "content": "Inhalte",
       "privacy": "Privatsphäre und Sicherheit",
-      "accounts": "Konten",
-      "desktop": "Computeranwendung"
+      "accounts": "Konten"
     },
     "audio": {
       "replayGain": {
@@ -732,16 +731,6 @@
           "label": "Integration aktivieren"
         },
         "group": "Discord Rich Presence"
-      }
-    },
-    "desktop": {
-      "general": {
-        "group": "Allgemein",
-        "description": "Anpassen der Einstellungen für die Computer-Anwendung.",
-        "tray": {
-          "label": "In die Taskleiste minimieren",
-          "info": "Wenn diese Option aktiviert ist, wird die Anwendung beim Klicken auf die Schaltfläche „Schließen“ nicht geschlossen, sondern in die Taskleiste minimiert."
-        }
       }
     }
   },
