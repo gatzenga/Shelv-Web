@@ -69,8 +69,6 @@
   },
   "generic": {
     "seeMore": "See more",
-    "showDetails": "Show details",
-    "hideDetails": "Hide details",
     "viewAll": "View all",
     "loading": "Loading…",
     "viewMode": {
@@ -246,8 +244,11 @@
       "albumsCount_one": "{{count}} album",
       "albumsCount_other": "{{count}} albums"
     },
-    "topSongs": "Popular",
+    "topSongs": "Top Songs",
     "albums": "Albums",
+    "discography": "Discography",
+    "latestRelease": "Latest Release",
+    "moreInfo": "More Info",
     "recentAlbums": "Recent albums",
     "relatedArtists": "Related artists",
     "search": {

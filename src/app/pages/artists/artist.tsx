@@ -3,8 +3,14 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import ImageHeader from '@/app/components/album/image-header'
+import {
+  AlbumSortControls,
+  getLatestRelease,
+  useAlbumSort,
+} from '@/app/components/artist/album-sort'
 import ArtistTopSongs from '@/app/components/artist/artist-top-songs'
 import { ArtistBiography, ArtistInfo } from '@/app/components/artist/info'
+import { LatestReleaseCard } from '@/app/components/artist/latest-release-card'
 import RelatedArtistsList from '@/app/components/artist/related-artists'
 import { ArtistStickyHeader } from '@/app/components/artist/sticky-header'
 import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
@@ -21,7 +27,6 @@ import {
 import ErrorPage from '@/app/pages/error-page'
 import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
-import { sortRecentAlbums } from '@/utils/album'
 import { queryKeys } from '@/utils/queryKeys'
 
 export default function Artist() {
@@ -41,6 +46,12 @@ export default function Artist() {
     queryKey: [queryKeys.artist.all],
     queryFn: subsonic.artists.getAll,
   })
+
+  const albumSort = useAlbumSort(artist?.album)
+  const latestRelease = useMemo(
+    () => getLatestRelease(artist?.album ?? []),
+    [artist?.album],
+  )
 
   const albumArtistIds = useMemo(() => {
     if (!allArtists) return null
@@ -105,8 +116,6 @@ export default function Artist() {
     },
   ]
 
-  const recentAlbums = artist.album ? sortRecentAlbums(artist.album) : []
-
   return (
     <div className="w-full relative">
       <ArtistStickyHeader artist={artist} />
@@ -129,14 +138,26 @@ export default function Artist() {
           <ArtistTopSongs topSongs={topSongs} />
         )}
 
-        {recentAlbums.length > 0 && (
+        {albumSort.sortedAlbums.length > 0 && (
           <PreviewList
             cardSize="artist"
-            title={t('artist.albums')}
+            title={t('artist.discography')}
             titleRoute={ROUTES.ARTIST.DISCOGRAPHY(artist.id)}
-            list={recentAlbums}
+            list={albumSort.sortedAlbums}
+            limit={Number.POSITIVE_INFINITY}
             showMore={false}
             subtitleType="year"
+            subheader={
+              <>
+                {latestRelease && <LatestReleaseCard album={latestRelease} />}
+                <AlbumSortControls
+                  sortKey={albumSort.sortKey}
+                  isAscending={albumSort.isAscending}
+                  onSortKeyChange={albumSort.changeSortKey}
+                  onToggleDirection={albumSort.toggleDirection}
+                />
+              </>
+            }
           />
         )}
 

@@ -48,14 +48,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
             songCount: null,
           },
           pages: {
-            showInfoPanel: true,
-            toggleShowInfoPanel: () => {
-              const { showInfoPanel } = get().pages
-
-              set((state) => {
-                state.pages.showInfoPanel = !showInfoPanel
-              })
-            },
             ...sectionsFromConfig,
             artistsPageViewType: 'grid',
             setArtistsPageViewType: (type) => {
@@ -161,7 +153,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.data.serverType = 'subsonic'
                 state.data.songCount = null
                 state.data.extensionsSupported = {}
-                state.pages.showInfoPanel = true
                 state.pages.artistsPageViewType = 'grid'
               })
             },

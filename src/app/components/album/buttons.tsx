@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { subsonic } from '@/service/subsonic'
-import { useAppPages } from '@/store/app.store'
 import {
   useIsAlbumPlaying,
   usePlayerActions,
@@ -13,12 +12,10 @@ import { AlbumActionButtons } from './action-buttons'
 
 interface AlbumButtonsProps {
   album: SingleAlbum
-  showInfoButton: boolean
 }
 
-export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
+export function AlbumButtons({ album }: AlbumButtonsProps) {
   const { setSongList, toggleShuffle } = usePlayerActions()
-  const { showInfoPanel, toggleShowInfoPanel } = useAppPages()
   const { isAlbumActive } = useIsAlbumPlaying(album.id)
   const isShuffleActive = usePlayerStore(
     (state) => state.playerState.isShuffleActive,
@@ -69,12 +66,9 @@ export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
       isAlbumActive={isAlbumActive}
       isShuffleActive={isShuffleActive}
       isStarred={isAlbumStarred}
-      showInfoButton={showInfoButton}
-      infoShown={showInfoPanel}
       onPlay={handlePlayButton}
       onShuffle={handleShuffleButton}
       onToggleStar={handleLikeButton}
-      onToggleInfo={toggleShowInfoPanel}
     />
   )
 }

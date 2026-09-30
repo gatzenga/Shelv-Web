@@ -15,8 +15,6 @@ export interface IServerConfig {
 export type PageViewType = 'grid' | 'table'
 
 interface IAppPages {
-  showInfoPanel: boolean
-  toggleShowInfoPanel: () => void
   hideArtistsSection: boolean
   hideSongsSection: boolean
   hideAlbumsSection: boolean

@@ -1,6 +1,5 @@
 import {
   HeartIcon,
-  InfoIcon,
   ListEndIcon,
   ListMusicIcon,
   ListPlusIcon,
@@ -9,7 +8,7 @@ import {
   ShuffleIcon,
   SparklesIcon,
 } from 'lucide-react'
-import { ComponentType, ReactNode } from 'react'
+import { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { AddToPlaylistSubMenu } from '@/app/components/song/add-to-playlist'
@@ -37,12 +36,13 @@ interface ActionProps {
 // The row is a container: with room it shows icon and label, with less room
 // only the icons, and with very little room smaller round icons, like the
 // album screen of the Shelv app
-const shapeClasses =
+export const shapeClasses =
   'size-9 rounded-full px-0 @[28rem]/actions:size-10 @[58rem]/actions:w-auto @[58rem]/actions:gap-2 @[58rem]/actions:px-4'
 
-const plainButton = 'bg-foreground/10 hover:bg-foreground/15 text-foreground'
+export const plainButton =
+  'bg-foreground/10 hover:bg-foreground/15 text-foreground'
 
-const Action = ({
+export const Action = ({
   icon: Icon,
   label,
   onClick,
@@ -69,17 +69,52 @@ const Action = ({
   </SimpleTooltip>
 )
 
+interface PlaylistActionProps {
+  name: string
+  getSongIds: () => string[] | Promise<string[]>
+}
+
+// Adds the songs to an existing playlist or to a new one
+export function PlaylistAction({ name, getSongIds }: PlaylistActionProps) {
+  const { t } = useTranslation()
+  const { addToPlaylist, createNewPlaylist } = useOptions()
+  const label = t('options.playlist.add')
+
+  return (
+    <DropdownMenu>
+      <SimpleTooltip text={label}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            aria-label={label}
+            className={cn(shapeClasses, plainButton, 'font-semibold shrink-0')}
+          >
+            <ListMusicIcon className="size-[18px] shrink-0" />
+            <span className="hidden @[58rem]/actions:inline">{label}</span>
+          </Button>
+        </DropdownMenuTrigger>
+      </SimpleTooltip>
+      <DropdownMenuContent align="start">
+        <AddToPlaylistSubMenu
+          type="dropdown"
+          newPlaylistFn={async () =>
+            createNewPlaylist(name, await getSongIds())
+          }
+          addToPlaylistFn={async (id) => addToPlaylist(id, await getSongIds())}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 interface AlbumActionButtonsProps {
   album: SingleAlbum
   isAlbumActive: boolean
   isShuffleActive: boolean
   isStarred: boolean
-  showInfoButton: boolean
-  infoShown: boolean
   onPlay: () => void
   onShuffle: () => void
   onToggleStar: () => void
-  onToggleInfo: () => void
 }
 
 export function AlbumActionButtons({
@@ -87,66 +122,15 @@ export function AlbumActionButtons({
   isAlbumActive,
   isShuffleActive,
   isStarred,
-  showInfoButton,
-  infoShown,
   onPlay,
   onShuffle,
   onToggleStar,
-  onToggleInfo,
 }: AlbumActionButtonsProps) {
   const { t } = useTranslation()
-  const {
-    playNext,
-    playLast,
-    startInstantMix,
-    addToPlaylist,
-    createNewPlaylist,
-  } = useOptions()
+  const { playNext, playLast, startInstantMix } = useOptions()
   const { share } = useShare()
   const pages = useAppStore().pages
   const hasSongs = album.song.length > 0
-
-  function addPlaylistTrigger(): ReactNode {
-    const label = t('options.playlist.add')
-
-    return (
-      <DropdownMenu>
-        <SimpleTooltip text={label}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              aria-label={label}
-              className={cn(
-                shapeClasses,
-                plainButton,
-                'font-semibold shrink-0',
-              )}
-            >
-              <ListMusicIcon className="size-[18px] shrink-0" />
-              <span className="hidden @[58rem]/actions:inline">{label}</span>
-            </Button>
-          </DropdownMenuTrigger>
-        </SimpleTooltip>
-        <DropdownMenuContent align="start">
-          <AddToPlaylistSubMenu
-            type="dropdown"
-            newPlaylistFn={() =>
-              createNewPlaylist(
-                album.name,
-                album.song.map((song) => song.id),
-              )
-            }
-            addToPlaylistFn={(id) =>
-              addToPlaylist(
-                id,
-                album.song.map((song) => song.id),
-              )
-            }
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    )
-  }
 
   return (
     <div className="@container/actions w-full mb-6">
@@ -194,7 +178,12 @@ export function AlbumActionButtons({
           </>
         )}
 
-        {!pages.hidePlaylistsSection && hasSongs && addPlaylistTrigger()}
+        {!pages.hidePlaylistsSection && hasSongs && (
+          <PlaylistAction
+            name={album.name}
+            getSongIds={() => album.song.map((song) => song.id)}
+          />
+        )}
 
         <Action
           icon={Share2Icon}
@@ -222,26 +211,6 @@ export function AlbumActionButtons({
                   isStarred && 'fill-red-500 text-red-500',
                 )}
               />
-            </Button>
-          </SimpleTooltip>
-        )}
-
-        {showInfoButton && (
-          <SimpleTooltip
-            text={
-              infoShown ? t('generic.hideDetails') : t('generic.showDetails')
-            }
-          >
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onToggleInfo}
-              className={cn(
-                'size-9 shrink-0 rounded-full p-0 @[28rem]/actions:size-10',
-                infoShown && 'text-primary',
-              )}
-            >
-              <InfoIcon className="size-5" />
             </Button>
           </SimpleTooltip>
         )}

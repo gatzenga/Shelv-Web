@@ -355,8 +355,6 @@
   },
   "generic": {
     "seeMore": "Mehr anzeigen",
-    "showDetails": "Details anzeigen",
-    "hideDetails": "Details ausblenden",
     "viewAll": "Alle ansehen",
     "loading": "Wird geladen…",
     "viewMode": {
@@ -394,8 +392,11 @@
       "albumsCount_one": "{{count}} Album",
       "albumsCount_other": "{{count}} Alben"
     },
-    "topSongs": "Beliebt",
+    "topSongs": "Top-Titel",
     "albums": "Alben",
+    "discography": "Diskografie",
+    "latestRelease": "Neueste Veröffentlichung",
+    "moreInfo": "Mehr Infos",
     "recentAlbums": "Neueste Alben",
     "relatedArtists": "Ähnliche Künstler",
     "search": {

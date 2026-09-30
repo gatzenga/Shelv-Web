@@ -1,39 +1,59 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  HeartIcon,
+  ListEndIcon,
+  ListPlusIcon,
+  Loader2Icon,
+  PauseIcon,
+  PlayIcon,
+  Share2Icon,
+  ShuffleIcon,
+  SparklesIcon,
+} from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Actions } from '@/app/components/actions'
+import { toast } from 'react-toastify'
+import { Action, PlaylistAction } from '@/app/components/album/action-buttons'
+import { Button } from '@/app/components/ui/button'
+import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
+import { useOptions } from '@/app/hooks/use-options'
+import { useShare } from '@/app/hooks/use-share'
 import { useSongList } from '@/app/hooks/use-song-list'
+import { cn } from '@/lib/utils'
 import { subsonic } from '@/service/subsonic'
-import { useAppPages, useAppStore } from '@/store/app.store'
+import { useAppStore } from '@/store/app.store'
 import {
   useIsArtistPlaying,
   usePlayerActions,
   usePlayerStore,
 } from '@/store/player.store'
 import { IArtist } from '@/types/responses/artist'
+import { ISong } from '@/types/responses/song'
 import { queryKeys } from '@/utils/queryKeys'
-import { ArtistOptions } from './options'
+
+const SpinnerIcon = ({ className }: { className?: string }) => (
+  <Loader2Icon className={cn(className, 'animate-spin')} />
+)
 
 interface ArtistButtonsProps {
   artist: IArtist
-  showInfoButton: boolean
   isArtistEmpty: boolean
 }
 
-export function ArtistButtons({
-  artist,
-  showInfoButton,
-  isArtistEmpty,
-}: ArtistButtonsProps) {
+// The same buttons as on the album screen, for all songs of the artist
+export function ArtistButtons({ artist, isArtistEmpty }: ArtistButtonsProps) {
   const { t } = useTranslation()
   const { setSongList, togglePlayPause, toggleShuffle } = usePlayerActions()
-  const { showInfoPanel, toggleShowInfoPanel } = useAppPages()
   const { getArtistAllSongs } = useSongList()
+  const { playNext, playLast, startInstantMix } = useOptions()
+  const { share } = useShare()
   const { isArtistActive, isArtistPlaying } = useIsArtistPlaying(artist.id)
   const isShuffleActive = usePlayerStore(
     (state) => state.playerState.isShuffleActive,
   )
-  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
+  const pages = useAppStore().pages
   const isArtistStarred = artist.starred !== undefined
+  const [loadingSongs, setLoadingSongs] = useState(false)
 
   const queryClient = useQueryClient()
 
@@ -46,31 +66,31 @@ export function ArtistButtons({
     },
   })
 
-  function handleLikeButton() {
-    if (!artist) return
-    starMutation.mutate({
-      id: artist.id,
-      starred: isArtistStarred,
-    })
+  async function loadSongs(): Promise<ISong[]> {
+    setLoadingSongs(true)
+    try {
+      return (await getArtistAllSongs(artist.name)) ?? []
+    } finally {
+      setLoadingSongs(false)
+    }
   }
 
-  async function playArtistRadio(shuffle = false) {
-    const songList = await getArtistAllSongs(artist?.name || '')
+  async function playArtist(shuffle = false) {
+    const songs = await loadSongs()
+    if (songs.length === 0) return
 
-    if (songList) {
-      setSongList(songList, 0, shuffle, {
-        id: artist.id,
-        name: artist.name,
-        type: 'artist',
-      })
-    }
+    setSongList(songs, 0, shuffle, {
+      id: artist.id,
+      name: artist.name,
+      type: 'artist',
+    })
   }
 
   function handlePlayButton() {
     if (isArtistActive) {
       togglePlayPause()
     } else {
-      playArtistRadio()
+      playArtist()
     }
   }
 
@@ -78,67 +98,111 @@ export function ArtistButtons({
     if (isArtistActive) {
       toggleShuffle()
     } else {
-      playArtistRadio(true)
+      playArtist(true)
     }
   }
 
-  const buttonsTooltips = {
-    play: isArtistPlaying
-      ? t('playlist.buttons.pause', { name: artist.name })
-      : t('playlist.buttons.play', { name: artist.name }),
-    shuffle: t('playlist.buttons.shuffle', { name: artist.name }),
-    options: t('playlist.buttons.options', { name: artist.name }),
-    like: isArtistStarred
-      ? t('album.buttons.dislike', { name: artist.name })
-      : t('album.buttons.like', { name: artist.name }),
-    info: showInfoPanel ? t('generic.hideDetails') : t('generic.showDetails'),
+  async function addToQueue(
+    add: (songs: ISong[]) => void,
+    messageKey: 'addedToPlayNext' | 'addedToQueue',
+  ) {
+    const songs = await loadSongs()
+    if (songs.length === 0) return
+
+    add(songs)
+    toast.success(t(`album.actions.${messageKey}`))
+  }
+
+  function handleLikeButton() {
+    starMutation.mutate({
+      id: artist.id,
+      starred: isArtistStarred,
+    })
   }
 
   if (isArtistEmpty) {
     return <div className="h-8 w-full" />
   }
 
+  const PlayStateIcon = loadingSongs
+    ? SpinnerIcon
+    : isArtistPlaying
+      ? PauseIcon
+      : PlayIcon
+
   return (
-    <Actions.Container>
-      <Actions.Button
-        tooltip={buttonsTooltips.play}
-        buttonStyle="primary"
-        onClick={handlePlayButton}
-      >
-        {isArtistPlaying ? <Actions.PauseIcon /> : <Actions.PlayIcon />}
-      </Actions.Button>
+    <div className="@container/actions w-full mb-6">
+      <div className="flex flex-wrap items-center gap-1.5 @[28rem]/actions:gap-2.5">
+        <Action
+          icon={PlayStateIcon}
+          label={
+            isArtistPlaying ? t('player.tooltips.pause') : t('options.play')
+          }
+          onClick={handlePlayButton}
+          prominent
+        />
 
-      <Actions.Button
-        tooltip={buttonsTooltips.shuffle}
-        onClick={handleShuffleButton}
-        isActive={isArtistActive && isShuffleActive}
-      >
-        <Actions.ShuffleIcon />
-      </Actions.Button>
+        <Action
+          icon={ShuffleIcon}
+          label={t('album.actions.shuffle')}
+          onClick={handleShuffleButton}
+          active={isArtistActive && isShuffleActive}
+        />
 
-      {!hideFavoritesSection && (
-        <>
-          <Actions.Button
-            tooltip={buttonsTooltips.like}
-            onClick={handleLikeButton}
+        <Action
+          icon={SparklesIcon}
+          label={t('options.instantMix')}
+          onClick={() => startInstantMix('artist', artist.id)}
+        />
+
+        <Action
+          icon={ListPlusIcon}
+          label={t('options.playNext')}
+          onClick={() => addToQueue(playNext, 'addedToPlayNext')}
+        />
+        <Action
+          icon={ListEndIcon}
+          label={t('options.addLast')}
+          onClick={() => addToQueue(playLast, 'addedToQueue')}
+        />
+
+        {!pages.hidePlaylistsSection && (
+          <PlaylistAction
+            name={artist.name}
+            getSongIds={async () => (await loadSongs()).map((song) => song.id)}
+          />
+        )}
+
+        <Action
+          icon={Share2Icon}
+          label={t('options.share')}
+          onClick={() => share(artist.id)}
+        />
+
+        {!pages.hideFavoritesSection && (
+          <SimpleTooltip
+            text={
+              isArtistStarred
+                ? t('album.buttons.dislike', { name: artist.name })
+                : t('album.buttons.like', { name: artist.name })
+            }
           >
-            <Actions.LikeIcon isStarred={isArtistStarred} />
-          </Actions.Button>
-        </>
-      )}
-      {showInfoButton && (
-        <Actions.Button
-          tooltip={buttonsTooltips.info}
-          onClick={toggleShowInfoPanel}
-        >
-          <Actions.InfoIcon />
-        </Actions.Button>
-      )}
-
-      <Actions.Dropdown
-        tooltip={buttonsTooltips.options}
-        options={<ArtistOptions artist={artist} />}
-      />
-    </Actions.Container>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleLikeButton}
+              className="size-9 shrink-0 rounded-full p-0 @[28rem]/actions:size-10"
+            >
+              <HeartIcon
+                className={cn(
+                  'size-5',
+                  isArtistStarred && 'fill-red-500 text-red-500',
+                )}
+              />
+            </Button>
+          </SimpleTooltip>
+        )}
+      </div>
+    </div>
   )
 }
