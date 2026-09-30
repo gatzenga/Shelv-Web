@@ -10,10 +10,13 @@ import {
 import { ComponentPropsWithoutRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import RepeatOne from '@/app/components/icons/repeat-one'
+import { PlayerLikeButton } from '@/app/components/player/like-button'
+import { PlayerMoreMenu } from '@/app/components/player/more-menu'
 import { Button } from '@/app/components/ui/button'
 import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
 import { usePlayerHotkeys } from '@/app/hooks/use-audio-hotkeys'
 import { cn } from '@/lib/utils'
+import { useAppStore } from '@/store/app.store'
 import {
   usePlayerActions,
   usePlayerIsPlaying,
@@ -48,6 +51,7 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
     playNextSong,
   } = usePlayerActions()
   const { useAudioHotkeys } = usePlayerHotkeys()
+  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
 
   useAudioHotkeys('space', togglePlayPause)
   useAudioHotkeys('mod+left', playPrevSong)
@@ -83,6 +87,10 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
 
   return (
     <div className="flex w-full gap-1 justify-center items-center mb-1">
+      {isSong && !hideFavoritesSection && (
+        <PlayerLikeButton disabled={!song?.id} />
+      )}
+
       {isSong && (
         <PlayerButton
           className={clsx(isShuffleActive && 'player-button-active')}
@@ -150,6 +158,8 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
           )}
         </PlayerButton>
       )}
+
+      {isSong && <PlayerMoreMenu song={song} />}
     </div>
   )
 }

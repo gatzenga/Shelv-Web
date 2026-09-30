@@ -494,7 +494,8 @@
       "episode": "Go to episode",
       "podcast": "Go to podcast"
     },
-    "instantMix": "Instant Mix"
+    "instantMix": "Instant Mix",
+    "share": "Share"
   },
   "radios": {
     "label": "Radio",
@@ -881,5 +882,9 @@
     "empty": "No data available yet",
     "error": "Insights could not be loaded.",
     "retry": "Retry"
+  },
+  "share": {
+    "copied": "Link copied to clipboard",
+    "failed": "Couldn't create share link."
   }
 }

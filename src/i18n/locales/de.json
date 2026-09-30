@@ -472,7 +472,8 @@
       "episode": "Zu Episode gehen"
     },
     "markAsPlayed": "Als gespielt markieren",
-    "instantMix": "Instant Mix"
+    "instantMix": "Instant Mix",
+    "share": "Teilen"
   },
   "time": {
     "days_one": "{{days}} Tag",
@@ -860,5 +861,9 @@
     "empty": "Noch keine Daten vorhanden",
     "error": "Insights konnten nicht geladen werden.",
     "retry": "Erneut versuchen"
+  },
+  "share": {
+    "copied": "Link in die Zwischenablage kopiert",
+    "failed": "Link konnte nicht erstellt werden."
   }
 }

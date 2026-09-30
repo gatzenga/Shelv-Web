@@ -8,6 +8,7 @@ import { playlists } from './playlists'
 import { radios } from './radios'
 import { scrobble } from './scrobble'
 import { search } from './search'
+import { share } from './share'
 import { songs } from './songs'
 import { star } from './star'
 import { user } from './user'
@@ -22,6 +23,7 @@ export const subsonic = {
   radios,
   scrobble,
   search,
+  share,
   songs,
   star,
   user,

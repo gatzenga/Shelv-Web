@@ -4,7 +4,6 @@ import { getSongStreamUrl } from '@/api/httpClient'
 import { RadioInfo } from '@/app/components/player/radio-info'
 import { TrackInfo } from '@/app/components/player/track-info'
 import { useRadioNowPlaying } from '@/app/hooks/use-radio-now-playing'
-import { useAppStore } from '@/store/app.store'
 import {
   getVolume,
   usePlayerActions,
@@ -18,26 +17,21 @@ import { LoopState } from '@/types/playerContext'
 import { ensureSupportForAlac } from '@/utils/alac'
 import { AudioPlayer } from './audio'
 import { PlayerControls } from './controls'
-import { PlayerLikeButton } from './like-button'
 import { PlayerLyricsButton } from './lyrics-button'
 import { PlayerProgress } from './progress'
 import { PlayerQueueButton } from './queue-button'
 import { RadioAudio } from './radio-audio'
-import { PlayerSmartMixButton } from './smart-mix-button'
 import { PlayerVolume } from './volume'
 
 const MemoTrackInfo = memo(TrackInfo)
 const MemoRadioInfo = memo(RadioInfo)
 const MemoPlayerControls = memo(PlayerControls)
 const MemoPlayerProgress = memo(PlayerProgress)
-const MemoPlayerLikeButton = memo(PlayerLikeButton)
 const MemoPlayerQueueButton = memo(PlayerQueueButton)
 const MemoPlayerVolume = memo(PlayerVolume)
 const MemoLyricsButton = memo(PlayerLyricsButton)
-const MemoSmartMixButton = memo(PlayerSmartMixButton)
 
 export function Player() {
-  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
   const audioRef = useRef<HTMLAudioElement>(null)
   const radioRef = useRef<HTMLAudioElement>(null)
   const {
@@ -136,10 +130,6 @@ export function Player() {
           <div className="flex items-center gap-1">
             {isSong && (
               <>
-                {!hideFavoritesSection && (
-                  <MemoPlayerLikeButton disabled={!song} />
-                )}
-                <MemoSmartMixButton />
                 <MemoLyricsButton disabled={!song} />
                 <MemoPlayerQueueButton disabled={!song} />
               </>

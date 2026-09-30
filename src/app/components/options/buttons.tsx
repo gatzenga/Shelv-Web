@@ -6,6 +6,7 @@ import {
   Pencil,
   PlayIcon,
   PlusIcon,
+  Share2Icon,
   SparklesIcon,
   Trash,
 } from 'lucide-react'
@@ -68,6 +69,19 @@ function InstantMix({ variant = 'dropdown', ...props }: DropdownMenuItemProps) {
       variant={variant}
       icon={<SparklesIcon className="mr-2 h-4 w-4" />}
       label={t('options.instantMix')}
+      {...props}
+    />
+  )
+}
+
+function Share({ variant = 'dropdown', ...props }: DropdownMenuItemProps) {
+  const { t } = useTranslation()
+
+  return (
+    <MenuItemFactory
+      variant={variant}
+      icon={<Share2Icon className="mr-2 h-4 w-4" />}
+      label={t('options.share')}
       {...props}
     />
   )
@@ -159,6 +173,7 @@ export const OptionsButtons = {
   PlayNext,
   PlayLast,
   InstantMix,
+  Share,
   AddToPlaylistOption,
   EditPlaylist,
   RemovePlaylist,
