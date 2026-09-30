@@ -1,5 +1,7 @@
 export enum Theme {
   Black = 'black',
+  ShelvDark = 'shelv-dark',
+  ShelvLight = 'shelv-light',
   Vesper = 'vesper',
   Mirage = 'mirage',
   MonokaiPro = 'monokai-pro',

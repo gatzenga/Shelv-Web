@@ -79,6 +79,8 @@
   "theme": {
     "label": "Theme",
     "black": "Black and White",
+    "shelv-dark": "Shelv Dark",
+    "shelv-light": "Shelv Light",
     "vesper": "Vesper",
     "mirage": "Mirage",
     "marmalade-beaver": "Marmalade Beaver",

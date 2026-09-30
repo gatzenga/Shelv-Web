@@ -28,6 +28,52 @@
     --ring: 240 4.9% 83.9%;
   }
 
+  .shelv-dark {
+    --background: 300 3% 8%;
+    --background-foreground: 275 8% 11%;
+    --foreground: 270 20% 96%;
+    --muted: 270 10% 15%;
+    --muted-foreground: 267 10% 66%;
+    --popover: 275 10% 10%;
+    --popover-foreground: 270 20% 96%;
+    --card: 300 3% 8%;
+    --card-foreground: 270 20% 96%;
+    --border: 268 14% 19%;
+    --input: 268 14% 22%;
+    --primary: 266 62% 70%;
+    --primary-foreground: 267 45% 12%;
+    --secondary: 267 30% 20%;
+    --secondary-foreground: 266 50% 88%;
+    --accent: 267 32% 25%;
+    --accent-foreground: 266 40% 94%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 266 62% 70%;
+  }
+
+  .shelv-light {
+    --background: 262 26% 66%;
+    --background-foreground: 262 28% 72%;
+    --foreground: 267 45% 9%;
+    --muted: 262 22% 58%;
+    --muted-foreground: 267 40% 13%;
+    --popover: 262 32% 78%;
+    --popover-foreground: 267 45% 9%;
+    --card: 262 30% 71%;
+    --card-foreground: 267 45% 9%;
+    --border: 262 20% 55%;
+    --input: 262 20% 58%;
+    --primary: 267 41% 23%;
+    --primary-foreground: 262 45% 94%;
+    --secondary: 262 24% 58%;
+    --secondary-foreground: 267 45% 12%;
+    --accent: 262 28% 58%;
+    --accent-foreground: 267 45% 10%;
+    --destructive: 0 70% 38%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 267 41% 23%;
+  }
+
   .vesper {
     --background: 0 0% 6%;
     --background-foreground: 0 0% 8%;
