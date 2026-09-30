@@ -88,21 +88,20 @@ export default function PreviewList({
           )}
           <div className="flex gap-2">
             {onRefresh && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-md shadow-sm"
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none"
                 disabled={isRefreshing}
                 onClick={onRefresh}
                 data-testid="preview-list-refresh-button"
               >
                 {isRefreshing ? (
-                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
+                  <RefreshCwIcon className="h-5 w-5 animate-spin" />
                 ) : (
-                  <DicesIcon className="h-4 w-4" />
+                  <DicesIcon className="h-5 w-5" />
                 )}
                 <span className="sr-only">Refresh</span>
-              </Button>
+              </button>
             )}
             <CarouselButton
               direction="prev"
