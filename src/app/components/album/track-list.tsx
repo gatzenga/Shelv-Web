@@ -15,19 +15,25 @@ import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 interface AlbumTrackListProps {
   songs: ISong[]
   onPlay: (index: number) => void
+  // an album shows the track numbers and the discs, a playlist its positions
+  numbering?: 'track' | 'position'
 }
 
 // The tracks like in the Shelv app: the number, the title with the artist
 // below, the duration, and action menu
-export function AlbumTrackList({ songs, onPlay }: AlbumTrackListProps) {
+export function AlbumTrackList({
+  songs,
+  onPlay,
+  numbering = 'track',
+}: AlbumTrackListProps) {
   const { t } = useTranslation()
 
   const discs = useMemo(() => {
     const numbers = new Set(songs.map((song) => song.discNumber ?? 1))
-    if (numbers.size < 2) return null
+    if (numbering === 'position' || numbers.size < 2) return null
 
     return [...numbers].sort((a, b) => a - b)
-  }, [songs])
+  }, [songs, numbering])
 
   return (
     <div
@@ -47,7 +53,12 @@ export function AlbumTrackList({ songs, onPlay }: AlbumTrackListProps) {
                 {t('album.disc', { number: song.discNumber ?? 1 })}
               </div>
             )}
-            <TrackRow song={song} index={index} onPlay={() => onPlay(index)} />
+            <TrackRow
+              song={song}
+              index={index}
+              position={numbering === 'position'}
+              onPlay={() => onPlay(index)}
+            />
           </Fragment>
         )
       })}
@@ -58,10 +69,11 @@ export function AlbumTrackList({ songs, onPlay }: AlbumTrackListProps) {
 interface TrackRowProps {
   song: ISong
   index: number
+  position: boolean
   onPlay: () => void
 }
 
-function TrackRow({ song, index, onPlay }: TrackRowProps) {
+function TrackRow({ song, index, position, onPlay }: TrackRowProps) {
   const currentSong = usePlayerCurrentSong()
   const isPlayerPlaying = usePlayerIsPlaying()
   const hideFavorites = useAppStore().pages.hideFavoritesSection
@@ -89,7 +101,7 @@ function TrackRow({ song, index, onPlay }: TrackRowProps) {
               <EqualizerBars size={14} className="text-primary mb-0.5" />
             ) : (
               <span className={cn(isCurrent && 'text-primary')}>
-                {song.track ?? index + 1}
+                {position ? index + 1 : (song.track ?? index + 1)}
               </span>
             )}
           </div>
