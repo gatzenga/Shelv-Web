@@ -1,4 +1,6 @@
+import { InsightsButton } from '@/app/components/header/insights-button'
 import { NavigationButtons } from '@/app/components/header/navigation-buttons'
+import { RefreshButton } from '@/app/components/header/refresh-button'
 import { UserDropdown } from '@/app/components/header/user-dropdown'
 import { ThemeButton } from '@/app/components/theme/theme-button'
 
@@ -10,6 +12,8 @@ export function Header() {
       </div>
       <div className="col-span-2" />
       <div className="flex justify-end items-center gap-2">
+        <RefreshButton />
+        <InsightsButton />
         <ThemeButton />
         <UserDropdown />
       </div>

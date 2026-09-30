@@ -63,6 +63,8 @@ const GENRE = {
   PATH: `${LIBRARY.GENRES}/:genreName`,
 }
 
+const INSIGHTS = '/insights'
+
 const SERVER_CONFIG = '/server-config'
 
 export const ROUTES = {
@@ -74,5 +76,6 @@ export const ROUTES = {
   FAVORITES,
   PLAYLIST,
   GENRE,
+  INSIGHTS,
   SERVER_CONFIG,
 }

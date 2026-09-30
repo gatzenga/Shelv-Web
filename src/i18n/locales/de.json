@@ -841,5 +841,19 @@
     "loading": "Instant Mix wird erstellt…",
     "empty": "Für diese Auswahl gibt es keinen Instant Mix.",
     "error": "Der Instant Mix konnte nicht erstellt werden."
+  },
+  "header": {
+    "refresh": "Neu laden",
+    "insights": "Insights"
+  },
+  "insights": {
+    "title": "Insights",
+    "artists": "Künstler",
+    "albums": "Alben",
+    "songs": "Titel",
+    "loading": "Analysiere deine Library…",
+    "empty": "Noch keine Daten vorhanden",
+    "error": "Insights konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
   }
 }

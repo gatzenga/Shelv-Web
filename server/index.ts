@@ -10,6 +10,7 @@ import { DiskCache } from './cache.ts'
 import { loadConfig } from './config.ts'
 import { isAbortError, sendJson, sendText } from './http.ts'
 import { sendInfinityMix } from './infinity-mix.ts'
+import { sendInsights } from './insights.ts'
 import { sendInstantMix } from './instant-mix.ts'
 import { createLastFMHandler, LastFMService } from './lastfm.ts'
 import { logger } from './logger.ts'
@@ -92,6 +93,12 @@ async function route(req: IncomingMessage, res: ServerResponse) {
 
   if (pathname === '/api/infinity-mix') {
     await sendInfinityMix(config, res, url)
+    return
+  }
+
+  if (pathname === '/api/insights') {
+    res.setHeader('cache-control', 'no-store')
+    await sendInsights(config, res, url)
     return
   }
 
