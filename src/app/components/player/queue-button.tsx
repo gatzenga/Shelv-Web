@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  ListVideo,
+  ListIcon,
   ListXIcon,
 } from 'lucide-react'
 import { ComponentPropsWithoutRef, useState } from 'react'
@@ -51,9 +51,7 @@ export function PlayerQueueButton({ disabled }: PlayerSongListButtonProps) {
               setOpenPopover(!openPopover)
             }}
           >
-            <ListVideo
-              className={clsx('w-4 h-4', isActive && 'text-primary')}
-            />
+            <ListIcon className={clsx('w-4 h-4', isActive && 'text-primary')} />
           </Button>
         </SimpleTooltip>
       </div>

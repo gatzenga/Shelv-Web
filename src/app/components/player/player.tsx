@@ -16,6 +16,7 @@ import {
 import { LoopState } from '@/types/playerContext'
 import { ensureSupportForAlac } from '@/utils/alac'
 import { AudioPlayer } from './audio'
+import { PlayerAudioBadge } from './audio-badge'
 import { PlayerControls } from './controls'
 import { PlayerLyricsButton } from './lyrics-button'
 import { PlayerProgress } from './progress'
@@ -130,8 +131,9 @@ export function Player() {
           <div className="flex items-center gap-1">
             {isSong && (
               <>
-                <MemoLyricsButton disabled={!song} />
+                <PlayerAudioBadge song={song} />
                 <MemoPlayerQueueButton disabled={!song} />
+                <MemoLyricsButton disabled={!song} />
               </>
             )}
 

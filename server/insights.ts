@@ -4,7 +4,7 @@ import type { ServerResponse } from 'node:http'
 import type { ServerConfig } from './config.ts'
 import { mostPlayedSongs } from './frequent-songs.ts'
 import { sendJson } from './http.ts'
-import { type Album, albumList, type Song, songsOfAlbums } from './smart-mix.ts'
+import { type Album, albumList } from './smart-mix.ts'
 import { createClient, SubsonicError } from './subsonic-client.ts'
 
 const listSize = 20

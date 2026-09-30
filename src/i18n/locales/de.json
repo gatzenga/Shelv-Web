@@ -522,8 +522,14 @@
     "yourQueue": "Deine Warteschlange",
     "songsCount_one": "{{count}} Titel",
     "songsCount_other": "{{count}} Titel",
-    "infinityMixEnable": "Endlos-Mix aktivieren",
-    "infinityMixDisable": "Endlos-Mix deaktivieren"
+    "infinityMode": "Endlos-Modus",
+    "edit": "Bearbeiten",
+    "done": "Fertig",
+    "clearShort": "Leeren",
+    "clearConfirmTitle": "Warteschlange leeren?",
+    "clearConfirmDescription": "Alle kommenden Songs werden aus der Warteschlange entfernt.",
+    "cancel": "Abbrechen",
+    "remove": "Entfernen"
   },
   "shortcuts": {
     "modal": {

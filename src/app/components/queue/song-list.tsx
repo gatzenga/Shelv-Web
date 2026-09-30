@@ -1,22 +1,28 @@
-import clsx from 'clsx'
 import {
   GripVerticalIcon,
   InfinityIcon,
   ListMusicIcon,
-  ListXIcon,
   PlayIcon,
   XIcon,
 } from 'lucide-react'
-import { DragEvent, useMemo, useState } from 'react'
+import { DragEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoverImage } from '@/app/components/table/cover-image'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/app/components/ui/alert-dialog'
 import { Button } from '@/app/components/ui/button'
-import { Separator } from '@/app/components/ui/separator'
-import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
+import { Switch } from '@/app/components/ui/switch'
 import { cn } from '@/lib/utils'
 import {
   usePlayerActions,
-  usePlayerContext,
   usePlayerCurrentSongIndex,
   usePlayerInfinityMode,
   usePlayerPlayNextQueue,
@@ -24,17 +30,14 @@ import {
   usePlayerUpcomingAlbumQueue,
   usePlayerUserQueue,
 } from '@/store/player.store'
-import { PlaybackSource } from '@/types/playerContext'
 import { ISong } from '@/types/responses/song'
-import {
-  convertSecondsToHumanRead,
-  convertSecondsToTime,
-} from '@/utils/convertSecondsToTime'
+import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
 
 interface QueueRowProps {
   song: ISong
   index: number
   sectionId: string
+  isEditing: boolean
   onPlay: () => void
   onRemove: () => void
   onMove: (from: number, to: number) => void
@@ -44,6 +47,7 @@ function QueueRow({
   song,
   index,
   sectionId,
+  isEditing,
   onPlay,
   onRemove,
   onMove,
@@ -93,7 +97,7 @@ function QueueRow({
 
   return (
     <div
-      draggable
+      draggable={isEditing}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -139,41 +143,50 @@ function QueueRow({
         )}
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground font-mono">
-          {convertSecondsToTime(song.duration ?? 0)}
-        </span>
+      <div className="flex items-center justify-end gap-2 shrink-0 min-w-[3.5rem]">
+        {isEditing ? (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-7 h-7 p-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove()
+              }}
+              onDoubleClick={(e) => e.stopPropagation()}
+            >
+              <XIcon className="w-4 h-4" />
+            </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-7 h-7 p-0 rounded-full opacity-0 group-hover:opacity-100 hover:bg-background/80 text-muted-foreground hover:text-foreground transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove()
-          }}
-          onDoubleClick={(e) => e.stopPropagation()}
-        >
-          <XIcon className="w-4 h-4" />
-        </Button>
-
-        <div className="cursor-grab active:cursor-grabbing text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-colors">
-          <GripVerticalIcon className="w-4 h-4" />
-        </div>
+            <div className="cursor-grab active:cursor-grabbing text-primary">
+              <GripVerticalIcon className="w-4 h-4" />
+            </div>
+          </>
+        ) : (
+          <span className="text-xs text-muted-foreground font-mono">
+            {convertSecondsToTime(song.duration ?? 0)}
+          </span>
+        )}
       </div>
     </div>
   )
 }
 
-export function QueueSongList() {
+interface QueueSongListProps {
+  onClose: () => void
+}
+
+export function QueueSongList({ onClose }: QueueSongListProps) {
   const { t } = useTranslation()
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
   const playNextQueue = usePlayerPlayNextQueue()
   const upcomingAlbum = usePlayerUpcomingAlbumQueue()
   const userQueue = usePlayerUserQueue()
   const currentSongIndex = usePlayerCurrentSongIndex()
   const isShuffleActive = usePlayerShuffle()
   const infinityModeEnabled = usePlayerInfinityMode()
-  const { source } = usePlayerContext()
 
   const {
     jumpToPlayNext,
@@ -192,87 +205,86 @@ export function QueueSongList() {
   const totalCount =
     playNextQueue.length + upcomingAlbum.length + userQueue.length
 
-  const totalDuration = useMemo(() => {
-    let seconds = 0
-    playNextQueue.forEach((s) => {
-      seconds += s.duration ?? 0
-    })
-    upcomingAlbum.forEach((s) => {
-      seconds += s.duration ?? 0
-    })
-    userQueue.forEach((s) => {
-      seconds += s.duration ?? 0
-    })
-    return convertSecondsToHumanRead(seconds)
-  }, [playNextQueue, upcomingAlbum, userQueue])
-
-  function getSourceLabel(src: PlaybackSource | null) {
-    if (!src) return null
-    return src.name
-  }
-
-  const sourceLabel = getSourceLabel(source)
+  const isEditing = isEditMode && totalCount > 0
 
   return (
     <div className="flex flex-1 flex-col h-full min-w-0">
-      <div className="flex items-center justify-between gap-2 h-8 mb-2">
-        <div className="flex gap-1.5 items-center text-muted-foreground text-xs whitespace-nowrap min-w-0">
-          {sourceLabel && (
-            <>
-              <span className="truncate text-foreground font-medium">
-                {sourceLabel}
-              </span>
-              <span className="shrink-0">•</span>
-            </>
+      <div className="flex items-center justify-between gap-2 h-12 min-h-12 px-4 border-b">
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="text-base font-semibold">{t('queue.title')}</h2>
+          {totalCount > 0 && (
+            <span className="text-xs font-mono text-muted-foreground bg-muted rounded-full px-1.5 py-0.5">
+              {totalCount}
+            </span>
           )}
-          <span className="shrink-0">
-            {t('playlist.songCount', { count: totalCount })}
-          </span>
-          <span className="shrink-0">•</span>
-          <span className="shrink-0">
-            {t('playlist.duration', { duration: totalDuration })}
-          </span>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <SimpleTooltip
-            text={
-              infinityModeEnabled
-                ? t('queue.infinityMixDisable')
-                : t('queue.infinityMixEnable')
-            }
+        <div className="flex items-center gap-3 shrink-0">
+          {totalCount > 0 && (
+            <>
+              <button
+                type="button"
+                className={cn(
+                  'text-sm font-semibold transition-colors hover:text-primary',
+                  isEditing ? 'text-primary' : 'text-muted-foreground',
+                )}
+                onClick={() => setIsEditMode(!isEditing)}
+              >
+                {isEditing ? t('queue.done') : t('queue.edit')}
+              </button>
+              <button
+                type="button"
+                className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
+                onClick={() => setShowClearConfirm(true)}
+              >
+                {t('queue.clearShort')}
+              </button>
+            </>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-full"
+            onClick={onClose}
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              className={clsx(
-                'h-8 w-8 shrink-0 rounded-md transition-all',
-                infinityModeEnabled
-                  ? 'text-primary bg-primary/20 hover:bg-primary/30 shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-              )}
-              onClick={toggleInfinityMode}
-            >
-              <InfinityIcon className="w-4 h-4" />
-            </Button>
-          </SimpleTooltip>
-
-          <SimpleTooltip text={t('queue.clear')}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-              onClick={clearQueue}
-            >
-              <ListXIcon className="w-4 h-4" />
-            </Button>
-          </SimpleTooltip>
+            <XIcon className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
-      <Separator />
+      <div className="flex items-center justify-between gap-2 px-4 py-2 border-b">
+        <label
+          htmlFor="infinity-mode"
+          className="flex items-center gap-2 text-sm cursor-pointer"
+        >
+          <InfinityIcon className="w-4 h-4 text-muted-foreground" />
+          {t('queue.infinityMode')}
+        </label>
+        <Switch
+          id="infinity-mode"
+          checked={infinityModeEnabled}
+          onCheckedChange={toggleInfinityMode}
+        />
+      </div>
 
-      <div className="w-full flex-1 overflow-y-auto min-h-0 pb-2 space-y-4">
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('queue.clearConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('queue.clearConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('queue.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={clearQueue}>
+              {t('queue.clearShort')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="w-full flex-1 overflow-y-auto min-h-0 px-2 py-2 space-y-4">
         {totalCount === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground py-16">
             <ListMusicIcon className="w-12 h-12 opacity-30" />
@@ -294,6 +306,7 @@ export function QueueSongList() {
                     song={song}
                     index={idx}
                     sectionId="playNext"
+                    isEditing={isEditing}
                     onPlay={() => jumpToPlayNext(idx)}
                     onRemove={() => removeFromPlayNextQueue(idx)}
                     onMove={moveInPlayNextQueue}
@@ -320,6 +333,7 @@ export function QueueSongList() {
                     song={song}
                     index={idx}
                     sectionId="upcoming"
+                    isEditing={isEditing}
                     onPlay={() => jumpToQueueTrack(currentSongIndex + 1 + idx)}
                     onRemove={() =>
                       removeFromPlayQueue(currentSongIndex + 1 + idx)
@@ -344,6 +358,7 @@ export function QueueSongList() {
                     song={song}
                     index={idx}
                     sectionId="userQueue"
+                    isEditing={isEditing}
                     onPlay={() => jumpToUserQueue(idx)}
                     onRemove={() => removeFromUserQueue(idx)}
                     onMove={moveInUserQueue}

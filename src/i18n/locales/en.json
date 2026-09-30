@@ -597,8 +597,14 @@
     "yourQueue": "Your Queue",
     "songsCount_one": "{{count}} song",
     "songsCount_other": "{{count}} songs",
-    "infinityMixEnable": "Enable Infinity Mix",
-    "infinityMixDisable": "Disable Infinity Mix"
+    "infinityMode": "Infinity Mode",
+    "edit": "Edit",
+    "done": "Done",
+    "clearShort": "Clear",
+    "clearConfirmTitle": "Clear Queue?",
+    "clearConfirmDescription": "All upcoming songs will be removed from the queue.",
+    "cancel": "Cancel",
+    "remove": "Remove"
   },
   "shortcuts": {
     "modal": {
