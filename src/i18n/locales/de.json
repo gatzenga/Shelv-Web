@@ -454,8 +454,8 @@
   },
   "options": {
     "play": "Abspielen",
-    "playNext": "Als nächstes abspielen",
-    "addLast": "Als letztes spielen",
+    "playNext": "Als nächstes",
+    "addLast": "Zur Warteschlange",
     "download": "Herunterladen",
     "playlist": {
       "add": "Zur Playlist hinzufügen",

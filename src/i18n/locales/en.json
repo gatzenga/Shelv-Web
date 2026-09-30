@@ -476,8 +476,8 @@
   },
   "options": {
     "play": "Play",
-    "playNext": "Play next",
-    "addLast": "Add last",
+    "playNext": "Play Next",
+    "addLast": "Add to Queue",
     "download": "Download",
     "playlist": {
       "add": "Add to playlist",
