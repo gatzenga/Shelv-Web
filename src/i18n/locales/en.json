@@ -641,12 +641,16 @@
   },
   "about": {
     "client": "Client",
-    "server": "Server",
     "version": "Version",
-    "type": "Type",
-    "apiVersion": "API Version",
     "toasts": {
       "copy": "Link copied to clipboard!"
+    },
+    "links": {
+      "website": "Developer Website",
+      "github": "GitHub",
+      "contact": "Contact",
+      "discord": "Discord",
+      "coffee": "Buy me a coffee"
     }
   },
   "mobile": {

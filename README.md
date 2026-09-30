@@ -4,6 +4,8 @@ A web player for [Navidrome](https://www.navidrome.org) and other Subsonic serve
 
 This is a fork of [Aonsoku](https://github.com/victoralvesf/aonsoku) by Victor Alves, changed for my own use. It runs as a single Docker container that serves the app and proxies Navidrome, so the browser never talks to Navidrome directly.
 
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/Shelv)
+
 ## Run
 
 Copy `docker-compose.yml`, adjust the environment values and the volume paths, then:

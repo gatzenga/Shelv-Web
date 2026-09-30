@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { AppIcon } from '@/app/components/app-icon'
 import { MultiBadge } from '@/app/components/ui/badge'
@@ -8,9 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog'
-import { subsonic } from '@/service/subsonic'
+import { aboutLinks } from '@/utils/appLinks'
 import { getAppInfo } from '@/utils/appName'
-import { queryKeys } from '@/utils/queryKeys'
 
 interface AboutDialogProps {
   open: boolean
@@ -20,11 +18,6 @@ interface AboutDialogProps {
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const { t } = useTranslation()
   const { name, version } = getAppInfo()
-
-  const { data: server, isLoading } = useQuery({
-    queryKey: [queryKeys.update.serverInfo],
-    queryFn: subsonic.ping.pingInfo,
-  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,32 +33,26 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           </div>
         </DialogHeader>
 
-        <div className="w-full h-full p-6 gap-6 flex flex-col">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2 h-full text-sm">
-              <span className="text-xs font-medium">{t('about.client')}</span>
-              <div className="flex flex-col gap-1 justify-center text-muted-foreground">
-                <div className="flex gap-2">
-                  <MultiBadge label={t('about.version')}>{version}</MultiBadge>
-                </div>
-              </div>
+        <div className="w-full p-6 gap-6 flex flex-col">
+          <div className="flex flex-col gap-2 text-sm">
+            <span className="text-xs font-medium">{t('about.client')}</span>
+            <div className="flex gap-2">
+              <MultiBadge label={t('about.version')}>{version}</MultiBadge>
             </div>
+          </div>
 
-            <div className="flex flex-col gap-2 h-full text-sm">
-              <span className="text-xs font-medium">{t('about.server')}</span>
-              {isLoading && <p>{t('generic.loading')}</p>}
-              {server && !isLoading && (
-                <div className="flex gap-2 flex-wrap">
-                  <MultiBadge label={t('about.type')}>{server.type}</MultiBadge>
-                  <MultiBadge label={t('about.version')}>
-                    {server.serverVersion}
-                  </MultiBadge>
-                  <MultiBadge label={t('about.apiVersion')}>
-                    {server.version}
-                  </MultiBadge>
-                </div>
-              )}
-            </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            {aboutLinks.map(({ key, url }) => (
+              <a
+                key={key}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground hover:text-primary hover:underline"
+              >
+                {t(`about.links.${key}`)}
+              </a>
+            ))}
           </div>
         </div>
       </DialogContent>
