@@ -3,7 +3,7 @@ import { Skeleton } from '@/app/components/ui/skeleton'
 export function HomeFallback() {
   return (
     <div className="w-full px-8 py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">
+      <div className="flex flex-col gap-2.5 mb-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <Skeleton key={index} className="h-[52px] rounded-full" />
         ))}

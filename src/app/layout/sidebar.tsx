@@ -1,10 +1,10 @@
 import {
   HeartIcon,
-  HomeIcon,
   LibraryIcon,
   Mic2Icon,
   Music2Icon,
   RadioIcon,
+  SparklesIcon,
   TagsIcon,
 } from 'lucide-react'
 import { ElementType, memo } from 'react'
@@ -13,7 +13,7 @@ import { ROUTES } from '@/routes/routesList'
 const Mic2 = memo(Mic2Icon)
 const Music2 = memo(Music2Icon)
 const Radio = memo(RadioIcon)
-const Home = memo(HomeIcon)
+const Discover = memo(SparklesIcon)
 const Library = memo(LibraryIcon)
 const Heart = memo(HeartIcon)
 const Tags = memo(TagsIcon)
@@ -41,7 +41,7 @@ export const mainNavItems = [
     id: SidebarItems.Home,
     title: 'sidebar.home',
     route: ROUTES.LIBRARY.HOME,
-    icon: Home,
+    icon: Discover,
   },
 ]
 

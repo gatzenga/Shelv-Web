@@ -1,12 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { useGetRandomAlbums } from '@/app/hooks/use-home'
-import { ROUTES } from '@/routes/routesList'
 import PreviewList from './preview-list'
 
 export function Explore() {
   const { t } = useTranslation()
-  const { data, isLoading } = useGetRandomAlbums()
+  const { data, isLoading, isFetching, refetch } = useGetRandomAlbums()
 
   if (isLoading) {
     return <PreviewListFallback />
@@ -17,8 +16,9 @@ export function Explore() {
   return (
     <PreviewList
       title={t('home.explore')}
-      moreRoute={ROUTES.ALBUMS.RANDOM}
       list={data.list}
+      onRefresh={() => refetch()}
+      isRefreshing={isFetching}
     />
   )
 }

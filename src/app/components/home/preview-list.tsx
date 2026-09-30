@@ -1,7 +1,9 @@
+import { DicesIcon, RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
+import { Button } from '@/app/components/ui/button'
 import {
   Carousel,
   type CarouselApi,
@@ -19,6 +21,8 @@ interface PreviewListProps {
   moreTitle?: string
   moreRoute?: string
   cardSize?: 'home' | 'compact' | 'artist'
+  onRefresh?: () => void
+  isRefreshing?: boolean
   subtitleType?: 'artist' | 'year'
 }
 
@@ -31,6 +35,8 @@ export default function PreviewList({
   moreRoute,
   cardSize = 'home',
   subtitleType = 'artist',
+  onRefresh,
+  isRefreshing = false,
 }: PreviewListProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [canScrollPrev, setCanScrollPrev] = useState<boolean>()
@@ -81,6 +87,23 @@ export default function PreviewList({
             </Link>
           )}
           <div className="flex gap-2">
+            {onRefresh && (
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-md shadow-sm"
+                disabled={isRefreshing}
+                onClick={onRefresh}
+                data-testid="preview-list-refresh-button"
+              >
+                {isRefreshing ? (
+                  <RefreshCwIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <DicesIcon className="h-4 w-4" />
+                )}
+                <span className="sr-only">Refresh</span>
+              </Button>
+            )}
             <CarouselButton
               direction="prev"
               disabled={!canScrollPrev}

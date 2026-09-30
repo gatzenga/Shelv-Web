@@ -21,6 +21,7 @@ services:
       - LASTFM_SECRET=
       - LASTFM_TOP_SONGS=false
       - LASTFM_MIXES=true
+      - DISCOVER_SECTIONS=smart-mixes,recently-added,recently-played,frequently-played,random-albums
       - SONGS_TO_ADD=5
       - MATCH_CURRENT_SONG=true
     volumes:

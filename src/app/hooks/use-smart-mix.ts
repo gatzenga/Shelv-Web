@@ -1,13 +1,13 @@
-import {
-  ChartColumnIcon,
-  ClockIcon,
-  ShuffleIcon,
-  SparklesIcon,
-} from 'lucide-react'
 import { ComponentType, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 import { getBackendUrl } from '@/api/httpClient'
+import {
+  MixChartIcon,
+  MixClockIcon,
+  MixShuffleIcon,
+  MixSparklesIcon,
+} from '@/app/components/icons/mix-icons'
 import { getLastFMOptions } from '@/store/lastfm-options.store'
 import { usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
@@ -20,10 +20,10 @@ export const smartMixes: {
   type: SmartMix
   icon: ComponentType<{ className?: string }>
 }[] = [
-  { type: 'newest', icon: SparklesIcon },
-  { type: 'frequent', icon: ChartColumnIcon },
-  { type: 'recent', icon: ClockIcon },
-  { type: 'shuffle', icon: ShuffleIcon },
+  { type: 'newest', icon: MixSparklesIcon },
+  { type: 'frequent', icon: MixChartIcon },
+  { type: 'recent', icon: MixClockIcon },
+  { type: 'shuffle', icon: MixShuffleIcon },
 ]
 
 async function loadMix(type: SmartMix) {

@@ -6,10 +6,21 @@ import { join } from 'node:path'
 
 type Language = 'de' | 'en'
 
+const discoverSectionNames = [
+  'smart-mixes',
+  'recently-added',
+  'recently-played',
+  'frequently-played',
+  'random-albums',
+] as const
+
+export type DiscoverSection = (typeof discoverSectionNames)[number]
+
 export interface ClientConfig {
   language: Language
   lyrics: boolean
   lastfm: boolean
+  discoverSections: DiscoverSection[]
   lastfmDefaults: {
     topSongs: boolean
     mixes: boolean
@@ -95,6 +106,34 @@ function readLanguage(name: string, fallback: Language): Language {
   throw new Error(`${name} must be "de" or "en", got "${value}"`)
 }
 
+// The order of the sections on the Discover page, first to last. A section
+// that is not listed is not shown.
+function readDiscoverSections(
+  name: string,
+  fallback: DiscoverSection[],
+): DiscoverSection[] {
+  const value = process.env[name]?.trim()
+  if (!value) return fallback
+
+  const sections: DiscoverSection[] = []
+
+  for (const entry of value.split(',')) {
+    const section = entry.trim().toLowerCase()
+    if (!section) continue
+
+    if (!(discoverSectionNames as readonly string[]).includes(section)) {
+      throw new Error(
+        `${name} contains "${section}", allowed are ${discoverSectionNames.join(', ')}`,
+      )
+    }
+    if (!sections.includes(section as DiscoverSection)) {
+      sections.push(section as DiscoverSection)
+    }
+  }
+
+  return sections
+}
+
 function readInt(name: string, fallback: number, min = 1, max = 10): number {
   const value = process.env[name]?.trim()
   if (!value) return fallback
@@ -149,6 +188,9 @@ export function loadConfig(): ServerConfig {
       language: readLanguage('LANGUAGE', 'de'),
       lyrics: lyricsServer !== null,
       lastfm: isLastfmConfigured,
+      discoverSections: readDiscoverSections('DISCOVER_SECTIONS', [
+        ...discoverSectionNames,
+      ]),
       lastfmDefaults: {
         topSongs: readBoolean('LASTFM_TOP_SONGS', true),
         mixes: readBoolean('LASTFM_MIXES', true),

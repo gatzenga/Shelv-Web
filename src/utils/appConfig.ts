@@ -4,9 +4,17 @@
 
 export type AppLanguage = 'de' | 'en'
 
+export type DiscoverSection =
+  | 'smart-mixes'
+  | 'recently-added'
+  | 'recently-played'
+  | 'frequently-played'
+  | 'random-albums'
+
 export interface AppConfig {
   language: AppLanguage
   lyrics: boolean
+  discoverSections: DiscoverSection[]
   lastfmDefaults: {
     topSongs: boolean
     mixes: boolean
@@ -31,6 +39,13 @@ export interface AppConfig {
 const defaultConfig: AppConfig = {
   language: 'de',
   lyrics: false,
+  discoverSections: [
+    'smart-mixes',
+    'recently-added',
+    'recently-played',
+    'frequently-played',
+    'random-albums',
+  ],
   lastfmDefaults: {
     topSongs: true,
     mixes: true,
