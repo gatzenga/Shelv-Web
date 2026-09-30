@@ -1,5 +1,5 @@
 import { iso6392BTo1, iso6392TTo1 } from 'iso-639-2'
-import { httpClient } from '@/api/httpClient'
+import { getBackendUrl, httpClient } from '@/api/httpClient'
 import {
   ILyric,
   IStructuredLine,
@@ -138,15 +138,15 @@ async function getLyricsFromLRCLib(getLyricsData: GetLyricsData) {
   }
 
   try {
-    const params = new URLSearchParams({
+    const url = getBackendUrl(lrclibGetUrl, {
       artist_name: artist,
       track_name: title,
+      duration: duration ? duration.toString() : undefined,
+      album_name: album,
+      song_id: getLyricsData.id,
     })
 
-    if (duration) params.append('duration', duration.toString())
-    if (album) params.append('album_name', album)
-
-    const request = await fetch(`${lrclibGetUrl}?${params.toString()}`, {
+    const request = await fetch(url, {
       headers: {
         'Lrclib-Client': lrclibClient,
       },

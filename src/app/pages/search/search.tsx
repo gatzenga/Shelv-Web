@@ -3,18 +3,21 @@ import { HistoryIcon, Loader2Icon, SearchIcon, XCircleIcon } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDebounce } from 'use-debounce'
+import { type LyricsSearchResult, searchLyrics } from '@/api/lyrics'
 import { LibraryPage } from '@/app/components/library/page'
 import ListWrapper from '@/app/components/list-wrapper'
 import {
   SearchAlbumRow,
   SearchArtistRow,
+  SearchLyricsRow,
+  SearchSongRow,
 } from '@/app/components/search/result-rows'
-import { SongListRow } from '@/app/components/song/list-row'
 import { Input } from '@/app/components/ui/input'
 import { useFavorites } from '@/app/hooks/use-favorites'
 import { subsonic } from '@/service/subsonic'
 import { useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
+import { ISong } from '@/types/responses/song'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
 import { queryKeys } from '@/utils/queryKeys'
 import {
@@ -41,6 +44,12 @@ export default function Search() {
   const { data, isFetching, isError } = useQuery({
     queryKey: [queryKeys.search, debounced],
     queryFn: () => subsonic.search.get({ query: debounced }),
+    enabled: debounced.length > 0,
+    staleTime: convertMinutesToMs(5),
+  })
+  const { data: lyricsData, isFetching: isFetchingLyrics } = useQuery({
+    queryKey: ['lyricsSearch', debounced],
+    queryFn: () => searchLyrics(debounced),
     enabled: debounced.length > 0,
     staleTime: convertMinutesToMs(5),
   })
@@ -75,6 +84,7 @@ export default function Search() {
   )
   const albums = isCurrent ? (data?.album ?? []) : []
   const songs = isCurrent ? (data?.song ?? []) : []
+  const lyrics = isCurrent ? (lyricsData ?? []) : []
 
   const needle = term.toLowerCase()
   const includes = (...values: (string | undefined)[]) =>
@@ -100,9 +110,12 @@ export default function Search() {
   const hasFavoriteResults =
     favoriteSongs.length + favoriteAlbums.length + favoriteArtists.length > 0
   const hasResults =
-    artists.length + albums.length + songs.length > 0 || hasFavoriteResults
+    artists.length + albums.length + songs.length + lyrics.length > 0 ||
+    hasFavoriteResults
   const isSearching =
-    term.length > 0 && !hasResults && (!isCurrent || isFetching)
+    term.length > 0 &&
+    !hasResults &&
+    (!isCurrent || isFetching || isFetchingLyrics)
 
   // The user opened a result: the search is kept like a chosen one
   function commit() {
@@ -130,6 +143,31 @@ export default function Search() {
       type: 'songs',
       id: 'search',
       name: t('sidebar.search'),
+    })
+  }
+
+  function playLyricsResult(item: LyricsSearchResult) {
+    commit()
+    const song = {
+      id: item.songId,
+      title: item.songTitle ?? item.songId,
+      artist: item.artistName ?? '',
+      albumId: item.albumId ?? '',
+      album: '',
+      coverArt: item.coverArt ?? '',
+      duration: item.duration ?? 0,
+      parent: '',
+      isDir: false,
+      track: 0,
+      year: 0,
+      size: 0,
+      contentType: 'audio/mpeg',
+      suffix: 'mp3',
+    } as ISong
+    setSongList([song], 0, false, {
+      type: 'songs',
+      id: 'search-lyrics',
+      name: t('sidebar.lyrics'),
     })
   }
 
@@ -191,7 +229,7 @@ export default function Search() {
     }
 
     return (
-      <ListWrapper className="flex flex-col gap-7">
+      <ListWrapper className="flex flex-col gap-4">
         {artists.length > 0 && (
           <Section title={t('sidebar.artists')}>
             {artists.map((artist) => (
@@ -215,7 +253,7 @@ export default function Search() {
         {songs.length > 0 && (
           <Section title={t('sidebar.songs')}>
             {songs.map((song, index) => (
-              <SongListRow
+              <SearchSongRow
                 key={song.id}
                 song={song}
                 index={index}
@@ -225,10 +263,23 @@ export default function Search() {
           </Section>
         )}
 
+        {lyrics.length > 0 && (
+          <Section title={t('sidebar.lyrics')}>
+            {lyrics.map((item) => (
+              <SearchLyricsRow
+                key={item.id}
+                item={item}
+                query={debounced}
+                onPlay={() => playLyricsResult(item)}
+              />
+            ))}
+          </Section>
+        )}
+
         {hasFavoriteResults && (
           <Section title={t('sidebar.favorites')}>
             {favoriteSongs.map((song, index) => (
-              <SongListRow
+              <SearchSongRow
                 key={`favorite-song-${song.id}`}
                 song={song}
                 index={index}
@@ -299,8 +350,10 @@ export default function Search() {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-1">
-      <h3 className="mb-2 text-2xl font-semibold tracking-tight">{title}</h3>
+    <section className="flex flex-col gap-0.5">
+      <h3 className="mb-1 text-sm font-semibold tracking-tight text-foreground/90">
+        {title}
+      </h3>
       {children}
     </section>
   )

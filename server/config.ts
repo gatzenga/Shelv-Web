@@ -48,6 +48,13 @@ export interface ServerConfig {
   logsDir: string
   navidromeUrl: string
   lyricsServer: string | null
+  lyrics: {
+    enabled: boolean
+    customServer: string | null
+    fallback: boolean
+    includeNavidrome: boolean
+    defaultServer: string
+  }
   cache: {
     dir: string
     images: boolean
@@ -156,7 +163,11 @@ function readPort(name: string, fallback: number): number {
 }
 
 export function loadConfig(): ServerConfig {
-  const lyricsServer = readUrl('LYRICS_SERVER', null)
+  const lyricsEnabled = readBoolean('LYRICS_ENABLED', true)
+  const lyricsCustomServer =
+    readUrl('LYRICS_CUSTOM_SERVER', null) ?? readUrl('LYRICS_SERVER', null)
+  const lrclibFallback = readBoolean('LRCLIB_FALLBACK', true)
+  const includeNavidromeLyrics = readBoolean('INCLUDE_NAVIDROME_LYRICS', true)
   const lastfmApiKey =
     readString('LASTFM_API', '') || readString('LASTFM_API_KEY', '')
   const lastfmSecret = readString('LASTFM_SECRET', '')
@@ -172,7 +183,14 @@ export function loadConfig(): ServerConfig {
     configDir,
     logsDir: readString('LOGS_DIR', '/logs'),
     navidromeUrl: readRequiredUrl('NAVIDROME_URL'),
-    lyricsServer,
+    lyricsServer: lyricsCustomServer ?? 'https://lrclib.net',
+    lyrics: {
+      enabled: lyricsEnabled,
+      customServer: lyricsCustomServer,
+      fallback: lrclibFallback,
+      includeNavidrome: includeNavidromeLyrics,
+      defaultServer: 'https://lrclib.net',
+    },
     cache: {
       dir: readString('CACHE_DIR', '/cache'),
       images: readBoolean('CACHE_IMAGES', false),
@@ -185,7 +203,7 @@ export function loadConfig(): ServerConfig {
     },
     client: {
       language: readLanguage('LANGUAGE', 'de'),
-      lyrics: lyricsServer !== null,
+      lyrics: lyricsEnabled,
       lastfm: isLastfmConfigured,
       discoverSections: readDiscoverSections('DISCOVER_SECTIONS', [
         ...discoverSectionNames,

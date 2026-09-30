@@ -325,10 +325,30 @@
   "menu": {
     "language": "Sprache",
     "lastfm": "Last.fm",
+    "lyrics": "Lyrics",
     "about": "Über",
     "serverLogout": "Abmelden",
     "server": "Server",
     "manageServers": "Server verwalten"
+  },
+  "lyrics": {
+    "title": "Lyrics",
+    "stored": "STORED",
+    "database": "DATABASE",
+    "tracks": "Titel",
+    "size": "Größe",
+    "empty": "Leer",
+    "downloadAll": "Download all Lyrics",
+    "downloading": "Lade Songtexte herunter...",
+    "cancelDownload": "Download abbrechen",
+    "reset": "Reset Lyrics Database",
+    "downloadStarted": "Download gestartet",
+    "downloadError": "Download konnte nicht gestartet werden",
+    "downloadCancelled": "Download abgebrochen",
+    "resetSuccess": "Datenbank erfolgreich zurückgesetzt",
+    "resetError": "Fehler beim Zurücksetzen der Datenbank",
+    "resetConfirmTitle": "Lyrics-Datenbank zurücksetzen?",
+    "resetConfirmDescription": "Alle lokal gespeicherten Songtexte für diesen Server werden gelöscht."
   },
   "lastfm": {
     "title": "Last.fm",

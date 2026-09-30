@@ -15,6 +15,8 @@ import { sendInstantMix } from './instant-mix.ts'
 import { createLastFMHandler, LastFMService } from './lastfm.ts'
 import { logger } from './logger.ts'
 import { createLyricsHandler } from './lyrics.ts'
+import { LyricsDatabase } from './lyrics-db.ts'
+import { LyricsService } from './lyrics-service.ts'
 import { createRadioHandler } from './radio.ts'
 import { sendServerInfo } from './server-info.ts'
 import { sendSmartMix } from './smart-mix.ts'
@@ -46,8 +48,11 @@ await lastfm.init()
 const handleLastFM = createLastFMHandler(lastfm)
 await lastfm.verifyOnLaunchIfNeeded()
 
+const lyricsDb = new LyricsDatabase(config.configDir)
+const lyricsService = new LyricsService(config, lyricsDb)
+
 const handleSubsonic = createSubsonicHandler(config, cache)
-const handleLyrics = createLyricsHandler(config, cache)
+const handleLyrics = createLyricsHandler(config, lyricsService)
 const handleRadio = createRadioHandler(config)
 
 // Written into index.html (see static.ts), /env-config.js remains for the Vite dev server
@@ -77,7 +82,10 @@ async function route(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
-  if (pathname.startsWith('/api/lrclib/')) {
+  if (
+    pathname.startsWith('/api/lrclib/') ||
+    pathname.startsWith('/api/lyrics/')
+  ) {
     await handleLyrics(req, res, url)
     return
   }

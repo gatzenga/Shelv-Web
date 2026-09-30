@@ -1,4 +1,4 @@
-import { Info, LogOut, Radio, ServerIcon, User } from 'lucide-react'
+import { Info, LogOut, Mic, Radio, ServerIcon, User } from 'lucide-react'
 import { useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 
 import { AboutDialog } from '@/app/components/about/dialog'
 import { LastFMDialog } from '@/app/components/lastfm/dialog'
+import { LyricsDialog } from '@/app/components/lyrics/dialog'
 import { ManageServersDialog } from '@/app/components/server/manage-dialog'
 import { Avatar, AvatarFallback } from '@/app/components/ui/avatar'
 import {
@@ -30,6 +31,7 @@ export function UserDropdown() {
   const { t } = useTranslation()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [lastfmOpen, setLastfmOpen] = useState(false)
+  const [lyricsOpen, setLyricsOpen] = useState(false)
   const [serversOpen, setServersOpen] = useState(false)
   const isAdmin = useIsAdmin()
 
@@ -40,6 +42,7 @@ export function UserDropdown() {
       <LogoutObserver />
 
       <LastFMDialog open={lastfmOpen} onOpenChange={setLastfmOpen} />
+      <LyricsDialog open={lyricsOpen} onOpenChange={setLyricsOpen} />
       {isAdmin && (
         <ManageServersDialog open={serversOpen} onOpenChange={setServersOpen} />
       )}
@@ -66,6 +69,10 @@ export function UserDropdown() {
           <DropdownMenuItem onClick={() => setLastfmOpen(true)}>
             <Radio className="mr-2 h-4 w-4" />
             <span>{t('menu.lastfm')}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setLyricsOpen(true)}>
+            <Mic className="mr-2 h-4 w-4" />
+            <span>{t('menu.lyrics', 'Lyrics')}</span>
           </DropdownMenuItem>
           {isAdmin && (
             <DropdownMenuItem onClick={() => setServersOpen(true)}>
