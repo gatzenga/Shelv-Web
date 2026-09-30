@@ -56,7 +56,7 @@ export function SongListRow({ song, index, onPlay }: SongListRowProps) {
             )}
             <span
               className={cn(
-                'truncate',
+                'truncate text-sm font-medium',
                 isCurrent && 'text-primary font-medium',
               )}
             >
@@ -77,7 +77,7 @@ export function SongListRow({ song, index, onPlay }: SongListRowProps) {
           </Link>
         )}
 
-        <span className="w-14 text-right text-sm text-muted-foreground tabular-nums">
+        <span className="w-14 text-right text-xs text-muted-foreground tabular-nums">
           {convertSecondsToTime(song.duration ?? 0)}
         </span>
       </div>

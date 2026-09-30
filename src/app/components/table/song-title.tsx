@@ -16,7 +16,7 @@ export function TableSongTitle({ song }: { song: ISong }) {
       />
       <div className="flex flex-col w-full justify-center truncate">
         <SimpleTooltip text={song.title} delay={1000}>
-          <span className="block w-fit max-w-full font-medium truncate">
+          <span className="block w-fit max-w-full text-sm font-medium truncate">
             {song.title}
           </span>
         </SimpleTooltip>
