@@ -2,7 +2,7 @@
   "name": "shelv-web",
   "license": "GPL-3.0-only",
   "private": true,
-  "version": "0.15.0",
+  "version": "1.0.0",
   "description": "Web player for Navidrome, the web counterpart of the Shelv apps",
   "type": "module",
   "scripts": {
