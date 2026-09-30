@@ -6,7 +6,7 @@ import {
   type ServerResponse,
 } from 'node:http'
 import { sendArtistTopSongs } from './artist-top-songs.ts'
-import { verifyCredentials } from './auth.ts'
+import { verifyAdmin, verifyCredentials } from './auth.ts'
 import { DiskCache } from './cache.ts'
 import { loadConfig } from './config.ts'
 import { isAbortError, sendJson, sendText } from './http.ts'
@@ -90,6 +90,25 @@ const loginPrefixes = [
   '/api/server-info',
 ]
 
+// Changes that concern everyone who uses the server
+const adminPaths = new Set([
+  '/api/lyrics/reset',
+  '/api/lyrics/download-all',
+  '/api/lyrics/cancel-download',
+  '/api/lastfm/verify',
+  '/api/lastfm/disconnect',
+  '/api/lastfm/auth/begin',
+  '/api/lastfm/auth/complete',
+  '/api/lastfm/logs/clear',
+])
+
+function needsAdmin(pathname: string, method: string | undefined) {
+  if (adminPaths.has(pathname)) return true
+
+  // the settings of a radio station: reading is for everyone, changing is not
+  return pathname === '/api/radio/settings' && method !== 'GET'
+}
+
 function needsLogin(pathname: string) {
   if (openPaths.has(pathname)) return false
 
@@ -104,7 +123,12 @@ async function route(req: IncomingMessage, res: ServerResponse) {
 
   // Everything but the app itself, the health check and the signed radio links
   // is only for users of the Navidrome server
-  if (needsLogin(pathname)) {
+  if (needsAdmin(pathname, req.method)) {
+    if (!(await verifyAdmin(config.navidromeUrl, url.searchParams))) {
+      sendJson(res, 403, { error: 'administrators only' })
+      return
+    }
+  } else if (needsLogin(pathname)) {
     const isValid = await verifyCredentials(
       config.navidromeUrl,
       url.searchParams,
