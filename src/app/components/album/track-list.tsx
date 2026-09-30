@@ -29,7 +29,10 @@ export function AlbumTrackList({ songs, onPlay }: AlbumTrackListProps) {
   }, [songs])
 
   return (
-    <div className="flex flex-col px-5 pb-2" data-testid="album-track-list">
+    <div
+      className="flex flex-col px-5 pt-3 pb-2"
+      data-testid="album-track-list"
+    >
       {songs.map((song, index) => {
         const isFirstOfDisc =
           discs !== null &&
