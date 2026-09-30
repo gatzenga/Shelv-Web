@@ -168,9 +168,6 @@ export function loadConfig(): ServerConfig {
   // Like the lyrics settings of the Shelv app: both are off until switched on
   const lrclibFallback = readBoolean('LRCLIB_FALLBACK', false)
   const includeNavidromeLyrics = readBoolean('INCLUDE_NAVIDROME_LYRICS', false)
-  // Lyrics are there as soon as one source is set up, there is no switch for them
-  const hasLyricsSource =
-    includeNavidromeLyrics || lyricsCustomServer !== null || lrclibFallback
   const lastfmApiKey =
     readString('LASTFM_API', '') || readString('LASTFM_API_KEY', '')
   const lastfmSecret = readString('LASTFM_SECRET', '')
@@ -186,10 +183,9 @@ export function loadConfig(): ServerConfig {
     configDir,
     logsDir: readString('LOGS_DIR', '/logs'),
     navidromeUrl: readRequiredUrl('NAVIDROME_URL'),
-    lyricsServer:
-      lyricsCustomServer ?? (lrclibFallback ? 'https://lrclib.net' : null),
+    lyricsServer: lyricsCustomServer ?? 'https://lrclib.net',
     lyrics: {
-      enabled: hasLyricsSource,
+      enabled: true,
       customServer: lyricsCustomServer,
       fallback: lrclibFallback,
       includeNavidrome: includeNavidromeLyrics,
@@ -207,7 +203,7 @@ export function loadConfig(): ServerConfig {
     },
     client: {
       language: readLanguage('LANGUAGE', 'de'),
-      lyrics: hasLyricsSource,
+      lyrics: true,
       lastfm: isLastfmConfigured,
       discoverSections: readDiscoverSections('DISCOVER_SECTIONS', [
         ...discoverSectionNames,

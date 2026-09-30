@@ -206,11 +206,11 @@ export class LyricsService {
     const { customServer, fallback, defaultServer } = this.config.lyrics
     const queryString = params.toString()
 
-    // The order of the Shelv app: your own server first, then the public
-    // LRCLIB when the fallback is on. A source that is not set up is skipped.
+    // Your own server first. The public LRCLIB is asked when there is no own
+    // server, or after it when the fallback is on.
     const servers = [
       ...(customServer ? [customServer] : []),
-      ...(fallback ? [defaultServer] : []),
+      ...(!customServer || fallback ? [defaultServer] : []),
     ]
 
     let allNotFound = servers.length > 0
