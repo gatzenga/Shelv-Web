@@ -35,7 +35,6 @@ const Playlist = lazy(() => import('@/app/pages/playlists/playlist'))
 const Radios = lazy(() => import('@/app/pages/radios/radios-list'))
 const SongList = lazy(() => import('@/app/pages/songs/songlist'))
 const Home = lazy(() => import('@/app/pages/home'))
-const Insights = lazy(() => import('@/app/pages/insights'))
 const GenresList = lazy(() => import('@/app/pages/genres/list'))
 const GenrePage = lazy(() => import('@/app/pages/genres/genre'))
 
@@ -52,16 +51,6 @@ export const router = createHashRouter([
         element: (
           <Suspense fallback={<HomeFallback />}>
             <Home />
-          </Suspense>
-        ),
-      },
-      {
-        id: 'insights',
-        path: ROUTES.INSIGHTS,
-        errorElement: <ErrorPage />,
-        element: (
-          <Suspense fallback={<SongListFallback />}>
-            <Insights />
           </Suspense>
         ),
       },
