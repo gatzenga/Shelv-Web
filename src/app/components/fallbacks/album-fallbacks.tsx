@@ -12,10 +12,12 @@ export function AlbumHeaderFallback({
 } = {}) {
   if (isArtist) {
     return (
-      <div className="w-full px-8 py-6 bg-muted-foreground flex flex-col items-center justify-center gap-2.5 bg-gradient-to-b from-background/50 to-background/50">
-        <Skeleton className="size-[140px] 2xl:size-[170px] rounded-full shadow-lg" />
-        <Skeleton className="h-9 w-[220px] mt-1" />
-        <Skeleton className="h-3.5 w-20" />
+      <div className="w-full px-8 py-6 bg-muted-foreground flex items-center gap-4 bg-gradient-to-b from-background/50 to-background/50">
+        <Skeleton className="size-[160px] min-w-[160px] 2xl:size-[200px] 2xl:min-w-[200px] rounded-full shadow-lg" />
+        <div className="flex flex-col">
+          <Skeleton className="h-9 w-[220px] mb-3" />
+          <Skeleton className="h-3.5 w-40" />
+        </div>
       </div>
     )
   }
