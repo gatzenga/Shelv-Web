@@ -1,14 +1,11 @@
 import clsx from 'clsx'
-import {
-  Pause,
-  Play,
-  Repeat,
-  Shuffle,
-  SkipBack,
-  SkipForward,
-} from 'lucide-react'
+import { Pause, Play, Repeat, Shuffle } from 'lucide-react'
 import { ComponentPropsWithoutRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  FastForwardIcon,
+  RewindIcon,
+} from '@/app/components/icons/phosphor-icons'
 import RepeatOne from '@/app/components/icons/repeat-one'
 import { PlayerLikeButton } from '@/app/components/player/like-button'
 import { PlayerMoreMenu } from '@/app/components/player/more-menu'
@@ -113,11 +110,12 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
         data-testid="player-button-prev"
         tooltip={previousTooltip}
       >
-        <SkipBack className="text-secondary-foreground fill-secondary-foreground" />
+        <RewindIcon className="text-secondary-foreground" />
       </PlayerButton>
 
       <PlayerButton
         variant="default"
+        className="mx-1.5"
         disabled={disableButtons}
         onClick={togglePlayPause}
         data-testid={`player-button-${isPlaying ? 'pause' : 'play'}`}
@@ -136,7 +134,7 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
         data-testid="player-button-next"
         tooltip={nextTooltip}
       >
-        <SkipForward className="text-secondary-foreground fill-secondary-foreground" />
+        <FastForwardIcon className="text-secondary-foreground" />
       </PlayerButton>
 
       {isSong && (
