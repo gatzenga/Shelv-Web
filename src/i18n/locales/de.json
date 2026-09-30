@@ -496,6 +496,7 @@
   },
   "options": {
     "play": "Abspielen",
+    "shuffle": "Mischen",
     "playNext": "Als nächstes",
     "addLast": "Zur Warteschlange",
     "download": "Herunterladen",

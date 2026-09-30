@@ -7,6 +7,7 @@ import {
   PlayIcon,
   PlusIcon,
   Share2Icon,
+  ShuffleIcon,
   SparklesIcon,
   Trash,
 } from 'lucide-react'
@@ -30,6 +31,19 @@ function Play({ variant = 'dropdown', ...props }: DropdownMenuItemProps) {
       variant={variant}
       icon={<PlayIcon className="mr-2 h-4 w-4 fill-foreground" />}
       label={t('options.play')}
+      {...props}
+    />
+  )
+}
+
+function Shuffle({ variant = 'dropdown', ...props }: DropdownMenuItemProps) {
+  const { t } = useTranslation()
+
+  return (
+    <MenuItemFactory
+      variant={variant}
+      icon={<ShuffleIcon className="mr-2 h-4 w-4" />}
+      label={t('options.shuffle')}
       {...props}
     />
   )
@@ -170,6 +184,7 @@ function SongInfo({ variant = 'dropdown', ...props }: DropdownMenuItemProps) {
 
 export const OptionsButtons = {
   Play,
+  Shuffle,
   PlayNext,
   PlayLast,
   InstantMix,

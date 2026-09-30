@@ -83,7 +83,7 @@ function TrackRow({ song, index, onPlay }: TrackRowProps) {
         <button
           type="button"
           onClick={onPlay}
-          className="w-12 shrink-0 flex items-center justify-center text-sm text-muted-foreground"
+          className="w-12 shrink-0 flex items-center justify-center text-sm font-semibold text-muted-foreground"
           aria-label={song.title}
         >
           <span className="group-hover:hidden">
@@ -100,7 +100,10 @@ function TrackRow({ song, index, onPlay }: TrackRowProps) {
 
         <div className="flex flex-col min-w-0 flex-1 ml-2 justify-center">
           <span
-            className={cn('truncate', isCurrent && 'text-primary font-medium')}
+            className={cn(
+              'truncate text-sm font-medium',
+              isCurrent && 'text-primary',
+            )}
           >
             {song.title}
           </span>
@@ -113,7 +116,7 @@ function TrackRow({ song, index, onPlay }: TrackRowProps) {
           {isStarred && (
             <HeartIcon className="size-3.5 fill-red-500 text-red-500" />
           )}
-          <span className="text-sm text-muted-foreground tabular-nums">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {convertSecondsToTime(song.duration ?? 0)}
           </span>
         </div>

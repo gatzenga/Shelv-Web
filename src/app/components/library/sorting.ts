@@ -40,6 +40,13 @@ export function naturalDirection(option: AlbumSortOption): SortDirection {
   return allowsDirection(option) ? 'desc' : 'asc'
 }
 
+export const isSortOption = (value: unknown): value is AlbumSortOption =>
+  typeof value === 'string' &&
+  albumSortOptions.includes(value as AlbumSortOption)
+
+export const isDirection = (value: unknown): value is SortDirection =>
+  value === 'asc' || value === 'desc'
+
 const collator = new Intl.Collator(undefined, {
   sensitivity: 'base',
   numeric: true,

@@ -505,6 +505,7 @@
   },
   "options": {
     "play": "Play",
+    "shuffle": "Shuffle",
     "playNext": "Play Next",
     "addLast": "Add to Queue",
     "download": "Download",

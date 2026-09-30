@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   AlbumSortOption,
   albumSortOptions,
   allowsDirection,
+  isDirection,
+  isSortOption,
   naturalDirection,
   SortDirection,
   sortAlbums,
@@ -12,6 +14,7 @@ import {
   LibraryDirectionButton,
   LibrarySortMenu,
 } from '@/app/components/library/toolbar'
+import { usePersistedState } from '@/app/hooks/use-persisted-state'
 import { Albums } from '@/types/responses/album'
 
 // The same options as the Library, except the artist: they are all the same here
@@ -34,13 +37,42 @@ export function getLatestRelease(albums: Albums[]) {
   }, undefined)
 }
 
+export function getPersistedAlbumSort(): {
+  sortOption: AlbumSortOption
+  direction: SortDirection
+} {
+  try {
+    const rawOption = localStorage.getItem('album-sort-option')
+    const option = rawOption ? JSON.parse(rawOption) : 'recentlyAdded'
+    const validOption: AlbumSortOption = isSortOption(option)
+      ? option
+      : 'recentlyAdded'
+
+    const rawDir = localStorage.getItem('album-sort-direction')
+    const dir = rawDir ? JSON.parse(rawDir) : naturalDirection(validOption)
+    const validDir: SortDirection = isDirection(dir)
+      ? dir
+      : naturalDirection(validOption)
+
+    return { sortOption: validOption, direction: validDir }
+  } catch {
+    return { sortOption: 'recentlyAdded', direction: 'desc' }
+  }
+}
+
 export function useAlbumSort(
   albums: Albums[] | undefined,
   initialOption: AlbumSortOption = 'recentlyAdded',
 ) {
-  const [sortOption, setSortOption] = useState(initialOption)
-  const [direction, setDirection] = useState<SortDirection>(
-    naturalDirection(initialOption),
+  const [sortOption, setSortOption] = usePersistedState<AlbumSortOption>(
+    'album-sort-option',
+    initialOption,
+    isSortOption,
+  )
+  const [direction, setDirection] = usePersistedState<SortDirection>(
+    'album-sort-direction',
+    naturalDirection(sortOption),
+    isDirection,
   )
 
   const sortedAlbums = useMemo(
