@@ -4,7 +4,6 @@ import { KeyboardEvent, useCallback, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { useDebouncedCallback } from 'use-debounce'
-import { Keyboard } from '@/app/components/command/keyboard-key'
 import { Button } from '@/app/components/ui/button'
 import {
   Command,
@@ -103,10 +102,6 @@ export default function CommandMenu() {
           <span className="inline-flex text-muted-foreground text-sm">
             {t('sidebar.search')}
           </span>
-
-          <div className="absolute right-2">
-            <Keyboard text="/" />
-          </div>
         </Button>
       )}
       <CommandDialog
