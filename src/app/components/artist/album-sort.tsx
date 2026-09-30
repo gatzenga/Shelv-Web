@@ -88,8 +88,7 @@ export function useAlbumSort(
       setSortOption(option)
       setDirection(naturalDirection(option))
     },
-    toggleDirection: () =>
-      setDirection((prev) => (prev === 'asc' ? 'desc' : 'asc')),
+    toggleDirection: () => setDirection(direction === 'asc' ? 'desc' : 'asc'),
   }
 }
 
