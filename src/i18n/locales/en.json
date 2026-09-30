@@ -214,6 +214,11 @@
     },
     "table": {
       "discNumber": "Disc {{number}}"
+    },
+    "actions": {
+      "shuffle": "Shuffle",
+      "addedToPlayNext": "Added to Play Next",
+      "addedToQueue": "Added to Queue"
     }
   },
   "genre": {

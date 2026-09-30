@@ -134,6 +134,11 @@
     },
     "table": {
       "discNumber": "Disc {{number}}"
+    },
+    "actions": {
+      "shuffle": "Zufällig",
+      "addedToPlayNext": "Als nächstes hinzugefügt",
+      "addedToQueue": "Zur Warteschlange hinzugefügt"
     }
   },
   "table": {

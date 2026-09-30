@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { Actions } from '@/app/components/actions'
 import { subsonic } from '@/service/subsonic'
-import { useAppPages, useAppStore } from '@/store/app.store'
+import { useAppPages } from '@/store/app.store'
 import {
   useIsAlbumPlaying,
   usePlayerActions,
@@ -11,7 +9,7 @@ import {
 import { PlaybackSource } from '@/types/playerContext'
 import { SingleAlbum } from '@/types/responses/album'
 import { queryKeys } from '@/utils/queryKeys'
-import { AlbumOptions } from './options'
+import { AlbumActionButtons } from './action-buttons'
 
 interface AlbumButtonsProps {
   album: SingleAlbum
@@ -19,14 +17,12 @@ interface AlbumButtonsProps {
 }
 
 export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
-  const { t } = useTranslation()
   const { setSongList, toggleShuffle } = usePlayerActions()
   const { showInfoPanel, toggleShowInfoPanel } = useAppPages()
   const { isAlbumActive } = useIsAlbumPlaying(album.id)
   const isShuffleActive = usePlayerStore(
     (state) => state.playerState.isShuffleActive,
   )
-  const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
   const isAlbumStarred = album.starred !== undefined
 
   const queryClient = useQueryClient()
@@ -49,16 +45,6 @@ export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
     })
   }
 
-  const buttonsTooltips = {
-    play: t('album.buttons.play', { name: album.name }),
-    shuffle: t('album.buttons.shuffle', { name: album.name }),
-    options: t('playlist.buttons.options', { name: album.name }),
-    like: isAlbumStarred
-      ? t('album.buttons.dislike', { name: album.name })
-      : t('album.buttons.like', { name: album.name }),
-    info: showInfoPanel ? t('generic.hideDetails') : t('generic.showDetails'),
-  }
-
   const playbackSource: PlaybackSource = {
     id: album.id,
     name: album.name,
@@ -78,49 +64,17 @@ export function AlbumButtons({ album, showInfoButton }: AlbumButtonsProps) {
   }
 
   return (
-    <Actions.Container>
-      <Actions.Button
-        tooltip={buttonsTooltips.play}
-        buttonStyle="primary"
-        onClick={handlePlayButton}
-      >
-        <Actions.PlayIcon />
-      </Actions.Button>
-
-      {album.song.length > 1 && (
-        <Actions.Button
-          tooltip={buttonsTooltips.shuffle}
-          onClick={handleShuffleButton}
-          isActive={isAlbumActive && isShuffleActive}
-        >
-          <Actions.ShuffleIcon />
-        </Actions.Button>
-      )}
-
-      {!hideFavoritesSection && (
-        <>
-          <Actions.Button
-            tooltip={buttonsTooltips.like}
-            onClick={handleLikeButton}
-          >
-            <Actions.LikeIcon isStarred={isAlbumStarred} />
-          </Actions.Button>
-        </>
-      )}
-
-      {showInfoButton && (
-        <Actions.Button
-          tooltip={buttonsTooltips.info}
-          onClick={toggleShowInfoPanel}
-        >
-          <Actions.InfoIcon />
-        </Actions.Button>
-      )}
-
-      <Actions.Dropdown
-        tooltip={buttonsTooltips.options}
-        options={<AlbumOptions album={album} />}
-      />
-    </Actions.Container>
+    <AlbumActionButtons
+      album={album}
+      isAlbumActive={isAlbumActive}
+      isShuffleActive={isShuffleActive}
+      isStarred={isAlbumStarred}
+      showInfoButton={showInfoButton}
+      infoShown={showInfoPanel}
+      onPlay={handlePlayButton}
+      onShuffle={handleShuffleButton}
+      onToggleStar={handleLikeButton}
+      onToggleInfo={toggleShowInfoPanel}
+    />
   )
 }
