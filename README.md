@@ -1,18 +1,38 @@
 # Shelv Web
 
-A web player for [Navidrome](https://www.navidrome.org) and other Subsonic servers, built as the web counterpart to my iOS app [Shelv](https://github.com/gatzenga/Shelv).
+A web player for [Navidrome](https://www.navidrome.org), built as the web counterpart to my iOS app [Shelv](https://github.com/gatzenga/Shelv).
 
 This is a fork of [Aonsoku](https://github.com/victoralvesf/aonsoku) by Victor Alves, changed for my own use. It runs as a single Docker container that serves the app and proxies Navidrome, so the browser never talks to Navidrome directly.
 
+## What it does
+
+- **Discover** with smart mixes (Newest Tracks, Most Played, Recently Played, Shuffle All), recently added, recently played, frequently played and random albums. You choose which sections show and in which order.
+- **Albums and Artists** with filter, sort and a grid or list view. Albums also have a genre filter, Play and Shuffle.
+- **Artist pages** with top songs, the latest release, the discography, similar artists and the biography.
+- **Album pages** with the tracks, Play, Shuffle, Instant Mix, Play Next, Add to Queue, share and favorite.
+- **Favorites**, **Playlists** (a `/` in a name makes folders, like in the Shelv app) and **Search** with recent searches.
+- **Radio** for stations in Navidrome: HLS, Icecast and Shoutcast, with now playing and cover from ICY or the AzuraCast API.
+- **Synced lyrics** from Navidrome, your own LRCLIB server or lrclib.net.
+- **Instant Mix** and **Infinity Mix**, a queue you can edit, and **Insights** with your most played artists, albums and songs.
+- **Last.fm** for the top songs of an artist and for the mixes. It only reads from Last.fm.
+
 ## Run
 
-Copy `docker-compose.yml`, adjust the environment values and the volume paths, then:
+You need a running [Navidrome](https://www.navidrome.org). Shelv Web is built for Navidrome, other Subsonic servers may work but are not tested.
+
+Copy `docker-compose.yml`, set `NAVIDROME_URL` and `user:`, adjust the volume paths, then:
 
 ```
 docker compose up -d
 ```
 
-Every setting is an environment variable in that file, see [docs/VARIABLES.md](docs/VARIABLES.md) for all of them and their values.
+Open the address of the container and sign in with your Navidrome user. Every setting is an environment variable in that file, see [docs/VARIABLES.md](docs/VARIABLES.md) for all of them and their values.
+
+To update: `docker compose pull && docker compose up -d`.
+
+**Folders.** The container runs as the `user:` of the compose file and never changes permissions. Create the `cache`, `config` and `logs` folders for that user once, then mount them, like you would for Navidrome. `config` holds `lastfm.json` and `azuracast.json`.
+
+**HTTPS.** The compose file publishes the port on `127.0.0.1` only. Put a reverse proxy with HTTPS in front of it to use Shelv Web from outside. The image is built for `linux/amd64`.
 
 ## Run it next to Navidrome
 

@@ -35,6 +35,12 @@ error that names the variable.
 | `SONGS_TO_ADD` | `5` | How many songs Infinity Mix adds each time, 1 to 10. |
 | `MATCH_CURRENT_SONG` | `true` | Infinity Mix picks songs that fit the one playing. |
 
+## Playing
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `SCROBBLE_COUNT` | `30` | How much of a song has to be played, in percent, before Navidrome counts it as played. Usual values are 10, 20, 30, 40 and 50. |
+
 ## Last.fm
 
 Needs an API account from [last.fm/api](https://www.last.fm/api/account/create).
