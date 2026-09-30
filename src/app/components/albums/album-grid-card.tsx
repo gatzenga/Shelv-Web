@@ -3,7 +3,10 @@ import { memo } from 'react'
 import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { ImageLoader } from '@/app/components/image-loader'
 import { PreviewCard } from '@/app/components/preview-card/card'
-import { AlbumCardMenu } from '@/app/components/preview-card/card-menu'
+import {
+  AlbumCardContextMenu,
+  AlbumCardMenu,
+} from '@/app/components/preview-card/card-menu'
 import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
 import { useIsAlbumPlaying, usePlayerActions } from '@/store/player.store'
@@ -31,48 +34,50 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
   }
 
   return (
-    <PreviewCard.Root>
-      <PreviewCard.ImageWrapper link={ROUTES.ALBUM.PAGE(album.id)}>
-        <ImageLoader id={album.coverArt} type="album" size={300}>
-          {(src) => <PreviewCard.Image src={src} alt={album.name} />}
-        </ImageLoader>
-        <PreviewCard.PlayButton onClick={playCurrentAlbum} />
-      </PreviewCard.ImageWrapper>
-      <div className="flex items-start gap-1">
-        <PreviewCard.InfoWrapper>
-          <div className="flex items-center gap-1">
-            {isAlbumPlaying && (
-              <EqualizerBars size={14} className="mb-0.5 text-primary" />
-            )}
-            <PreviewCard.Title
-              link={ROUTES.ALBUM.PAGE(album.id)}
-              className={clsx(isAlbumPlaying && 'text-primary')}
+    <AlbumCardContextMenu albumId={album.id}>
+      <PreviewCard.Root>
+        <PreviewCard.ImageWrapper link={ROUTES.ALBUM.PAGE(album.id)}>
+          <ImageLoader id={album.coverArt} type="album" size={300}>
+            {(src) => <PreviewCard.Image src={src} alt={album.name} />}
+          </ImageLoader>
+          <PreviewCard.PlayButton onClick={playCurrentAlbum} />
+        </PreviewCard.ImageWrapper>
+        <div className="flex items-start gap-1">
+          <PreviewCard.InfoWrapper>
+            <div className="flex items-center gap-1">
+              {isAlbumPlaying && (
+                <EqualizerBars size={14} className="mb-0.5 text-primary" />
+              )}
+              <PreviewCard.Title
+                link={ROUTES.ALBUM.PAGE(album.id)}
+                className={clsx(isAlbumPlaying && 'text-primary')}
+              >
+                {album.name}
+              </PreviewCard.Title>
+            </div>
+            <PreviewCard.Subtitle
+              enableLink={
+                subtitleType === 'year' ? false : album.artistId !== undefined
+              }
+              link={
+                subtitleType === 'year'
+                  ? undefined
+                  : ROUTES.ARTIST.PAGE(album.artistId ?? '')
+              }
             >
-              {album.name}
-            </PreviewCard.Title>
+              {subtitleType === 'year'
+                ? album.year
+                  ? String(album.year)
+                  : ''
+                : album.artist}
+            </PreviewCard.Subtitle>
+          </PreviewCard.InfoWrapper>
+          <div className="ml-auto mt-0.5">
+            <AlbumCardMenu albumId={album.id} />
           </div>
-          <PreviewCard.Subtitle
-            enableLink={
-              subtitleType === 'year' ? false : album.artistId !== undefined
-            }
-            link={
-              subtitleType === 'year'
-                ? undefined
-                : ROUTES.ARTIST.PAGE(album.artistId ?? '')
-            }
-          >
-            {subtitleType === 'year'
-              ? album.year
-                ? String(album.year)
-                : ''
-              : album.artist}
-          </PreviewCard.Subtitle>
-        </PreviewCard.InfoWrapper>
-        <div className="ml-auto mt-0.5">
-          <AlbumCardMenu albumId={album.id} />
         </div>
-      </div>
-    </PreviewCard.Root>
+      </PreviewCard.Root>
+    </AlbumCardContextMenu>
   )
 }
 

@@ -11,13 +11,14 @@ interface Children {
 
 type RootProps = ComponentPropsWithoutRef<'div'>
 
-function Root({ className, children, ...props }: RootProps) {
-  return (
-    <div className={cn('cursor-pointer', className)} {...props}>
+const Root = React.forwardRef<HTMLDivElement, RootProps>(
+  ({ className, children, ...props }, ref) => (
+    <div ref={ref} className={cn('cursor-pointer', className)} {...props}>
       {children}
     </div>
-  )
-}
+  ),
+)
+Root.displayName = 'PreviewCardRoot'
 
 interface ImageWrapperProps extends Children {
   link: string

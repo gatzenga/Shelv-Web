@@ -31,6 +31,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 
 import { PlaylistOptions } from '@/app/components/playlist/options'
+import { RadioOptions } from '@/app/components/radios/options'
 import { SongMenuOptions } from '@/app/components/song/menu-options'
 import { SelectedSongsMenuOptions } from '@/app/components/song/selected-options'
 import { Button } from '@/app/components/ui/button'
@@ -39,6 +40,7 @@ import { Input } from '@/app/components/ui/input'
 import { ColumnFilter } from '@/types/columnFilter'
 import { ColumnDefType } from '@/types/react-table/columnDef'
 import { Playlist } from '@/types/responses/playlist'
+import { Radio } from '@/types/responses/radios'
 import { ISong } from '@/types/responses/song'
 import { MouseButton } from '@/utils/browser'
 import { computeMultiSelectedRows } from '@/utils/dataTable'
@@ -284,6 +286,10 @@ export function DataTable<TData, TValue>({
             />
           )
         }
+      }
+
+      if (dataType === 'radio') {
+        return <RadioOptions radio={row.original as Radio} variant="context" />
       }
 
       if (dataType === 'playlist') {
