@@ -2,13 +2,10 @@
 // counts of the server like in the Shelv app (InsightsView.swift).
 import type { ServerResponse } from 'node:http'
 import type { ServerConfig } from './config.ts'
+import { mostPlayedSongs } from './frequent-songs.ts'
 import { sendJson } from './http.ts'
 import { type Album, albumList, type Song, songsOfAlbums } from './smart-mix.ts'
-import {
-  createClient,
-  SubsonicError,
-  type SubsonicRequest,
-} from './subsonic-client.ts'
+import { createClient, SubsonicError } from './subsonic-client.ts'
 
 const listSize = 20
 
@@ -78,24 +75,6 @@ function topArtists(albums: InsightAlbum[]) {
   return [...artists.values()].sort(byPlayCount).slice(0, listSize)
 }
 
-async function topSongs(request: SubsonicRequest, albums: InsightAlbum[]) {
-  const sorted = [...albums].sort(
-    (a, b) => (b.playCount ?? 0) - (a.playCount ?? 0),
-  )
-  const threshold = Math.max(Math.floor((sorted[0]?.playCount ?? 0) / 50), 1)
-
-  let scanned = sorted.filter((album) => (album.playCount ?? 0) >= threshold)
-  if (scanned.length < 30) scanned = sorted.slice(0, 30)
-  if (scanned.length > 80) scanned = sorted.slice(0, 80)
-
-  const songs: Song[] = await songsOfAlbums(request, scanned)
-
-  return songs
-    .filter((song) => (song.playCount ?? 0) > 0)
-    .sort(byPlayCount)
-    .slice(0, listSize)
-}
-
 export async function sendInsights(
   config: ServerConfig,
   res: ServerResponse,
@@ -109,7 +88,7 @@ export async function sendInsights(
     sendJson(res, 200, {
       artists: topArtists(albums),
       albums: [...albums].sort(byPlayCount).slice(0, listSize),
-      songs: await topSongs(request, albums),
+      songs: await mostPlayedSongs(request, albums, listSize),
     })
   } catch (error) {
     if (!(error instanceof SubsonicError)) throw error

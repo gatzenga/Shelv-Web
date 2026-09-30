@@ -3,6 +3,7 @@
 // SubsonicAPIService.swift); like there, every mix is played shuffled.
 import type { ServerResponse } from 'node:http'
 import type { ServerConfig } from './config.ts'
+import { mostPlayedSongs } from './frequent-songs.ts'
 import { readBooleanParam, sendJson } from './http.ts'
 import type { LastFMService } from './lastfm.ts'
 import {
@@ -89,21 +90,7 @@ async function frequentSongs(
     }
   }
 
-  const sorted = (await albumList(request, 'frequent', 500)).sort(byPlayCount)
-  const threshold = Math.max(Math.floor((sorted[0]?.playCount ?? 0) / 50), 1)
-
-  let albums = sorted.filter((album) => (album.playCount ?? 0) >= threshold)
-  if (albums.length < 30) albums = sorted.slice(0, 30)
-  if (albums.length > 80) albums = sorted.slice(0, 80)
-
-  const songs = await songsOfAlbums(request, albums)
-
-  // Tracks that were never played only pad the list when an album is
-  // mostly unplayed, which is not what a most-played mix should contain
-  const played = songs.filter((song) => (song.playCount ?? 0) > 0)
-  const pool = played.length > 0 ? played : songs
-
-  return pool.sort(byPlayCount).slice(0, 50)
+  return mostPlayedSongs(request, await albumList(request, 'frequent', 500), 50)
 }
 
 // Shelv: getRecentlyPlayedSongs, the songs of the 30 recently played albums
