@@ -61,6 +61,20 @@ export function requestBody(req: IncomingMessage) {
   return Readable.toWeb(req) as ReadableStream<Uint8Array>
 }
 
+// A small body as text, refused when it is larger than the limit
+export async function readBody(req: IncomingMessage, maxBytes: number) {
+  const chunks: Buffer[] = []
+  let size = 0
+
+  for await (const chunk of req) {
+    size += chunk.length
+    if (size > maxBytes) throw new Error('body too large')
+    chunks.push(chunk)
+  }
+
+  return Buffer.concat(chunks).toString('utf8')
+}
+
 // Aborts the upstream request as soon as the browser goes away,
 // e.g. when skipping a song while it is still streaming
 export function abortOnClose(res: ServerResponse): AbortSignal {

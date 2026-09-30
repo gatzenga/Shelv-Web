@@ -26,7 +26,11 @@ export function RemoveRadioDialog() {
 
   const removeMutation = useMutation({
     mutationFn: subsonic.radios.remove,
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      subsonic.radios.removeSettings(id)
+      queryClient.invalidateQueries({
+        queryKey: [queryKeys.radio.settings],
+      })
       queryClient.invalidateQueries({
         queryKey: [queryKeys.radio.all],
       })

@@ -60,18 +60,6 @@ export interface AlbumListResponse
 export interface GetAlbumResponse
   extends SubsonicResponse<{ album: SingleAlbum }> {}
 
-export interface IAlbumInfo {
-  notes?: string
-  musicBrainzId?: string
-  lastFmUrl?: string
-  smallImageUrl?: string
-  mediumImageUrl?: string
-  largeImageUrl?: string
-}
-
-export interface AlbumInfoResponse
-  extends SubsonicResponse<{ albumInfo: IAlbumInfo }> {}
-
 export type AlbumListType =
   | 'random'
   | 'newest'

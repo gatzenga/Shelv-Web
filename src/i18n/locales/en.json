@@ -168,11 +168,6 @@
       "like": "Like {{name}}",
       "dislike": "Remove like from {{name}}"
     },
-    "info": {
-      "about": "About {{name}}",
-      "lastfm": "Open in Last.fm",
-      "musicbrainz": "Open in MusicBrainz"
-    },
     "more": {
       "listTitle": "More from this artist",
       "discography": "Artist Discography",
@@ -522,8 +517,21 @@
     },
     "error": "Unable to play the Radio, check the Stream URL!",
     "form": {
+      "streamData": "Stream Data",
+      "streamingLink": "Streaming Link",
+      "cancel": "Cancel",
+      "azuracast": {
+        "title": "AzuraCast",
+        "use": "Use AzuraCast API",
+        "apiUrl": "API URL",
+        "fill": "Fill API URL from Stream URL",
+        "showCover": "Show Song Cover",
+        "format": "AzuraCast API format:",
+        "supportedFormats": "Supported formats",
+        "saveError": "The AzuraCast settings could not be saved!"
+      },
       "create": {
-        "title": "Add Radio",
+        "title": "New Radio Station",
         "button": "Save",
         "toast": {
           "success": "Radio created successfully!",
@@ -531,8 +539,8 @@
         }
       },
       "edit": {
-        "title": "Edit Radio",
-        "button": "Update",
+        "title": "Edit Radio Station",
+        "button": "Save",
         "toast": {
           "success": "Radio updated successfully!",
           "error": "Failed to update radio!"

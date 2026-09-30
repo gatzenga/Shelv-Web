@@ -2,14 +2,21 @@
 // so the browser only ever talks to this container (no CORS, no mixed content).
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { join } from 'node:path'
 import { authParams, credentialsKey } from './auth.ts'
 import type { ServerConfig } from './config.ts'
-import { abortOnClose, pipeUpstream, sendJson, sendText } from './http.ts'
+import {
+  abortOnClose,
+  pipeUpstream,
+  readBody,
+  sendJson,
+  sendText,
+} from './http.ts'
+import { parseRadioSettings, RadioSettingsStore } from './radio-settings.ts'
 import {
   azuraCastNowPlaying,
   emptyIcyNowPlaying,
   icyNowPlaying,
-  metadataSourceFor,
   type NowPlaying,
   resolveStream,
   userAgent,
@@ -127,6 +134,9 @@ function rewritePlaylist(text: string, baseUrl: string, stationId: string) {
 
 export function createRadioHandler(config: ServerConfig) {
   const stationLists = new TtlCache<Station[] | null>()
+  const settingsStore = new RadioSettingsStore(
+    join(config.configDir, 'azuracast.json'),
+  )
 
   // The station list is requested with the credentials of the browser,
   // which also authenticates every radio request against Navidrome
@@ -273,12 +283,14 @@ export function createRadioHandler(config: ServerConfig) {
     if (!station) return
 
     const stream = await resolveStream(station.streamUrl)
-    const source = await metadataSourceFor([station.streamUrl, stream.url])
+    const settings = await settingsStore.get(station.id)
 
     let nowPlaying: NowPlaying
 
-    if (source.type === 'azuracast') {
-      nowPlaying = { ...(await azuraCastNowPlaying(source.apiUrl)) }
+    // Like in the Shelv player only a station set up for it uses the AzuraCast API
+    if (settings?.useAzuraCastApi && settings.apiUrl) {
+      nowPlaying = { ...(await azuraCastNowPlaying(settings.apiUrl)) }
+      if (!settings.showSongCover) nowPlaying.artworkUrl = null
     } else if (stream.kind === 'hls') {
       // HLS carries no ICY metadata, only the station name is shown
       nowPlaying = emptyIcyNowPlaying()
@@ -295,6 +307,58 @@ export function createRadioHandler(config: ServerConfig) {
 
     res.setHeader('cache-control', 'no-store')
     sendJson(res, 200, nowPlaying)
+  }
+
+  async function handleSettings(
+    req: IncomingMessage,
+    res: ServerResponse,
+    url: URL,
+  ) {
+    res.setHeader('cache-control', 'no-store')
+
+    // Only users of the Navidrome server may read or change the settings
+    if (req.method === 'GET') {
+      const stations = await stationsFor(url.searchParams)
+      if (!stations) {
+        sendJson(res, 401, { error: 'unauthorized' })
+        return
+      }
+
+      sendJson(res, 200, await settingsStore.all())
+      return
+    }
+
+    const id = url.searchParams.get('id') ?? ''
+    const stations = await stationsFor(url.searchParams)
+    if (!stations) {
+      sendJson(res, 401, { error: 'unauthorized' })
+      return
+    }
+
+    // A station created a moment ago is not in the cached list yet. Removing
+    // the settings of a station that is gone is fine as well.
+    if (req.method === 'DELETE') {
+      await settingsStore.set(id, null)
+      sendJson(res, 200, { ok: true })
+      return
+    }
+
+    let body: unknown
+    try {
+      body = JSON.parse(await readBody(req, 16 * 1024))
+    } catch {
+      sendJson(res, 400, { error: 'invalid body' })
+      return
+    }
+
+    const settings = parseRadioSettings(body)
+    if (!id || !settings) {
+      sendJson(res, 400, { error: 'invalid settings' })
+      return
+    }
+
+    await settingsStore.set(id, settings)
+    sendJson(res, 200, settings)
   }
 
   async function handleArtwork(
@@ -329,6 +393,15 @@ export function createRadioHandler(config: ServerConfig) {
     res: ServerResponse,
     url: URL,
   ) {
+    if (url.pathname === '/api/radio/settings') {
+      if (!['GET', 'PUT', 'DELETE'].includes(req.method ?? '')) {
+        sendJson(res, 405, { error: 'method not allowed' })
+        return
+      }
+
+      return handleSettings(req, res, url)
+    }
+
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       sendJson(res, 405, { error: 'method not allowed' })
       return

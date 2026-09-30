@@ -25,7 +25,7 @@ services:
       - MATCH_CURRENT_SONG=true
     volumes:
       - /path/to/shelv/cache:/cache
-      - /path/to/shelv/config/lastfm:/config/lastfm
+      - /path/to/shelv/config:/config
       - /path/to/shelv/logs:/logs
     ports:
       - "127.0.0.1:9180:8080"

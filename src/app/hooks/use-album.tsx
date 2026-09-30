@@ -9,14 +9,6 @@ export const useGetAlbum = (albumId: string) => {
   })
 }
 
-export const useGetAlbumInfo = (albumId: string) => {
-  return useQuery({
-    queryKey: [queryKeys.album.info, albumId],
-    queryFn: () => subsonic.albums.getInfo(albumId),
-    enabled: !!albumId,
-  })
-}
-
 export const useGetArtistAlbums = (artistId: string) => {
   return useQuery({
     queryKey: [queryKeys.album.moreAlbums, artistId],

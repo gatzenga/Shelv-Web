@@ -3,6 +3,8 @@ import {
   CreateRadio,
   Radio,
   RadioNowPlaying,
+  RadioSettings,
+  RadioSettingsMap,
   RadioStationsResponse,
   RadioStreamKind,
 } from '@/types/responses/radios'
@@ -73,6 +75,30 @@ async function getNowPlaying(id: string, signal: AbortSignal) {
   return (await response.json()) as RadioNowPlaying
 }
 
+async function getSettings() {
+  const response = await fetch(getBackendUrl('/api/radio/settings'), {
+    cache: 'no-store',
+  })
+  if (!response.ok) return {}
+
+  return (await response.json()) as RadioSettingsMap
+}
+
+async function saveSettings(id: string, settings: RadioSettings) {
+  const response = await fetch(getBackendUrl('/api/radio/settings', { id }), {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(settings),
+  })
+  if (!response.ok) throw new Error(`radio settings: ${response.status}`)
+}
+
+async function removeSettings(id: string) {
+  await fetch(getBackendUrl('/api/radio/settings', { id }), {
+    method: 'DELETE',
+  })
+}
+
 export const radios = {
   getAll,
   create,
@@ -81,4 +107,7 @@ export const radios = {
   getStreamUrl,
   getStreamKind,
   getNowPlaying,
+  getSettings,
+  saveSettings,
+  removeSettings,
 }

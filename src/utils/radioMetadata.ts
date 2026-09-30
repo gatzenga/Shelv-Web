@@ -63,3 +63,22 @@ export function resolveNowPlaying(
     artworkUrl: current.artworkUrl ?? incoming.artworkUrl,
   }
 }
+
+// Shelv: RadioStationMetadata.derivedAzuraCastAPIURL
+// https://host/listen/<shortcode>/radio.mp3 and https://host/hls/<shortcode>/live.m3u8
+export function derivedAzuraCastApiUrl(streamUrl: string) {
+  try {
+    const url = new URL(streamUrl.trim())
+    const parts = url.pathname.split('/').filter(Boolean)
+
+    for (const marker of ['listen', 'hls']) {
+      const index = parts.indexOf(marker)
+      const shortcode = index >= 0 ? parts[index + 1] : undefined
+      if (shortcode) {
+        return `${url.origin}/api/nowplaying/${encodeURIComponent(shortcode)}`
+      }
+    }
+  } catch {}
+
+  return null
+}

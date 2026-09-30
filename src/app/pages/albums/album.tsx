@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { AlbumComment } from '@/app/components/album/comment'
 import ImageHeader from '@/app/components/album/image-header'
-import { AlbumInfo, AlbumNotes } from '@/app/components/album/info'
+import { AlbumInfo } from '@/app/components/album/info'
 import { RecordLabelsInfo } from '@/app/components/album/record-labels'
 import { AlbumStickyHeader } from '@/app/components/album/sticky-header'
 import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
@@ -191,8 +191,6 @@ export default function Album() {
             />
           )}
         </div>
-
-        <AlbumNotes album={album} />
       </ListWrapper>
     </div>
   )

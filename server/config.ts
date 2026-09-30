@@ -181,7 +181,7 @@ export function loadConfig(): ServerConfig {
     lastfm: {
       apiKey: lastfmApiKey,
       sharedSecret: lastfmSecret,
-      sessionFile: join(configDir, 'lastfm', 'session.json'),
+      sessionFile: join(configDir, 'lastfm.json'),
     },
     client: {
       language: readLanguage('LANGUAGE', 'de'),

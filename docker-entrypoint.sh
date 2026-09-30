@@ -21,7 +21,7 @@ if [ "$(id -u)" = "0" ]; then
   CONFIG_PATH="${CONFIG_DIR:-/config}"
   LOGS_PATH="${LOGS_DIR:-/logs}"
 
-  mkdir -p "$CACHE_PATH" "$CONFIG_PATH/lastfm" "$LOGS_PATH"
+  mkdir -p "$CACHE_PATH" "$CONFIG_PATH" "$LOGS_PATH"
   chown -R "$USER_ID:$GROUP_ID" "$CACHE_PATH" "$CONFIG_PATH" "$LOGS_PATH" 2>/dev/null || true
 
   exec su-exec "$USER_ID:$GROUP_ID" "$@"

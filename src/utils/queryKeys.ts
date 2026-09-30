@@ -7,7 +7,6 @@ const album = {
   all: 'get-all-albums',
   library: 'get-library-albums',
   single: 'get-album',
-  info: 'get-album-info',
   moreAlbums: 'get-artist-albums',
   genreAlbums: 'get-genre-random-albums',
   recentlyAdded: 'get-recently-added-albums',
@@ -37,6 +36,7 @@ const song = {
 
 const radio = {
   all: 'get-all-radios',
+  settings: 'get-radio-settings',
 }
 
 const search = 'search-key'

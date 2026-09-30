@@ -1,6 +1,5 @@
 import { httpClient } from '@/api/httpClient'
 import {
-  AlbumInfoResponse,
   AlbumListResponse,
   AlbumListType,
   GetAlbumResponse,
@@ -57,19 +56,7 @@ async function getOne(id: string) {
   return response?.data.album
 }
 
-async function getInfo(id: string) {
-  const response = await httpClient<AlbumInfoResponse>('/getAlbumInfo2', {
-    method: 'GET',
-    query: {
-      id,
-    },
-  })
-
-  return response?.data.albumInfo
-}
-
 export const albums = {
   getAlbumList,
   getOne,
-  getInfo,
 }

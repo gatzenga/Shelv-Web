@@ -32,4 +32,14 @@ export interface RadioNowPlaying {
   isOnline: boolean
 }
 
+// GET /api/radio/settings, kept in <config>/azuracast.json, see server/radio-settings.ts
+export interface RadioSettings {
+  name?: string
+  useAzuraCastApi: boolean
+  apiUrl: string
+  showSongCover: boolean
+}
+
+export type RadioSettingsMap = Record<string, RadioSettings>
+
 export type RadioStreamKind = 'hls' | 'direct'

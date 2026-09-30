@@ -95,11 +95,6 @@
       "pause": "{{name}} pausieren",
       "shuffle": "{{name}} zufällig wiedergeben"
     },
-    "info": {
-      "about": "Über {{name}}",
-      "lastfm": "Auf Last.fm öffnen",
-      "musicbrainz": "Auf MusicBrainz öffnen"
-    },
     "list": {
       "header": {
         "albumsByArtist": "Alben von {{artist}}"
@@ -232,8 +227,21 @@
   },
   "radios": {
     "form": {
+      "streamData": "Stream-Daten",
+      "streamingLink": "Streaming-Link",
+      "cancel": "Abbrechen",
+      "azuracast": {
+        "title": "AzuraCast",
+        "use": "AzuraCast API verwenden",
+        "apiUrl": "API-URL",
+        "fill": "API-URL aus Stream-URL ableiten",
+        "showCover": "Song-Cover anzeigen",
+        "format": "AzuraCast API-Format:",
+        "supportedFormats": "Unterstützte Formate",
+        "saveError": "Die AzuraCast-Einstellungen konnten nicht gespeichert werden!"
+      },
       "create": {
-        "title": "Radio hinzufügen",
+        "title": "Neuer Radiosender",
         "button": "Speichern",
         "toast": {
           "success": "Radio erfolgreich erstellt!",
@@ -241,8 +249,8 @@
         }
       },
       "edit": {
-        "title": "Radio bearbeiten",
-        "button": "Aktualisieren",
+        "title": "Radiosender bearbeiten",
+        "button": "Speichern",
         "toast": {
           "success": "Radio erfolgreich aktualisiert!",
           "error": "Radio konnte nicht aktualisiert werden!"

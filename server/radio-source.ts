@@ -111,21 +111,10 @@ export function resolveStream(url: string) {
   )
 }
 
-// --- metadata source ----------------------------------------------------
-
-type MetadataSource = { type: 'azuracast'; apiUrl: string } | { type: 'icy' }
-
-const metadataSources = new TtlCache<MetadataSource>()
-
-interface AzuraCastUrls {
-  listen_url?: string | null
-  hls_url?: string | null
-  mounts?: { url?: string | null }[]
-  remotes?: { url?: string | null }[]
-}
+// --- AzuraCast ----------------------------------------------------------
 
 interface AzuraCastNowPlaying {
-  station?: AzuraCastUrls & { name?: string; shortcode?: string }
+  station?: { name?: string; shortcode?: string }
   now_playing?: {
     song?: { title?: string; artist?: string; album?: string; art?: string }
   } | null
@@ -151,105 +140,6 @@ async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown> {
   }
 
   return response.json()
-}
-
-// Shelv: RadioStationMetadata.derivedAzuraCastAPIURL
-// https://host/listen/<shortcode>/radio.mp3 and https://host/hls/<shortcode>/live.m3u8
-function derivedApiUrl(streamUrl: string) {
-  try {
-    const url = new URL(streamUrl)
-    const parts = url.pathname.split('/').filter(Boolean)
-
-    for (const marker of ['listen', 'hls']) {
-      const index = parts.indexOf(marker)
-      const shortcode = index >= 0 ? parts[index + 1] : undefined
-      if (shortcode) {
-        return `${url.origin}/api/nowplaying/${encodeURIComponent(shortcode)}`
-      }
-    }
-  } catch {}
-
-  return null
-}
-
-function samePath(a: string | null | undefined, b: URL) {
-  if (!a) return false
-
-  try {
-    return (
-      new URL(a).pathname.replace(/\/+$/, '') === b.pathname.replace(/\/+$/, '')
-    )
-  } catch {
-    return false
-  }
-}
-
-// AzuraCast streams on /radio/8000/... carry no shortcode, so the station is
-// looked up in the list of all stations by its stream URLs
-async function apiUrlFromStationList(streamUrl: string) {
-  const url = new URL(streamUrl)
-  const list = await fetchJson(`${url.origin}/api/nowplaying`).catch(() => null)
-  if (!Array.isArray(list)) return null
-
-  for (const item of list as AzuraCastNowPlaying[]) {
-    const station = item.station
-    if (!station?.shortcode) continue
-
-    const urls = [
-      station.listen_url,
-      station.hls_url,
-      ...(station.mounts ?? []).map((mount) => mount.url),
-      ...(station.remotes ?? []).map((remote) => remote.url),
-    ]
-
-    if (urls.some((candidate) => samePath(candidate, url))) {
-      return `${url.origin}/api/nowplaying/${encodeURIComponent(station.shortcode)}`
-    }
-  }
-
-  return null
-}
-
-async function detectMetadataSource(
-  streamUrls: string[],
-): Promise<MetadataSource> {
-  const candidates = new Set<string>()
-
-  for (const streamUrl of streamUrls) {
-    const derived = derivedApiUrl(streamUrl)
-    if (derived) candidates.add(derived)
-  }
-
-  for (const apiUrl of candidates) {
-    const payload = await fetchJson(apiUrl).catch(() => null)
-    if (isNowPlayingPayload(payload)) return { type: 'azuracast', apiUrl }
-  }
-
-  for (const streamUrl of streamUrls) {
-    const apiUrl = await apiUrlFromStationList(streamUrl).catch(() => null)
-    if (apiUrl) return { type: 'azuracast', apiUrl }
-
-    // SUB/WAVE answers /api/nowplaying/<anything> in the AzuraCast format,
-    // also for its /stream.mp3 and /hls/live.m3u8 streams
-    const origin = new URL(streamUrl).origin
-    const fallback = `${origin}/api/nowplaying/station`
-    const payload = await fetchJson(fallback).catch(() => null)
-    if (isNowPlayingPayload(payload))
-      return { type: 'azuracast', apiUrl: fallback }
-  }
-
-  return { type: 'icy' }
-}
-
-export function metadataSourceFor(streamUrls: string[]) {
-  const unique = [...new Set(streamUrls)]
-
-  return metadataSources.getOrLoad(
-    unique.join('|'),
-    // Retry soon if AzuraCast was not reachable while detecting
-    (source) => (source.type === 'azuracast' ? 30 * minute : 15 * minute),
-    () => detectMetadataSource(unique).catch(() => ({ type: 'icy' as const })),
-  )
 }
 
 // --- now playing --------------------------------------------------------
