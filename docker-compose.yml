@@ -25,9 +25,9 @@ services:
       - MATCH_CURRENT_SONG=true
       - UMASK=077
     volumes:
-      - /volume2/docker/aonsoku/cache:/cache
-      - /volume2/docker/aonsoku/config/lastfm:/config/lastfm
-      - /volume2/docker/aonsoku/logs:/logs
+      - /volume2/docker/shelv-web/cache:/cache
+      - /volume2/docker/shelv-web/config/lastfm:/config/lastfm
+      - /volume2/docker/shelv-web/logs:/logs
     ports:
       - "127.0.0.1:9180:8080"
     networks:
