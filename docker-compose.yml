@@ -3,37 +3,37 @@ services:
     image: ghcr.io/gatzenga/shelv-web:latest
     container_name: shelv
     restart: unless-stopped
-    user: 1037:100
+    user: UID:GID
     environment:
-      - NAVIDROME_URL=http://172.168.22.10:4533
-      - LYRICS_SERVER=https://lrclib.vkugler.ch
+      - NAVIDROME_URL=http://NAVIDROME_HOST:4533
+      - LYRICS_SERVER=https://LYRICS_SERVER_URL
       - LANGUAGE=en
       - SIDEBAR_ARTISTS=true
       - SIDEBAR_SONGS=true
       - SIDEBAR_ALBUMS=true
-      - SIDEBAR_GENRES=false
+      - SIDEBAR_GENRES=true
       - SIDEBAR_RADIOS=true
-      - FEATURE_FAVORITES=false
-      - FEATURE_PLAYLISTS=false
+      - FEATURE_FAVORITES=true
+      - FEATURE_PLAYLISTS=true
       - CACHE_IMAGES=true
       - CACHE_LYRICS=true
-      - LASTFM_API=
-      - LASTFM_SECRET=
-      - LASTFM_TOP_SONGS=false
+      - LASTFM_API=YOUR_LASTFM_API_KEY
+      - LASTFM_SECRET=YOUR_LASTFM_SECRET
+      - LASTFM_TOP_SONGS=true
       - LASTFM_MIXES=true
       - DISCOVER_SECTIONS=smart-mixes,recently-added,recently-played,frequently-played,random-albums
       - SONGS_TO_ADD=5
       - MATCH_CURRENT_SONG=true
     volumes:
-      - /volume2/docker/shelv/cache:/cache
-      - /volume2/docker/shelv/config/lastfm:/config/lastfm
-      - /volume2/docker/shelv/logs:/logs
+      - /path/to/shelv/cache:/cache
+      - /path/to/shelv/config/lastfm:/config/lastfm
+      - /path/to/shelv/logs:/logs
     ports:
       - "127.0.0.1:9180:8080"
     networks:
-      navidrome:
-        ipv4_address: 172.168.22.80
+      YOUR_NETWORK:
+        ipv4_address: YOUR_CONTAINER_IP
 
 networks:
-  navidrome:
+  YOUR_NETWORK:
     external: true
