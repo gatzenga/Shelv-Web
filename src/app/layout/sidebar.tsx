@@ -1,6 +1,6 @@
 import {
   HeartIcon,
-  LibraryIcon,
+  LayoutGridIcon,
   Mic2Icon,
   RadioIcon,
   SearchIcon,
@@ -14,7 +14,7 @@ const Mic2 = memo(Mic2Icon)
 const Radio = memo(RadioIcon)
 const Search = memo(SearchIcon)
 const Discover = memo(SparklesIcon)
-const Library = memo(LibraryIcon)
+const Library = memo(LayoutGridIcon)
 const Heart = memo(HeartIcon)
 const Tags = memo(TagsIcon)
 

@@ -2,7 +2,6 @@ import {
   MainSidebar,
   MainSidebarContent,
 } from '@/app/components/ui/main-sidebar'
-import { SidebarMiniSeparator } from './mini-separator'
 import { MobileCloseButton } from './mobile-close-button'
 import { NavLibrary } from './nav-library'
 import { NavMain } from './nav-main'
@@ -17,7 +16,6 @@ export function AppSidebar({
       <MobileCloseButton />
       <SearchHotkeys />
       <NavMain />
-      <SidebarMiniSeparator />
       <MainSidebarContent className="max-h-fit flex-none overflow-x-clip mb-2">
         <NavLibrary />
       </MainSidebarContent>

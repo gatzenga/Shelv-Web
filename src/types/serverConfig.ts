@@ -23,7 +23,6 @@ interface IAppPages {
   hideRadiosSection: boolean
   artistsPageViewType: PageViewType
   setArtistsPageViewType: (type: PageViewType) => void
-  isAllSectionsHidden: () => boolean
 }
 
 export interface IAppData extends IServerConfig {

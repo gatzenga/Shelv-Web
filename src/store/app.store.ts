@@ -54,23 +54,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.pages.artistsPageViewType = type
               })
             },
-            isAllSectionsHidden: () => {
-              const {
-                hideAlbumsSection,
-                hideArtistsSection,
-                hideGenresSection,
-                hideFavoritesSection,
-                hideRadiosSection,
-              } = get().pages
-
-              return (
-                hideAlbumsSection &&
-                hideArtistsSection &&
-                hideGenresSection &&
-                hideFavoritesSection &&
-                hideRadiosSection
-              )
-            },
           },
           actions: {
             setOsType: (value) => {

@@ -16,7 +16,10 @@ export function SidebarMainItem({ item }: { item: ISidebarItem }) {
     <MainSidebarMenuButton
       asChild
       tooltip={t(item.title)}
-      className={clsx(isActive(item.route) && 'bg-accent')}
+      className={clsx(
+        isActive(item.route) &&
+          'bg-primary/15 font-semibold text-primary hover:bg-primary/20 hover:text-primary',
+      )}
     >
       <Link
         to={item.route}
