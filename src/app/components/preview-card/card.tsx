@@ -30,6 +30,9 @@ function ImageWrapper({ children, link, className }: ImageWrapperProps) {
     <div
       className={cn(
         'group flex-1 aspect-square rounded bg-border relative overflow-hidden',
+        // a slight zoom like in the Shelv app, the texts below stay on top
+        'shadow-md transition-[transform,box-shadow] duration-150 ease-in-out',
+        'hover:scale-[1.03] hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:scale-100',
         className,
       )}
     >
@@ -111,7 +114,7 @@ interface InfoWrapperProps extends Children {}
 
 function InfoWrapper({ children }: InfoWrapperProps) {
   return (
-    <div className="flex flex-col flex-1 min-w-0 cursor-default">
+    <div className="relative z-10 flex flex-col flex-1 min-w-0 cursor-default">
       {children}
     </div>
   )
