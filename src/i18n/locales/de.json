@@ -405,8 +405,8 @@
       "options": "Weitere Optionen für {{artist}}"
     },
     "info": {
-      "albumsCount_one": "{{count}} Album",
-      "albumsCount_other": "{{count}} Alben"
+      "albumsCount_one": "{{count}} Veröffentlichung",
+      "albumsCount_other": "{{count}} Veröffentlichungen"
     },
     "topSongs": "Top-Titel",
     "albums": "Alben",

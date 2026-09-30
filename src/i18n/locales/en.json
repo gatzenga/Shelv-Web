@@ -244,8 +244,8 @@
       "options": "More options for {{artist}}"
     },
     "info": {
-      "albumsCount_one": "{{count}} album",
-      "albumsCount_other": "{{count}} albums"
+      "albumsCount_one": "{{count}} release",
+      "albumsCount_other": "{{count}} releases"
     },
     "topSongs": "Top Songs",
     "albums": "Albums",

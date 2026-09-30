@@ -106,8 +106,7 @@ export default function Artist() {
   const badges: BadgesData = [
     {
       content: albumCount,
-      type: 'link',
-      link: ROUTES.ARTIST.DISCOGRAPHY(artist.id),
+      type: 'text',
     },
     {
       content: songCount,
