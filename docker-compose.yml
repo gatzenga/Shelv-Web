@@ -9,7 +9,6 @@ services:
       - LYRICS_SERVER=https://LYRICS_SERVER_URL
       - LANGUAGE=en
       - SIDEBAR_ARTISTS=true
-      - SIDEBAR_SONGS=true
       - SIDEBAR_ALBUMS=true
       - SIDEBAR_GENRES=true
       - SIDEBAR_RADIOS=true

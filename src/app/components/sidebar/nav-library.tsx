@@ -12,7 +12,6 @@ import { SidebarMainItem } from './main-item'
 export function NavLibrary() {
   const { t } = useTranslation()
   const hideAlbumsSection = useAppStore().pages.hideAlbumsSection
-  const hideSongsSection = useAppStore().pages.hideSongsSection
   const hideArtistsSection = useAppStore().pages.hideArtistsSection
   const hideGenresSection = useAppStore().pages.hideGenresSection
   const hideFavoritesSection = useAppStore().pages.hideFavoritesSection
@@ -29,7 +28,6 @@ export function NavLibrary() {
         {libraryItems.map((item) => {
           // Settings to show/hide library sections
           if (hideAlbumsSection && item.id === SidebarItems.Albums) return null
-          if (hideSongsSection && item.id === SidebarItems.Songs) return null
           if (hideArtistsSection && item.id === SidebarItems.Artists)
             return null
           if (hideGenresSection && item.id === SidebarItems.Genres) return null

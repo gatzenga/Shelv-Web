@@ -2,8 +2,6 @@ export enum AlbumsSearchParams {
   MainFilter = 'filter',
   YearFilter = 'yearFilter',
   Genre = 'genre',
-  ArtistId = 'artistId',
-  ArtistName = 'artistName',
   Query = 'query',
   Order = 'order',
 }

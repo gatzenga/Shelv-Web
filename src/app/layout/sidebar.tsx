@@ -2,7 +2,6 @@ import {
   HeartIcon,
   LibraryIcon,
   Mic2Icon,
-  Music2Icon,
   RadioIcon,
   SparklesIcon,
   TagsIcon,
@@ -11,7 +10,6 @@ import { ElementType, memo } from 'react'
 import { ROUTES } from '@/routes/routesList'
 
 const Mic2 = memo(Mic2Icon)
-const Music2 = memo(Music2Icon)
 const Radio = memo(RadioIcon)
 const Discover = memo(SparklesIcon)
 const Library = memo(LibraryIcon)
@@ -28,7 +26,6 @@ export interface ISidebarItem {
 export enum SidebarItems {
   Home = 'home',
   Albums = 'albums',
-  Songs = 'songs',
   Artists = 'artists',
   Genres = 'genres',
   Favorites = 'favorites',
@@ -51,12 +48,6 @@ export const libraryItems = [
     title: 'sidebar.albums',
     route: ROUTES.LIBRARY.ALBUMS,
     icon: Library,
-  },
-  {
-    id: SidebarItems.Songs,
-    title: 'sidebar.songs',
-    route: ROUTES.LIBRARY.SONGS,
-    icon: Music2,
   },
   {
     id: SidebarItems.Artists,

@@ -145,11 +145,7 @@ export default function CommandMenu() {
               )}
 
               {showSongGroup && (
-                <CommandSongResult
-                  query={query}
-                  songs={songs}
-                  runCommand={runCommand}
-                />
+                <CommandSongResult songs={songs} runCommand={runCommand} />
               )}
 
               {showArtistGroup && (

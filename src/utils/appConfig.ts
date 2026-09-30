@@ -21,7 +21,6 @@ export interface AppConfig {
   }
   sidebar: {
     albums: boolean
-    songs: boolean
     artists: boolean
     genres: boolean
     radios: boolean
@@ -52,7 +51,6 @@ const defaultConfig: AppConfig = {
   },
   sidebar: {
     albums: true,
-    songs: true,
     artists: true,
     genres: true,
     radios: true,

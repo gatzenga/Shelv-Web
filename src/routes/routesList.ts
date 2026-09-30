@@ -4,7 +4,6 @@ import { AlbumsFilters, YearFilter } from '@/utils/albumsFilter'
 const LIBRARY = {
   HOME: '/',
   ARTISTS: '/library/artists',
-  SONGS: '/library/songs',
   ALBUMS: '/library/albums',
   FAVORITES: '/library/favorites',
   PLAYLISTS: '/library/playlists',
@@ -41,13 +40,6 @@ const ALBUMS = {
   GENERIC: (filter: AlbumListType) => `${LIBRARY.ALBUMS}?filter=${filter}`,
 }
 
-const SONGS = {
-  SEARCH: (query: string) =>
-    `${LIBRARY.SONGS}?filter=${AlbumsFilters.Search}&query=${encodeURIComponent(query)}`,
-  ARTIST_TRACKS: (id: string, name: string) =>
-    `${LIBRARY.SONGS}?artistId=${id}&artistName=${encodeURIComponent(name)}`,
-}
-
 const FAVORITES = {
   PAGE: LIBRARY.FAVORITES,
 }
@@ -70,7 +62,6 @@ export const ROUTES = {
   ARTIST,
   ALBUM,
   ALBUMS,
-  SONGS,
   FAVORITES,
   PLAYLIST,
   GENRE,

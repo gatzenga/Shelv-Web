@@ -22,7 +22,6 @@ const serverUrl = window.location.origin
 // Visible sections are set through the docker environment, not in the app
 const sectionsFromConfig = {
   hideAlbumsSection: !appConfig.sidebar.albums,
-  hideSongsSection: !appConfig.sidebar.songs,
   hideArtistsSection: !appConfig.sidebar.artists,
   hideGenresSection: !appConfig.sidebar.genres,
   hideFavoritesSection: !appConfig.features.favorites,
@@ -58,7 +57,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
             isAllSectionsHidden: () => {
               const {
                 hideAlbumsSection,
-                hideSongsSection,
                 hideArtistsSection,
                 hideGenresSection,
                 hideFavoritesSection,
@@ -67,7 +65,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
 
               return (
                 hideAlbumsSection &&
-                hideSongsSection &&
                 hideArtistsSection &&
                 hideGenresSection &&
                 hideFavoritesSection &&

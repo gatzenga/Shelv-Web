@@ -111,8 +111,7 @@ export default function Artist() {
     },
     {
       content: songCount,
-      type: 'link',
-      link: ROUTES.SONGS.ARTIST_TRACKS(artist.id, artist.name),
+      type: 'text',
     },
   ]
 

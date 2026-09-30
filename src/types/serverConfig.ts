@@ -16,7 +16,6 @@ export type PageViewType = 'grid' | 'table'
 
 interface IAppPages {
   hideArtistsSection: boolean
-  hideSongsSection: boolean
   hideAlbumsSection: boolean
   hideGenresSection: boolean
   hideFavoritesSection: boolean
