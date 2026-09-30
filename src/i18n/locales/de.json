@@ -1,7 +1,7 @@
 {
   "sidebar": {
     "radios": "Radios",
-    "home": "Startseite",
+    "home": "Entdecken",
     "search": "Suche…",
     "miniSearch": "Suchen",
     "library": "Bibliothek",
@@ -297,9 +297,15 @@
   },
   "home": {
     "recentlyAdded": "Kürzlich hinzugefügt",
-    "recentlyPlayed": "Zuletzt gespielt",
-    "mostPlayed": "Am häufigsten gespielt",
-    "explore": "Entdecken"
+    "recentlyPlayed": "Kürzlich gespielt",
+    "mostPlayed": "Häufig gespielt",
+    "explore": "Zufällige Alben",
+    "mixes": {
+      "newest": "Mix: Neueste Titel",
+      "frequent": "Mix: Häufig gespielt",
+      "recent": "Mix: Kürzlich gespielt",
+      "shuffle": "Mix: Alles mischen"
+    }
   },
   "menu": {
     "language": "Sprache",

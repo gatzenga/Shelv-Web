@@ -1,12 +1,18 @@
 {
   "home": {
-    "recentlyPlayed": "Recently played",
-    "mostPlayed": "Most played",
-    "recentlyAdded": "Recently added",
-    "explore": "Explore"
+    "recentlyPlayed": "Recently Played",
+    "mostPlayed": "Frequently Played",
+    "recentlyAdded": "Recently Added",
+    "explore": "Random Albums",
+    "mixes": {
+      "newest": "Mix: Newest Tracks",
+      "frequent": "Mix: Most Played",
+      "recent": "Mix: Recently Played",
+      "shuffle": "Mix: Shuffle All"
+    }
   },
   "sidebar": {
-    "home": "Home",
+    "home": "Discover",
     "search": "Search…",
     "miniSearch": "Search",
     "library": "Library",

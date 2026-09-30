@@ -1,38 +1,18 @@
 import { Skeleton } from '@/app/components/ui/skeleton'
 
-export function HeaderFallback() {
-  return (
-    <div className="flex w-full bg-skeleton h-[180px] 2xl:h-[210px] p-5 gap-5 rounded-lg">
-      <Skeleton className="bg-background/50 h-full aspect-square rounded-md" />
-      <div className="flex flex-col gap-3 w-full h-full justify-end">
-        <Skeleton className="w-72 h-7 bg-background/50" />
-        <Skeleton className="w-48 h-5 bg-background/50" />
-
-        <div className="flex gap-2">
-          <Skeleton className="w-16 h-6 bg-background/50 rounded-full" />
-          <Skeleton className="w-16 h-6 bg-background/50 rounded-full" />
-          <Skeleton className="w-16 h-6 bg-background/50 rounded-full" />
-        </div>
-      </div>
-      <div className="flex gap-2 h-full items-end">
-        <Skeleton className="w-8 h-8 bg-background/50 rounded-full" />
-        <Skeleton className="w-8 h-8 bg-background/50 rounded-full" />
-      </div>
-    </div>
-  )
-}
-
 export function HomeFallback() {
   return (
-    <div className="w-full">
-      <HeaderFallback />
-
-      <div className="px-8 pb-6">
-        <PreviewListFallback />
-        <PreviewListFallback />
-        <PreviewListFallback />
-        <PreviewListFallback />
+    <div className="w-full px-8 py-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-[52px] rounded-full" />
+        ))}
       </div>
+
+      <PreviewListFallback />
+      <PreviewListFallback />
+      <PreviewListFallback />
+      <PreviewListFallback />
     </div>
   )
 }

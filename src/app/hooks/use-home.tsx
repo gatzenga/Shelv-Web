@@ -3,13 +3,6 @@ import { subsonic } from '@/service/subsonic'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
 import { queryKeys } from '@/utils/queryKeys'
 
-export const useGetRandomSongs = () => {
-  return useQuery({
-    queryKey: [queryKeys.song.random],
-    queryFn: () => subsonic.songs.getRandomSongs({ size: 10 }),
-  })
-}
-
 export const useGetRecentlyAdded = () => {
   return useQuery({
     queryKey: [queryKeys.album.recentlyAdded],
