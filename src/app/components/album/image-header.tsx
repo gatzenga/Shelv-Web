@@ -10,7 +10,7 @@ import { CoverArt } from '@/types/coverArtType'
 import { getTextSizeClass } from '@/utils/getTextSizeClass'
 
 // Where the fade below the header starts, the artist header is shorter
-const artistEffectTop = 'top-[calc(3rem+184px)] 2xl:top-[calc(3rem+216px)]'
+const artistEffectTop = 'top-[calc(3rem+160px)] 2xl:top-[calc(3rem+200px)]'
 
 interface ImageHeaderProps {
   type: string
@@ -48,7 +48,7 @@ export default function ImageHeader({
           className={cn(
             'flex relative w-full',
             isArtist
-              ? 'h-[calc(3rem+184px)] 2xl:h-[calc(3rem+216px)]'
+              ? 'h-[calc(3rem+160px)] 2xl:h-[calc(3rem+200px)]'
               : 'h-[calc(3rem+200px)] 2xl:h-[calc(3rem+250px)]',
           )}
           key={`header-${coverArtId}`}
@@ -69,7 +69,7 @@ export default function ImageHeader({
             <div
               className={cn(
                 isArtist
-                  ? 'w-[184px] h-[184px] min-w-[184px] min-h-[184px] 2xl:w-[216px] 2xl:h-[216px] 2xl:min-w-[216px] 2xl:min-h-[216px]'
+                  ? 'size-[160px] min-w-[160px] min-h-[160px] 2xl:size-[200px] 2xl:min-w-[200px] 2xl:min-h-[200px]'
                   : 'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px]',
                 'bg-skeleton aspect-square bg-cover bg-center',
                 isArtist ? 'rounded-full' : 'rounded',
@@ -98,7 +98,7 @@ export default function ImageHeader({
               className={cn(
                 'flex w-full flex-col z-10',
                 isArtist
-                  ? 'max-w-[calc(100%-200px)] 2xl:max-w-[calc(100%-232px)] justify-center'
+                  ? 'max-w-[calc(100%-176px)] 2xl:max-w-[calc(100%-216px)] justify-center'
                   : 'max-w-[calc(100%-216px)] 2xl:max-w-[calc(100%-266px)] justify-end',
               )}
             >
@@ -110,7 +110,7 @@ export default function ImageHeader({
               <h1
                 className={clsx(
                   'max-w-full scroll-m-20 font-bold tracking-tight antialiased text-shadow-md break-words line-clamp-2',
-                  getTextSizeClass(title),
+                  isArtist ? 'text-3xl' : getTextSizeClass(title),
                 )}
               >
                 {title}

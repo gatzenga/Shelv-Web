@@ -16,7 +16,7 @@ export function AlbumHeaderFallback({
         className={cn(
           'shadow-lg aspect-square',
           isArtist
-            ? 'w-[184px] h-[184px] min-w-[184px] min-h-[184px] 2xl:w-[216px] 2xl:h-[216px] 2xl:min-w-[216px] 2xl:min-h-[216px] rounded-full'
+            ? 'size-[160px] min-w-[160px] 2xl:size-[200px] 2xl:min-w-[200px] rounded-full'
             : 'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px] rounded',
         )}
       />
