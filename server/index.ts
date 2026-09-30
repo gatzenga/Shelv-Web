@@ -16,6 +16,7 @@ import { createLastFMHandler, LastFMService } from './lastfm.ts'
 import { logger } from './logger.ts'
 import { createLyricsHandler } from './lyrics.ts'
 import { createRadioHandler } from './radio.ts'
+import { sendServerInfo } from './server-info.ts'
 import { sendSmartMix } from './smart-mix.ts'
 import { createStaticHandler } from './static.ts'
 import { createSubsonicHandler } from './subsonic.ts'
@@ -93,6 +94,11 @@ async function route(req: IncomingMessage, res: ServerResponse) {
 
   if (pathname === '/api/infinity-mix') {
     await sendInfinityMix(config, res, url)
+    return
+  }
+
+  if (pathname === '/api/server-info') {
+    await sendServerInfo(config, res, url)
     return
   }
 

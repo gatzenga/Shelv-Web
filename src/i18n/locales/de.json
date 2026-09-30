@@ -312,7 +312,8 @@
     "lastfm": "Last.fm",
     "about": "Über",
     "serverLogout": "Abmelden",
-    "server": "Server"
+    "server": "Server",
+    "manageServers": "Server verwalten"
   },
   "lastfm": {
     "title": "Last.fm",
@@ -481,22 +482,22 @@
     "seconds": "{{seconds}} Sek"
   },
   "server": {
-    "songCount_one": "{{count}} Lied",
-    "songCount_other": "{{count}} Lieder",
-    "folderCount_one": "{{count}} Ordner",
-    "folderCount_other": "{{count}} Ordner",
-    "lastScan": "Letzter Scan: {{date}}",
-    "status": "Status",
-    "management": "Serververwaltung",
-    "buttons": {
-      "refresh": "Status aktualisieren",
-      "startScan": "Schnellscan"
-    },
-    "incompatible": {
-      "title": "Inkompatibler Server",
-      "description": "Dieser Server verwendet eine ältere Version des Subsonic-Protokolls, die nicht vollständig unterstützt wird. Bitte seien Sie achtsam, es können Probleme auftreten.",
-      "skip": "Trotzdem fortfahren"
-    }
+    "connected": "Verbundener Server",
+    "user": "Benutzer",
+    "library": "Bibliothek",
+    "albums": "Alben",
+    "artists": "Künstler",
+    "tracks": "Titel",
+    "synchronisation": "Synchronisation",
+    "lastSync": "Letzte Synchronisation",
+    "never": "Noch nie",
+    "fullSync": "Vollständig synchronisieren",
+    "scanning": "Bibliothek wird gescannt…",
+    "syncComplete": "Synchronisation abgeschlossen",
+    "refreshMetadata": "Metadaten aktualisieren",
+    "refreshing": "Metadaten werden aktualisiert… {{done}} / {{total}}",
+    "metadataComplete": "Metadaten-Aktualisierung abgeschlossen",
+    "metadataFailed": "{{failed}} von {{total}} Künstlern konnten nicht aktualisiert werden"
   },
   "downloads": {
     "started": "Download gestartet.",
