@@ -33,9 +33,9 @@ export function ThemeButton() {
       </SimpleTooltip>
       <PopoverContent
         align="end"
-        className="w-[34rem] max-w-[calc(100vw-2rem)] p-3"
+        className="w-[24rem] max-w-[calc(100vw-2rem)] p-3"
       >
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {appThemes.map((theme) => (
             <button
               key={theme}

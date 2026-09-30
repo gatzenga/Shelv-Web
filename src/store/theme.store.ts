@@ -9,7 +9,7 @@ export const useThemeStore = createWithEqualityFn<IThemeContext>()(
     persist(
       devtools(
         immer((set) => ({
-          theme: Theme.Black,
+          theme: Theme.ShelvDark,
           setTheme: (theme: Theme) => {
             set((state) => {
               state.theme = theme
@@ -23,14 +23,14 @@ export const useThemeStore = createWithEqualityFn<IThemeContext>()(
       {
         name: 'theme_store',
         version: 1,
-        // Theme.Black is the default, a theme picked
+        // Theme.ShelvDark is the default, a theme picked
         // with the theme button is kept
         merge: (persistedState, currentState) => {
           const merged = merge(currentState, persistedState)
 
           // a stored theme that no longer exists falls back to the default
           if (!Object.values(Theme).includes(merged.theme)) {
-            merged.theme = Theme.Black
+            merged.theme = Theme.ShelvDark
           }
 
           return merged

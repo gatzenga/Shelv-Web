@@ -16,16 +16,9 @@
   },
   "theme": {
     "label": "Theme",
-    "black": "Black and White",
     "shelv-dark": "Shelv Dark",
     "shelv-light": "Shelv Light",
-    "vesper": "Vesper",
-    "mirage": "Mirage",
-    "marmalade-beaver": "Marmalade Beaver",
-    "vue-dark": "Vue Dark",
-    "nuclear-dark": "Nuclear Dark",
-    "shades-of-purple": "Shades Of Purple",
-    "monokai-pro": "Monokai Pro"
+    "black": "Black and White"
   },
   "playlist": {
     "form": {

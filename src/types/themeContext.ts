@@ -1,14 +1,7 @@
 export enum Theme {
-  Black = 'black',
   ShelvDark = 'shelv-dark',
   ShelvLight = 'shelv-light',
-  Vesper = 'vesper',
-  Mirage = 'mirage',
-  MonokaiPro = 'monokai-pro',
-  VueDark = 'vue-dark',
-  NuclearDark = 'nuclear-dark',
-  ShadesOfPurple = 'shades-of-purple',
-  MarmaladeBeaver = 'marmalade-beaver',
+  Black = 'black',
 }
 
 export interface IThemeContext {
