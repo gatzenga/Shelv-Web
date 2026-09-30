@@ -13,7 +13,6 @@ import ArtistTopSongs from '@/app/components/artist/artist-top-songs'
 import { ArtistBiography, ArtistInfo } from '@/app/components/artist/info'
 import { LatestReleaseCard } from '@/app/components/artist/latest-release-card'
 import RelatedArtistsList from '@/app/components/artist/related-artists'
-import { ArtistStickyHeader } from '@/app/components/artist/sticky-header'
 import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { TopSongsTableFallback } from '@/app/components/fallbacks/table-fallbacks'
@@ -116,8 +115,6 @@ export default function Artist() {
 
   return (
     <div className="w-full relative">
-      <ArtistStickyHeader artist={artist} />
-
       <ImageHeader
         type={t('artist.headline')}
         title={artist.name}
