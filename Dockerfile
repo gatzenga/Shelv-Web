@@ -15,8 +15,6 @@ RUN pnpm run build
 # The backend has no dependencies, Node.js runs the TypeScript files directly.
 FROM node:24-alpine
 
-RUN apk add --no-cache su-exec
-
 WORKDIR /app
 
 ENV NODE_ENV=production \
@@ -28,8 +26,7 @@ ENV NODE_ENV=production \
 
 COPY --from=build /app/dist ./dist
 COPY server ./server
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p /cache /config /logs
+RUN mkdir -p /cache /config /logs
 
 EXPOSE 8080
 VOLUME ["/cache", "/config", "/logs"]
@@ -37,5 +34,7 @@ VOLUME ["/cache", "/config", "/logs"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
   CMD wget -qO- "http://127.0.0.1:${PORT}/api/health" > /dev/null || exit 1
 
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "server/index.ts"]
+# Like Navidrome: no entrypoint script, no chmod, no chown. The process runs as
+# the user of the compose file and creates its files with the defaults, so
+# they get the rights of the mounted folder.
+ENTRYPOINT ["node", "server/index.ts"]
