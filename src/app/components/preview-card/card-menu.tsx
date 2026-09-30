@@ -51,7 +51,7 @@ function LoadingItem({ variant }: { variant: 'dropdown' | 'context' }) {
 }
 
 // The album options need the song list, it is loaded when the menu opens
-function AlbumMenuContent({
+export function AlbumMenuContent({
   albumId,
   variant,
 }: {

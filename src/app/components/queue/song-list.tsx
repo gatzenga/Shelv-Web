@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 import { DragEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SongMenuOptions } from '@/app/components/song/menu-options'
+import { ContextMenuProvider } from '@/app/components/table/context-menu'
 import { CoverImage } from '@/app/components/table/cover-image'
 import {
   AlertDialog,
@@ -96,80 +98,84 @@ function QueueRow({
   }
 
   return (
-    <div
-      draggable={isEditing}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onDragEnd={handleDragEnd}
-      onDoubleClick={onPlay}
-      className={cn(
-        'group relative flex items-center gap-3 px-3 py-1.5 rounded-lg select-none cursor-pointer transition-colors',
-        'hover:bg-accent/60',
-        isDragging && 'opacity-40',
-        dropSide === 'top' && 'border-t-2 border-primary',
-        dropSide === 'bottom' && 'border-b-2 border-primary',
-      )}
+    <ContextMenuProvider
+      options={<SongMenuOptions variant="context" song={song} index={index} />}
     >
-      <div className="relative w-9 h-9 shrink-0 rounded overflow-hidden">
-        <CoverImage
-          coverArt={song.coverArt}
-          coverArtType="song"
-          size={36}
-          altText={song.title}
-        />
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onPlay()
-          }}
-          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded cursor-pointer"
-          title="Play"
-        >
-          <PlayIcon className="w-4 h-4 text-white fill-white" />
-        </button>
-      </div>
-
-      <div className="flex flex-col min-w-0 flex-1 justify-center">
-        <span className="font-medium text-sm truncate text-foreground group-hover:text-primary transition-colors">
-          {song.title}
-        </span>
-        {song.artist && (
-          <span className="text-xs text-muted-foreground truncate">
-            {song.artist}
-          </span>
+      <div
+        draggable={isEditing}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onDoubleClick={onPlay}
+        className={cn(
+          'group relative flex items-center gap-3 px-3 py-1.5 rounded-lg select-none cursor-pointer transition-colors',
+          'hover:bg-accent/60',
+          isDragging && 'opacity-40',
+          dropSide === 'top' && 'border-t-2 border-primary',
+          dropSide === 'bottom' && 'border-b-2 border-primary',
         )}
-      </div>
+      >
+        <div className="relative w-9 h-9 shrink-0 rounded overflow-hidden">
+          <CoverImage
+            coverArt={song.coverArt}
+            coverArtType="song"
+            size={36}
+            altText={song.title}
+          />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onPlay()
+            }}
+            className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded cursor-pointer"
+            title="Play"
+          >
+            <PlayIcon className="w-4 h-4 text-white fill-white" />
+          </button>
+        </div>
 
-      <div className="flex items-center justify-end gap-2 shrink-0 min-w-[3.5rem]">
-        {isEditing ? (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-7 h-7 p-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              onClick={(e) => {
-                e.stopPropagation()
-                onRemove()
-              }}
-              onDoubleClick={(e) => e.stopPropagation()}
-            >
-              <XIcon className="w-4 h-4" />
-            </Button>
-
-            <div className="cursor-grab active:cursor-grabbing text-primary">
-              <GripVerticalIcon className="w-4 h-4" />
-            </div>
-          </>
-        ) : (
-          <span className="text-xs text-muted-foreground font-mono">
-            {convertSecondsToTime(song.duration ?? 0)}
+        <div className="flex flex-col min-w-0 flex-1 justify-center">
+          <span className="font-medium text-sm truncate text-foreground group-hover:text-primary transition-colors">
+            {song.title}
           </span>
-        )}
+          {song.artist && (
+            <span className="text-xs text-muted-foreground truncate">
+              {song.artist}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-2 shrink-0 min-w-[3.5rem]">
+          {isEditing ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-7 h-7 p-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemove()
+                }}
+                onDoubleClick={(e) => e.stopPropagation()}
+              >
+                <XIcon className="w-4 h-4" />
+              </Button>
+
+              <div className="cursor-grab active:cursor-grabbing text-primary">
+                <GripVerticalIcon className="w-4 h-4" />
+              </div>
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground font-mono">
+              {convertSecondsToTime(song.duration ?? 0)}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </ContextMenuProvider>
   )
 }
 

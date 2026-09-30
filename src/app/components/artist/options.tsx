@@ -1,4 +1,5 @@
 import { OptionsButtons } from '@/app/components/options/buttons'
+import { AddToPlaylistSubMenu } from '@/app/components/song/add-to-playlist'
 import { ContextMenuSeparator } from '@/app/components/ui/context-menu'
 import {
   DropdownMenuGroup,
@@ -7,6 +8,7 @@ import {
 import { useOptions } from '@/app/hooks/use-options'
 import { useShare } from '@/app/hooks/use-share'
 import { useSongList } from '@/app/hooks/use-song-list'
+import { useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
 import { IArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
@@ -22,7 +24,14 @@ export function ArtistOptions({
 }: ArtistOptionsProps) {
   const { getArtistPlayOrderSongs } = useSongList()
   const { setSongList } = usePlayerActions()
-  const { playLast, playNext, startInstantMix } = useOptions()
+  const {
+    playLast,
+    playNext,
+    startInstantMix,
+    addToPlaylist,
+    createNewPlaylist,
+  } = useOptions()
+  const hidePlaylistsSection = useAppStore().pages.hidePlaylistsSection
   const { share } = useShare()
 
   const Separator =
@@ -67,6 +76,22 @@ export function ArtistOptions({
     playLast(songs)
   }
 
+  async function handleAddToPlaylist(id: string) {
+    const songs = await getSongs()
+    addToPlaylist(
+      id,
+      songs.map((song) => song.id),
+    )
+  }
+
+  async function handleCreateNewPlaylist() {
+    const songs = await getSongs()
+    createNewPlaylist(
+      artist.name,
+      songs.map((song) => song.id),
+    )
+  }
+
   return (
     <>
       <DropdownMenuGroup>
@@ -90,7 +115,16 @@ export function ArtistOptions({
 
         <Separator />
 
-        {/* Section 4: Share */}
+        {/* Section 4: Add to Playlist (if not hidden), Share */}
+        {!hidePlaylistsSection && (
+          <OptionsButtons.AddToPlaylistOption variant={variant}>
+            <AddToPlaylistSubMenu
+              type={variant}
+              newPlaylistFn={handleCreateNewPlaylist}
+              addToPlaylistFn={handleAddToPlaylist}
+            />
+          </OptionsButtons.AddToPlaylistOption>
+        )}
         <OptionsButtons.Share
           variant={variant}
           onClick={() => share(artist.id)}

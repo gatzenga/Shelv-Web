@@ -37,6 +37,16 @@ export function SongMenuOptions({
 
   return (
     <>
+      <OptionsButtons.InstantMix
+        variant={variant}
+        onClick={(e) => {
+          e.stopPropagation()
+          startInstantMix('song', song.id)
+        }}
+      />
+
+      <Separator />
+
       <OptionsButtons.PlayNext
         variant={variant}
         onClick={(e) => {
@@ -49,16 +59,6 @@ export function SongMenuOptions({
         onClick={(e) => {
           e.stopPropagation()
           playLast([song])
-        }}
-      />
-
-      <Separator />
-
-      <OptionsButtons.InstantMix
-        variant={variant}
-        onClick={(e) => {
-          e.stopPropagation()
-          startInstantMix('song', song.id)
         }}
       />
 

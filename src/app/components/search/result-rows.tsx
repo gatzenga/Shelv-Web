@@ -27,44 +27,48 @@ export function SearchArtistRow({
   albumsLabel,
 }: ArtistRowProps) {
   return (
-    <div
-      className={cn(
-        'group/tablerow group flex items-center justify-between p-2 rounded-lg',
-        'hover:bg-accent/60 transition-colors cursor-pointer select-none',
-      )}
-      onClick={onOpen}
-      data-testid="search-artist"
+    <ContextMenuProvider
+      options={<ArtistOptions artist={artist} variant="context" />}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
-        <div className="size-11 min-w-11 min-h-11 rounded-full overflow-hidden shrink-0 shadow-sm">
-          <CoverImage
-            coverArt={artist.coverArt}
-            coverArtType="artist"
-            altText={artist.name}
-            size={44}
+      <div
+        className={cn(
+          'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+          'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+        )}
+        onClick={onOpen}
+        data-testid="search-artist"
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+          <div className="size-11 min-w-11 min-h-11 rounded-full overflow-hidden shrink-0 shadow-sm">
+            <CoverImage
+              coverArt={artist.coverArt}
+              coverArtType="artist"
+              altText={artist.name}
+              size={44}
+            />
+          </div>
+          <div className="flex flex-col min-w-0 flex-1 justify-center">
+            <span className="truncate text-sm font-medium leading-tight">
+              {artist.name}
+            </span>
+            {albumsLabel && (
+              <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
+                {albumsLabel}
+              </span>
+            )}
+          </div>
+        </div>
+        <div
+          className="flex items-center shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <TableActionButton
+            alwaysVisible
+            optionsMenuItems={<ArtistOptions artist={artist} />}
           />
         </div>
-        <div className="flex flex-col min-w-0 flex-1 justify-center">
-          <span className="truncate text-sm font-medium leading-tight">
-            {artist.name}
-          </span>
-          {albumsLabel && (
-            <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
-              {albumsLabel}
-            </span>
-          )}
-        </div>
       </div>
-      <div
-        className="flex items-center shrink-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <TableActionButton
-          alwaysVisible
-          optionsMenuItems={<ArtistOptions artist={artist} />}
-        />
-      </div>
-    </div>
+    </ContextMenuProvider>
   )
 }
 
@@ -79,44 +83,48 @@ export function SearchAlbumRow({ album, onOpen }: AlbumRowProps) {
     .join(' · ')
 
   return (
-    <div
-      className={cn(
-        'group/tablerow group flex items-center justify-between p-2 rounded-lg',
-        'hover:bg-accent/60 transition-colors cursor-pointer select-none',
-      )}
-      onClick={onOpen}
-      data-testid="search-album"
+    <ContextMenuProvider
+      options={<AlbumOptions album={album} variant="context" />}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
-        <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden shrink-0 shadow-sm">
-          <CoverImage
-            coverArt={album.coverArt}
-            coverArtType="album"
-            altText={album.name}
-            size={44}
+      <div
+        className={cn(
+          'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+          'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+        )}
+        onClick={onOpen}
+        data-testid="search-album"
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+          <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden shrink-0 shadow-sm">
+            <CoverImage
+              coverArt={album.coverArt}
+              coverArtType="album"
+              altText={album.name}
+              size={44}
+            />
+          </div>
+          <div className="flex flex-col min-w-0 flex-1 justify-center">
+            <span className="truncate text-sm font-medium leading-tight">
+              {album.name}
+            </span>
+            {details && (
+              <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
+                {details}
+              </span>
+            )}
+          </div>
+        </div>
+        <div
+          className="flex items-center shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <TableActionButton
+            alwaysVisible
+            optionsMenuItems={<AlbumOptions album={album} />}
           />
         </div>
-        <div className="flex flex-col min-w-0 flex-1 justify-center">
-          <span className="truncate text-sm font-medium leading-tight">
-            {album.name}
-          </span>
-          {details && (
-            <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
-              {details}
-            </span>
-          )}
-        </div>
       </div>
-      <div
-        className="flex items-center shrink-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <TableActionButton
-          alwaysVisible
-          optionsMenuItems={<AlbumOptions album={album} />}
-        />
-      </div>
-    </div>
+    </ContextMenuProvider>
   )
 }
 

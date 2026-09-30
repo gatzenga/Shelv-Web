@@ -30,7 +30,9 @@ import { isMacOs } from 'react-device-detect'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 
+import { ArtistOptions } from '@/app/components/artist/options'
 import { PlaylistOptions } from '@/app/components/playlist/options'
+import { AlbumMenuContent } from '@/app/components/preview-card/card-menu'
 import { RadioOptions } from '@/app/components/radios/options'
 import { SongMenuOptions } from '@/app/components/song/menu-options'
 import { SelectedSongsMenuOptions } from '@/app/components/song/selected-options'
@@ -39,6 +41,8 @@ import { DataTablePagination } from '@/app/components/ui/data-table-pagination'
 import { Input } from '@/app/components/ui/input'
 import { ColumnFilter } from '@/types/columnFilter'
 import { ColumnDefType } from '@/types/react-table/columnDef'
+import { Albums } from '@/types/responses/album'
+import { ISimilarArtist } from '@/types/responses/artist'
 import { Playlist } from '@/types/responses/playlist'
 import { Radio } from '@/types/responses/radios'
 import { ISong } from '@/types/responses/song'
@@ -286,6 +290,24 @@ export function DataTable<TData, TValue>({
             />
           )
         }
+      }
+
+      if (dataType === 'album') {
+        return (
+          <AlbumMenuContent
+            albumId={(row.original as Albums).id}
+            variant="context"
+          />
+        )
+      }
+
+      if (dataType === 'artist') {
+        return (
+          <ArtistOptions
+            artist={row.original as ISimilarArtist}
+            variant="context"
+          />
+        )
       }
 
       if (dataType === 'radio') {
