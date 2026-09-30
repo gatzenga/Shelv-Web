@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import ImageHeader from '@/app/components/album/image-header'
+import { ArtistAlbumShelf } from '@/app/components/artist/album-shelf'
 import {
   AlbumSortControls,
   getLatestRelease,
@@ -17,7 +18,6 @@ import { AlbumFallback } from '@/app/components/fallbacks/album-fallbacks'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { TopSongsTableFallback } from '@/app/components/fallbacks/table-fallbacks'
 import { BadgesData } from '@/app/components/header-info'
-import PreviewList from '@/app/components/home/preview-list'
 import ListWrapper from '@/app/components/list-wrapper'
 import {
   useGetArtist,
@@ -139,26 +139,27 @@ export default function Artist() {
         )}
 
         {albumSort.sortedAlbums.length > 0 && (
-          <PreviewList
-            cardSize="artist"
-            title={t('artist.discography')}
-            titleRoute={ROUTES.ARTIST.DISCOGRAPHY(artist.id)}
-            list={albumSort.sortedAlbums}
-            limit={Number.POSITIVE_INFINITY}
-            showMore={false}
-            subtitleType="year"
-            subheader={
-              <>
-                {latestRelease && <LatestReleaseCard album={latestRelease} />}
+          <section className="w-full flex flex-col gap-4 mt-4 mb-6">
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              {t('artist.discography')}
+            </h3>
+
+            {latestRelease && <LatestReleaseCard album={latestRelease} />}
+
+            <ArtistAlbumShelf
+              title={t('artist.albums')}
+              titleRoute={ROUTES.ARTIST.DISCOGRAPHY(artist.id)}
+              albums={albumSort.sortedAlbums}
+              controls={
                 <AlbumSortControls
-                  sortKey={albumSort.sortKey}
-                  isAscending={albumSort.isAscending}
-                  onSortKeyChange={albumSort.changeSortKey}
+                  sortOption={albumSort.sortOption}
+                  direction={albumSort.direction}
+                  onSortOptionChange={albumSort.changeSortOption}
                   onToggleDirection={albumSort.toggleDirection}
                 />
-              </>
-            }
-          />
+              }
+            />
+          </section>
         )}
 
         {artistInfoIsLoading && <PreviewListFallback cardWidth={132} />}

@@ -5,6 +5,7 @@ const playlist = {
 
 const album = {
   all: 'get-all-albums',
+  library: 'get-library-albums',
   single: 'get-album',
   info: 'get-album-info',
   moreAlbums: 'get-artist-albums',

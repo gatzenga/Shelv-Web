@@ -22,8 +22,13 @@ export default function ArtistDiscography() {
   const { artistId } = useParams() as { artistId: string }
   const { data: artist, isLoading, isFetched } = useGetArtist(artistId)
 
-  const { sortKey, isAscending, sortedAlbums, changeSortKey, toggleDirection } =
-    useAlbumSort(artist?.album)
+  const {
+    sortOption,
+    direction,
+    sortedAlbums,
+    changeSortOption,
+    toggleDirection,
+  } = useAlbumSort(artist?.album)
 
   const [searchActive, setSearchActive] = useState(false)
   const [search, setSearch] = useState('')
@@ -78,9 +83,9 @@ export default function ArtistDiscography() {
 
           <div className="flex items-center gap-2">
             <AlbumSortControls
-              sortKey={sortKey}
-              isAscending={isAscending}
-              onSortKeyChange={changeSortKey}
+              sortOption={sortOption}
+              direction={direction}
+              onSortOptionChange={changeSortOption}
               onToggleDirection={toggleDirection}
             />
 

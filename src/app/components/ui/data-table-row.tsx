@@ -17,7 +17,7 @@ interface RowProps<TData> extends ComponentPropsWithoutRef<'div'> {
   isPrevRowSelected: (rowIndex: number) => boolean
   isNextRowSelected: (rowIndex: number) => boolean
   variant?: 'classic' | 'modern'
-  dataType?: 'song' | 'artist' | 'playlist' | 'radio' | 'genre'
+  dataType?: 'song' | 'album' | 'artist' | 'playlist' | 'radio' | 'genre'
   clickable?: boolean
 }
 

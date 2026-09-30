@@ -511,6 +511,18 @@
     "failed": "Beim Herunterladen Ihrer Datei ist ein Fehler aufgetreten.",
     "completed": "Ihre Datei wurde heruntergeladen."
   },
+  "library": {
+    "filter": "Filtern…",
+    "genre": "Genre",
+    "allGenres": "Alle Genres",
+    "sort": {
+      "name": "Name",
+      "artist": "Künstler",
+      "mostPlayed": "Meist gespielt",
+      "recentlyAdded": "Kürzlich hinzugefügt",
+      "year": "Jahr"
+    }
+  },
   "queue": {
     "title": "Warteschlange",
     "clear": "Warteschlange leeren",

@@ -1,5 +1,5 @@
 import { RefreshCwIcon } from 'lucide-react'
-import { ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
@@ -24,8 +24,6 @@ interface PreviewListProps {
   onRefresh?: () => void
   isRefreshing?: boolean
   subtitleType?: 'artist' | 'year'
-  subheader?: ReactNode
-  limit?: number
 }
 
 export default function PreviewList({
@@ -37,8 +35,6 @@ export default function PreviewList({
   moreRoute,
   cardSize = 'home',
   subtitleType = 'artist',
-  subheader,
-  limit = 16,
   onRefresh,
   isRefreshing = false,
 }: PreviewListProps) {
@@ -49,8 +45,8 @@ export default function PreviewList({
 
   moreTitle = moreTitle || t('generic.seeMore')
 
-  if (list.length > limit) {
-    list = list.slice(0, limit)
+  if (list.length > 16) {
+    list = list.slice(0, 16)
   }
 
   useEffect(() => {
@@ -122,8 +118,6 @@ export default function PreviewList({
           </div>
         </div>
       </div>
-
-      {subheader && <div className="mb-4 flex flex-col gap-3">{subheader}</div>}
 
       <div className="transform-gpu @container">
         <Carousel

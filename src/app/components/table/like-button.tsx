@@ -13,7 +13,7 @@ import {
 } from '@/store/player.store'
 
 interface TableLikeButtonProps {
-  type: 'song' | 'artist'
+  type: 'song' | 'artist' | 'album'
   starred: boolean
   entityId: string
 }
@@ -31,7 +31,7 @@ export function TableLikeButton({
   const { refreshFavorites } = useRefreshFavorites()
 
   useEffect(() => {
-    if (type === 'artist') return
+    if (type !== 'song') return
     if (isRadio) return
 
     const isSongPlaying = currentSong.id === entityId

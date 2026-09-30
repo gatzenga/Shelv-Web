@@ -586,6 +586,18 @@
     "failed": "There was an error downloading your file.",
     "completed": "Your file has been downloaded."
   },
+  "library": {
+    "filter": "Filter…",
+    "genre": "Genre",
+    "allGenres": "All Genres",
+    "sort": {
+      "name": "Name",
+      "artist": "Artist",
+      "mostPlayed": "Most Played",
+      "recentlyAdded": "Recently Added",
+      "year": "Year"
+    }
+  },
   "queue": {
     "title": "Queue",
     "clear": "Clear queue",

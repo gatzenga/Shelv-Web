@@ -3,18 +3,30 @@ import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShadowHeader } from '@/app/components/album/shadow-header'
 import { ArtistGridCard } from '@/app/components/artist/artist-grid-card'
-import {
-  ArtistsFilters,
-  filterAndSortArtists,
-  useArtistsFilters,
-} from '@/app/components/artist/list-filters'
 import { ArtistsFallback } from '@/app/components/fallbacks/artists.tsx'
 import { GridViewWrapper } from '@/app/components/grid-view-wrapper'
 import { HeaderTitle } from '@/app/components/header-title'
+import {
+  ArtistSortOption,
+  artistSortOptions,
+  naturalDirection,
+  SortDirection,
+  sortArtists,
+  sortOptionLabelKey,
+} from '@/app/components/library/sorting'
+import {
+  LibraryDirectionButton,
+  LibraryFilterInput,
+  LibrarySortMenu,
+  LibraryToolbar,
+  LibraryViewToggle,
+} from '@/app/components/library/toolbar'
 import ListWrapper from '@/app/components/list-wrapper'
-import { MainViewTypeSelector } from '@/app/components/main-grid'
 import { DataTable } from '@/app/components/ui/data-table'
+import { useAllAlbums } from '@/app/hooks/use-all-albums'
+import { usePersistedState } from '@/app/hooks/use-persisted-state'
 import { useSongList } from '@/app/hooks/use-song-list'
+import { useUrlParam } from '@/app/hooks/use-url-param'
 import { artistsColumns } from '@/app/tables/artists-columns'
 import { subsonic } from '@/service/subsonic'
 import { useAppArtistsViewType } from '@/store/app.store'
@@ -24,9 +36,13 @@ import { queryKeys } from '@/utils/queryKeys'
 
 const MemoShadowHeader = memo(ShadowHeader)
 const MemoHeaderTitle = memo(HeaderTitle)
-const MemoViewTypeSelector = memo(MainViewTypeSelector)
 const MemoDataTable = memo(DataTable) as typeof DataTable
 const MemoListWrapper = memo(ListWrapper)
+
+const isSortOption = (value: unknown): value is ArtistSortOption =>
+  artistSortOptions.includes(value as ArtistSortOption)
+const isDirection = (value: unknown): value is SortDirection =>
+  value === 'asc' || value === 'desc'
 
 export default function ArtistsList() {
   const { t } = useTranslation()
@@ -40,12 +56,25 @@ export default function ArtistsList() {
   } = useAppArtistsViewType()
 
   const columns = artistsColumns()
-  const filters = useArtistsFilters()
+
+  const [query, setQuery] = useUrlParam('query')
+  const [sortOption, setSortOption] = usePersistedState<ArtistSortOption>(
+    'artists-page-sort',
+    'name',
+    isSortOption,
+  )
+  const [direction, setDirection] = usePersistedState<SortDirection>(
+    'artists-page-direction',
+    'desc',
+    isDirection,
+  )
 
   const { data: allArtists, isLoading } = useQuery({
     queryKey: [queryKeys.artist.all],
     queryFn: subsonic.artists.getAll,
   })
+  // The plays of an artist are the plays of their albums
+  const { data: allAlbums } = useAllAlbums(sortOption === 'mostPlayed')
 
   async function handlePlayArtistRadio(artist: ISimilarArtist) {
     const songList = await getArtistAllSongs(artist.name)
@@ -58,31 +87,59 @@ export default function ArtistsList() {
       })
   }
 
-  const { sortBy, order, query } = filters
-  const artists = useMemo(
-    () =>
-      allArtists
-        ? filterAndSortArtists(allArtists, { sortBy, order, query })
-        : undefined,
-    [allArtists, sortBy, order, query],
-  )
+  const artists = useMemo(() => {
+    if (!allArtists) return undefined
+
+    const search = query.trim().toLowerCase()
+    const filtered = search
+      ? allArtists.filter((artist) =>
+          artist.name.toLowerCase().includes(search),
+        )
+      : allArtists
+
+    return sortArtists(filtered, allAlbums ?? [], sortOption, direction)
+  }, [allArtists, allAlbums, query, sortOption, direction])
+
+  function changeSort(option: ArtistSortOption) {
+    setSortOption(option)
+    setDirection(naturalDirection(option))
+  }
 
   if (isLoading) return <ArtistsFallback />
   if (!artists) return null
 
   return (
     <div className="w-full h-full">
-      <MemoShadowHeader className="flex justify-between">
+      <MemoShadowHeader>
         <MemoHeaderTitle title={t('sidebar.artists')} count={artists.length} />
+      </MemoShadowHeader>
 
-        <div className="flex gap-2 items-center">
-          <ArtistsFilters filters={filters} />
-          <MemoViewTypeSelector
+      <LibraryToolbar>
+        <LibraryFilterInput value={query} onChange={setQuery} />
+
+        <div className="flex items-center gap-2 ml-auto">
+          <LibrarySortMenu
+            options={artistSortOptions}
+            value={sortOption}
+            labelKey={(option) => sortOptionLabelKey[option]}
+            onChange={changeSort}
+          />
+
+          {sortOption !== 'name' && (
+            <LibraryDirectionButton
+              direction={direction}
+              onToggle={() =>
+                setDirection(direction === 'asc' ? 'desc' : 'asc')
+              }
+            />
+          )}
+
+          <LibraryViewToggle
             viewType={artistsPageViewType}
-            setViewType={setArtistsPageViewType}
+            onChange={setArtistsPageViewType}
           />
         </div>
-      </MemoShadowHeader>
+      </LibraryToolbar>
 
       {isTableView && (
         <MemoListWrapper>
@@ -94,6 +151,7 @@ export default function ArtistsList() {
             searchColumn="name"
             handlePlaySong={(row) => handlePlayArtistRadio(row.original)}
             allowRowSelection={false}
+            enableSorting={false}
             dataType="artist"
           />
         </MemoListWrapper>

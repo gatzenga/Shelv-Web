@@ -74,7 +74,7 @@ interface DataTableProps<TData, TValue> {
   showHeader?: boolean
   showDiscNumber?: boolean
   variant?: 'classic' | 'modern'
-  dataType?: 'song' | 'artist' | 'playlist' | 'radio' | 'genre'
+  dataType?: 'song' | 'album' | 'artist' | 'playlist' | 'radio' | 'genre'
   onRowClick?: (row: Row<TData>) => void
   enableVirtualization?: boolean
   enableSorting?: boolean

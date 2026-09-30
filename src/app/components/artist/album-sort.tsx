@@ -1,62 +1,23 @@
-import { ArrowDown, ArrowUp, ListFilter } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Button } from '@/app/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/app/components/ui/dropdown-menu'
-import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
+  AlbumSortOption,
+  albumSortOptions,
+  allowsDirection,
+  naturalDirection,
+  SortDirection,
+  sortAlbums,
+  sortOptionLabelKey,
+} from '@/app/components/library/sorting'
+import {
+  LibraryDirectionButton,
+  LibrarySortMenu,
+} from '@/app/components/library/toolbar'
 import { Albums } from '@/types/responses/album'
 
-export type AlbumSortKey =
-  | 'most-played'
-  | 'name'
-  | 'recent-added'
-  | 'recent-played'
-  | 'release-year'
-
-const sortItems: { key: AlbumSortKey; labelKey: string }[] = [
-  { key: 'most-played', labelKey: 'album.list.filter.mostPlayed' },
-  { key: 'name', labelKey: 'album.list.filter.name' },
-  { key: 'recent-added', labelKey: 'album.list.filter.recentlyAdded' },
-  { key: 'recent-played', labelKey: 'album.list.filter.recentlyPlayed' },
-  { key: 'release-year', labelKey: 'album.list.filter.releaseYear' },
-]
-
-function compareAlbums(a: Albums, b: Albums, key: AlbumSortKey) {
-  switch (key) {
-    case 'most-played':
-      return (b.playCount ?? 0) - (a.playCount ?? 0)
-    case 'name':
-      return a.name.localeCompare(b.name)
-    case 'recent-added':
-      return new Date(b.created).getTime() - new Date(a.created).getTime()
-    case 'recent-played': {
-      const aTime = a.played ? new Date(a.played).getTime() : 0
-      const bTime = b.played ? new Date(b.played).getTime() : 0
-      return bTime - aTime
-    }
-    case 'release-year':
-      return (b.year ?? 0) - (a.year ?? 0)
-  }
-}
-
-export function sortAlbums(
-  albums: Albums[],
-  key: AlbumSortKey,
-  isAscending: boolean,
-) {
-  return [...albums].sort((a, b) => {
-    const result = compareAlbums(a, b, key)
-
-    // Names read naturally A to Z, everything else is ranked high to low
-    if (key === 'name') return isAscending ? result : -result
-    return isAscending ? -result : result
-  })
-}
+// The same options as the Library, except the artist: they are all the same here
+const artistAlbumSortOptions = albumSortOptions.filter(
+  (option) => option !== 'artist',
+)
 
 // The newest release by year, the date it was added breaks ties
 export function getLatestRelease(albums: Albums[]) {
@@ -75,80 +36,59 @@ export function getLatestRelease(albums: Albums[]) {
 
 export function useAlbumSort(
   albums: Albums[] | undefined,
-  initialKey: AlbumSortKey = 'release-year',
+  initialOption: AlbumSortOption = 'recentlyAdded',
 ) {
-  const [sortKey, setSortKey] = useState<AlbumSortKey>(initialKey)
-  const [isAscending, setIsAscending] = useState(initialKey === 'name')
-
-  const sortedAlbums = useMemo(
-    () => sortAlbums(albums ?? [], sortKey, isAscending),
-    [albums, sortKey, isAscending],
+  const [sortOption, setSortOption] = useState(initialOption)
+  const [direction, setDirection] = useState<SortDirection>(
+    naturalDirection(initialOption),
   )
 
-  function changeSortKey(key: AlbumSortKey) {
-    setSortKey(key)
-    setIsAscending(key === 'name')
-  }
+  const sortedAlbums = useMemo(
+    () => sortAlbums(albums ?? [], sortOption, direction),
+    [albums, sortOption, direction],
+  )
 
   return {
-    sortKey,
-    isAscending,
+    sortOption,
+    direction,
     sortedAlbums,
-    changeSortKey,
-    toggleDirection: () => setIsAscending((prev) => !prev),
+    changeSortOption: (option: AlbumSortOption) => {
+      setSortOption(option)
+      setDirection(naturalDirection(option))
+    },
+    toggleDirection: () =>
+      setDirection((prev) => (prev === 'asc' ? 'desc' : 'asc')),
   }
 }
 
 interface AlbumSortControlsProps {
-  sortKey: AlbumSortKey
-  isAscending: boolean
-  onSortKeyChange: (key: AlbumSortKey) => void
+  sortOption: AlbumSortOption
+  direction: SortDirection
+  onSortOptionChange: (option: AlbumSortOption) => void
   onToggleDirection: () => void
 }
 
 export function AlbumSortControls({
-  sortKey,
-  isAscending,
-  onSortKeyChange,
+  sortOption,
+  direction,
+  onSortOptionChange,
   onToggleDirection,
 }: AlbumSortControlsProps) {
-  const { t } = useTranslation()
-  const currentItem = sortItems.find((item) => item.key === sortKey)
-
   return (
     <div className="flex items-center gap-2">
-      <SimpleTooltip
-        text={t(isAscending ? 'table.sort.asc' : 'table.sort.desc')}
-      >
-        <Button variant="outline" size="sm" onClick={onToggleDirection}>
-          {isAscending ? (
-            <ArrowUp className="w-4 h-4" />
-          ) : (
-            <ArrowDown className="w-4 h-4" />
-          )}
-        </Button>
-      </SimpleTooltip>
+      <LibrarySortMenu
+        options={artistAlbumSortOptions}
+        value={sortOption}
+        labelKey={(option) => sortOptionLabelKey[option]}
+        onChange={onSortOptionChange}
+      />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <ListFilter className="w-4 h-4 mr-2" />
-            {t(currentItem?.labelKey ?? sortItems[0].labelKey)}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {sortItems.map((item) => (
-            <DropdownMenuCheckboxItem
-              key={item.key}
-              checked={item.key === sortKey}
-              onCheckedChange={() => onSortKeyChange(item.key)}
-              className="cursor-pointer"
-            >
-              {t(item.labelKey)}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {allowsDirection(sortOption) && (
+        <LibraryDirectionButton
+          direction={direction}
+          onToggle={onToggleDirection}
+        />
+      )}
     </div>
   )
 }
