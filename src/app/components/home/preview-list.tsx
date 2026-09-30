@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
-import { Button } from '@/app/components/ui/button'
 import {
   Carousel,
   type CarouselApi,
