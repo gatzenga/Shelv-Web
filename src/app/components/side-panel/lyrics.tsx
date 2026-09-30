@@ -171,7 +171,7 @@ function SyncedLyrics({ lyrics }: LyricProps) {
       ref={containerRef}
       onWheel={pauseAutoScroll}
       onTouchMove={pauseAutoScroll}
-      className="relative w-full h-full overflow-y-auto text-center font-semibold text-lg px-2 pt-4 pb-[60%] maskImage-lyrics"
+      className="relative w-full h-full overflow-y-auto text-center font-semibold text-lg px-2 pt-4 pb-[60%] maskImage-lyrics-end"
       id="sync-lyrics-box"
     >
       {lines.map((line, index) => (
@@ -220,7 +220,7 @@ function UnsyncedLyrics({ lyrics }: LyricProps) {
   return (
     <ScrollArea
       type="always"
-      className="w-full h-full overflow-y-auto text-center font-semibold text-base px-2 scroll-smooth maskImage-unsynced-lyrics"
+      className="w-full h-full overflow-y-auto text-center font-semibold text-base px-2 scroll-smooth maskImage-lyrics-end"
       thumbClassName="secondary-thumb-bar"
       ref={lyricsBoxRef}
     >

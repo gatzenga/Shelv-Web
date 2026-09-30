@@ -139,6 +139,9 @@ module.exports = {
           'linear-gradient(180deg, transparent 0%, rgb(0, 0, 0) 10%, rgb(0, 0, 0) 90%, transparent 100%)',
         'unsynced-lyrics':
           'linear-gradient(180deg, transparent 0%, rgb(0, 0, 0) 4%, rgb(0, 0, 0) 96%, transparent 100%)',
+        // the lyrics start at the top, only the end fades out
+        'lyrics-end':
+          'linear-gradient(180deg, rgb(0, 0, 0) 0%, rgb(0, 0, 0) 85%, transparent 100%)',
       },
       boxShadow: {
         'custom-3': '0 0 3px rgba(255, 255, 255, 0.03)',
