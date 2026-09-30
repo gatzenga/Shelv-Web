@@ -10,7 +10,7 @@ import { CoverArt } from '@/types/coverArtType'
 import { getTextSizeClass } from '@/utils/getTextSizeClass'
 
 // Where the fade below the header starts, the artist header is shorter
-const artistEffectTop = 'top-[270px] 2xl:top-[310px]'
+const artistEffectTop = 'top-[calc(3rem+160px)] 2xl:top-[calc(3rem+200px)]'
 
 interface ImageHeaderProps {
   type: string
@@ -48,7 +48,7 @@ export default function ImageHeader({
           className={cn(
             'flex relative w-full',
             isArtist
-              ? 'h-[270px] 2xl:h-[310px]'
+              ? 'h-[calc(3rem+160px)] 2xl:h-[calc(3rem+200px)]'
               : 'h-[calc(3rem+200px)] 2xl:h-[calc(3rem+250px)]',
           )}
           key={`header-${coverArtId}`}
@@ -60,20 +60,20 @@ export default function ImageHeader({
           )}
           <div
             className={cn(
-              'w-full px-8 py-6 absolute inset-0',
+              'w-full px-8 py-6 flex gap-4 absolute inset-0',
               'bg-gradient-to-b from-background/20 to-background/50',
-              isArtist
-                ? 'flex flex-col items-center justify-center text-center gap-2.5'
-                : 'flex gap-4 items-end',
+              isArtist && 'items-center',
             )}
             style={{ backgroundColor: bgColor }}
           >
             <div
               className={cn(
                 isArtist
-                  ? 'size-[140px] min-w-[140px] min-h-[140px] 2xl:size-[170px] 2xl:min-w-[170px] 2xl:min-h-[170px] rounded-full'
-                  : 'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px] rounded',
-                'bg-skeleton aspect-square bg-cover bg-center shadow-header-image overflow-hidden relative shrink-0',
+                  ? 'size-[160px] min-w-[160px] min-h-[160px] 2xl:size-[200px] 2xl:min-w-[200px] 2xl:min-h-[200px]'
+                  : 'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px]',
+                'bg-skeleton aspect-square bg-cover bg-center',
+                isArtist ? 'rounded-full' : 'rounded',
+                'shadow-header-image overflow-hidden relative',
               )}
             >
               <LazyLoadImage
@@ -98,7 +98,7 @@ export default function ImageHeader({
               className={cn(
                 'flex w-full flex-col z-10',
                 isArtist
-                  ? 'items-center justify-center text-center'
+                  ? 'max-w-[calc(100%-176px)] 2xl:max-w-[calc(100%-216px)] justify-center'
                   : 'max-w-[calc(100%-216px)] 2xl:max-w-[calc(100%-266px)] justify-end',
               )}
             >
@@ -110,26 +110,22 @@ export default function ImageHeader({
               <h1
                 className={clsx(
                   'max-w-full scroll-m-20 font-bold tracking-tight antialiased text-shadow-md break-words line-clamp-2',
-                  isArtist ? 'text-3xl text-center' : getTextSizeClass(title),
+                  isArtist ? 'text-3xl' : getTextSizeClass(title),
                 )}
               >
                 {title}
               </h1>
 
-              {isArtist ? (
-                subtitle && (
-                  <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase text-shadow-sm mt-1">
-                    {subtitle}
-                  </p>
-                )
-              ) : isPlaylist && subtitle ? (
+              {isPlaylist && subtitle && (
                 <>
                   <p className="text-sm opacity-80 text-shadow-md line-clamp-2 mt-1 mb-2">
                     {subtitle}
                   </p>
                   <HeaderInfoGenerator badges={badges} showFirstDot={false} />
                 </>
-              ) : (
+              )}
+
+              {!subtitle && (
                 <div className="mt-1">
                   <HeaderInfoGenerator badges={badges} showFirstDot={false} />
                 </div>
