@@ -6,6 +6,7 @@ import {
   type ServerResponse,
 } from 'node:http'
 import { sendArtistTopSongs } from './artist-top-songs.ts'
+import { verifyCredentials } from './auth.ts'
 import { DiskCache } from './cache.ts'
 import { loadConfig } from './config.ts'
 import { isAbortError, sendJson, sendText } from './http.ts'
@@ -66,11 +67,53 @@ function setSecurityHeaders(res: ServerResponse) {
   res.setHeader('referrer-policy', 'same-origin')
 }
 
+// The paths that work without credentials: the signed links of the radio
+// streams, which are checked by their signature, the return of Last.fm to the
+// browser, the configuration of the app and the health check
+const openPaths = new Set([
+  '/api/health',
+  '/api/config',
+  '/api/radio/art',
+  '/api/radio/hls',
+  '/api/lastfm/auth/callback',
+])
+
+const loginPrefixes = [
+  '/api/lyrics/',
+  '/api/lrclib/',
+  '/api/lastfm/',
+  '/api/instant-mix',
+  '/api/infinity-mix',
+  '/api/insights',
+  '/api/artist-top-songs',
+  '/api/mix',
+  '/api/server-info',
+]
+
+function needsLogin(pathname: string) {
+  if (openPaths.has(pathname)) return false
+
+  return loginPrefixes.some((prefix) => pathname.startsWith(prefix))
+}
+
 async function route(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', 'http://localhost')
   const { pathname } = url
 
   setSecurityHeaders(res)
+
+  // Everything but the app itself, the health check and the signed radio links
+  // is only for users of the Navidrome server
+  if (needsLogin(pathname)) {
+    const isValid = await verifyCredentials(
+      config.navidromeUrl,
+      url.searchParams,
+    )
+    if (!isValid) {
+      sendJson(res, 401, { error: 'invalid credentials' })
+      return
+    }
+  }
 
   if (pathname.startsWith('/rest/')) {
     await handleSubsonic(req, res, url)
