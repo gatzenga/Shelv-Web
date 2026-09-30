@@ -89,7 +89,13 @@ export default function Genre() {
       </ListWrapper>
 
       <ListWrapper className="px-0 pt-0">
-        <GridViewWrapper list={albums} type="genre">
+        <GridViewWrapper
+          list={albums}
+          type="genre"
+          defaultWidth={160}
+          gap={28}
+          titleHeight={72}
+        >
           {(album) => <AlbumGridCard album={album} />}
         </GridViewWrapper>
       </ListWrapper>

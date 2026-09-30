@@ -3,10 +3,7 @@ import { memo } from 'react'
 import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { ImageLoader } from '@/app/components/image-loader'
 import { PreviewCard } from '@/app/components/preview-card/card'
-import {
-  AlbumCardContextMenu,
-  AlbumCardMenu,
-} from '@/app/components/preview-card/card-menu'
+import { AlbumCardContextMenu } from '@/app/components/preview-card/card-menu'
 import { ROUTES } from '@/routes/routesList'
 import { useIsAlbumPlaying } from '@/store/player.store'
 import { Albums } from '@/types/responses/album'
@@ -27,7 +24,7 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
             {(src) => <PreviewCard.Image src={src} alt={album.name} />}
           </ImageLoader>
         </PreviewCard.ImageWrapper>
-        <div className="flex items-start gap-1">
+        <div className="mt-1.5">
           <PreviewCard.InfoWrapper>
             <div className="flex items-center gap-1">
               {isAlbumPlaying && (
@@ -35,12 +32,16 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
               )}
               <PreviewCard.Title
                 link={ROUTES.ALBUM.PAGE(album.id)}
-                className={clsx(isAlbumPlaying && 'text-primary')}
+                className={clsx(
+                  'text-xs leading-5',
+                  isAlbumPlaying && 'text-primary',
+                )}
               >
                 {album.name}
               </PreviewCard.Title>
             </div>
             <PreviewCard.Subtitle
+              className="text-[11px] leading-4"
               enableLink={
                 subtitleType === 'year' ? false : album.artistId !== undefined
               }
@@ -56,10 +57,15 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
                   : ''
                 : album.artist}
             </PreviewCard.Subtitle>
+            {subtitleType !== 'year' && album.year ? (
+              <PreviewCard.Subtitle
+                enableLink={false}
+                className="text-[11px] text-muted-foreground/70"
+              >
+                {String(album.year)}
+              </PreviewCard.Subtitle>
+            ) : null}
           </PreviewCard.InfoWrapper>
-          <div className="ml-auto mt-0.5">
-            <AlbumCardMenu albumId={album.id} />
-          </div>
         </div>
       </PreviewCard.Root>
     </AlbumCardContextMenu>

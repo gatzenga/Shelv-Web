@@ -225,6 +225,9 @@ export default function AlbumsList() {
             list={albums}
             data-testid="albums-grid"
             type="albums"
+            defaultWidth={160}
+            gap={28}
+            titleHeight={72}
           >
             {(album) => <AlbumGridCard album={album} />}
           </GridViewWrapper>
