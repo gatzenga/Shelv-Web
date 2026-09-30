@@ -6,7 +6,6 @@ export function NavigationButtons() {
       <span className="text-sm font-semibold tracking-tight text-muted-foreground select-none">
         Navidrome
       </span>
-      <span className="h-4 w-px bg-border" aria-hidden="true" />
       <AppTitle />
     </div>
   )
