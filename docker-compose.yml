@@ -3,7 +3,7 @@ services:
     image: ghcr.io/gatzenga/shelv-web:latest
     container_name: shelv
     restart: unless-stopped
-    user: 1036:100
+    user: 1037:100
     environment:
       - NAVIDROME_URL=http://172.168.22.10:4533
       - LYRICS_SERVER=https://lrclib.vkugler.ch
