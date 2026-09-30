@@ -17,6 +17,7 @@ export function SidebarMainItem({ item }: { item: ISidebarItem }) {
       asChild
       tooltip={t(item.title)}
       className={clsx(
+        'h-9',
         isActive(item.route) &&
           'bg-primary/15 font-semibold text-primary hover:bg-primary/20 hover:text-primary',
       )}
