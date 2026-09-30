@@ -572,11 +572,11 @@
       "copy": "Link in die Zwischenablage kopiert!"
     },
     "links": {
-      "website": "Developer-Website",
+      "coffee": "Unterstütze mich auf Ko-fi",
       "github": "GitHub",
-      "contact": "Kontakt",
-      "discord": "Discord",
-      "coffee": "Spendier mir einen Kaffee"
+      "discord": "Discord beitreten",
+      "website": "Developer-Website",
+      "contact": "Kontakt"
     }
   },
   "mobile": {

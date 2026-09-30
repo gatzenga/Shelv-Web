@@ -647,11 +647,11 @@
       "copy": "Link copied to clipboard!"
     },
     "links": {
-      "website": "Developer Website",
+      "coffee": "Support me on Ko-fi",
       "github": "GitHub",
-      "contact": "Contact",
-      "discord": "Discord",
-      "coffee": "Buy me a coffee"
+      "discord": "Join Discord",
+      "website": "Developer Website",
+      "contact": "Contact"
     }
   },
   "mobile": {

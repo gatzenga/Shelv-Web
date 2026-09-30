@@ -1,8 +1,10 @@
-// The same links as in the About screen of the Shelv app
+// The same links as on vkugler.app and in the About screen of the Shelv app
 export const aboutLinks = [
-  { key: 'website', url: 'https://vkugler.app' },
+  { key: 'coffee', url: 'https://ko-fi.com/R6R61YBEZK' },
   { key: 'github', url: 'https://github.com/gatzenga/Shelv-Web' },
-  { key: 'contact', url: 'mailto:contact@vkugler.app' },
   { key: 'discord', url: 'https://discord.gg/UdJK5mpmZu' },
-  { key: 'coffee', url: 'https://ko-fi.com/Shelv' },
+  { key: 'website', url: 'https://vkugler.app' },
+  { key: 'contact', url: 'mailto:contact@vkugler.app' },
 ] as const
+
+export type AboutLink = (typeof aboutLinks)[number]['key']

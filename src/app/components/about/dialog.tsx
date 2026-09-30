@@ -1,5 +1,8 @@
+import { GlobeIcon, MailIcon } from 'lucide-react'
+import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppIcon } from '@/app/components/app-icon'
+import { DiscordIcon, GitHubIcon } from '@/app/components/icons/brand-icons'
 import { MultiBadge } from '@/app/components/ui/badge'
 import {
   Dialog,
@@ -7,12 +10,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/app/components/ui/dialog'
-import { aboutLinks } from '@/utils/appLinks'
+import { cn } from '@/lib/utils'
+import { AboutLink, aboutLinks } from '@/utils/appLinks'
 import { getAppInfo } from '@/utils/appName'
 
 interface AboutDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+// Same look as the buttons on vkugler.app: one size, brand colors
+const linkStyles: Record<AboutLink, { className: string; icon: ReactNode }> = {
+  coffee: {
+    className: 'bg-[#72a4f2] text-white',
+    icon: <img src="/kofi-cup.png" alt="" className="size-6 object-contain" />,
+  },
+  github: {
+    className: 'bg-white text-[#24292f]',
+    icon: <GitHubIcon className="size-5" />,
+  },
+  discord: {
+    className: 'bg-[#5865f2] text-white',
+    icon: <DiscordIcon className="size-5" />,
+  },
+  website: {
+    className: 'bg-secondary text-secondary-foreground',
+    icon: <GlobeIcon className="size-5" />,
+  },
+  contact: {
+    className: 'bg-secondary text-secondary-foreground',
+    icon: <MailIcon className="size-5" />,
+  },
 }
 
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
@@ -41,15 +69,21 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <div className="flex flex-col gap-2.5">
             {aboutLinks.map(({ key, url }) => (
               <a
                 key={key}
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-muted-foreground hover:text-primary hover:underline"
+                className={cn(
+                  'flex h-11 w-full items-center justify-center gap-2.5 rounded-lg px-4',
+                  'text-sm font-bold shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]',
+                  'transition-transform hover:-translate-y-0.5',
+                  linkStyles[key].className,
+                )}
               >
+                {linkStyles[key].icon}
                 {t(`about.links.${key}`)}
               </a>
             ))}
