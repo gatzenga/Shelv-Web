@@ -2,28 +2,27 @@ services:
   shelv:
     image: ghcr.io/gatzenga/shelv-web:latest
     container_name: shelv
-    user: 1036:100
     restart: unless-stopped
+    user: 1036:100
     environment:
       - NAVIDROME_URL=http://172.168.22.10:4533
       - LYRICS_SERVER=https://lrclib.vkugler.ch
-      - LANGUAGE=de
-      - SIDEBAR_ALBUMS=true
-      - SIDEBAR_SONGS=true
+      - LANGUAGE=en
       - SIDEBAR_ARTISTS=true
-      - SIDEBAR_GENRES=true
+      - SIDEBAR_SONGS=true
+      - SIDEBAR_ALBUMS=true
+      - SIDEBAR_GENRES=false
       - SIDEBAR_RADIOS=true
-      - FEATURE_FAVORITES=true
-      - FEATURE_PLAYLISTS=true
+      - FEATURE_FAVORITES=false
+      - FEATURE_PLAYLISTS=false
       - CACHE_IMAGES=true
       - CACHE_LYRICS=true
       - LASTFM_API=
       - LASTFM_SECRET=
-      - LASTFM_TOP_SONGS=true
+      - LASTFM_TOP_SONGS=false
       - LASTFM_MIXES=true
       - SONGS_TO_ADD=5
       - MATCH_CURRENT_SONG=true
-      - UMASK=077
     volumes:
       - /volume2/docker/shelv/cache:/cache
       - /volume2/docker/shelv/config/lastfm:/config/lastfm
