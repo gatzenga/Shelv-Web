@@ -1,0 +1,39 @@
+services:
+  shelv-web:
+    image: ghcr.io/gatzenga/shelv-web:latest
+    container_name: shelv-web
+    user: 1036:100
+    restart: unless-stopped
+    environment:
+      - NAVIDROME_URL=http://172.168.22.10:4533
+      - LYRICS_SERVER=https://lrclib.vkugler.ch
+      - LANGUAGE=de
+      - SIDEBAR_ALBUMS=true
+      - SIDEBAR_SONGS=true
+      - SIDEBAR_ARTISTS=true
+      - SIDEBAR_GENRES=true
+      - SIDEBAR_RADIOS=true
+      - FEATURE_FAVORITES=true
+      - FEATURE_PLAYLISTS=true
+      - CACHE_IMAGES=true
+      - CACHE_LYRICS=true
+      - LASTFM_API=
+      - LASTFM_SECRET=
+      - LASTFM_TOP_SONGS=true
+      - LASTFM_MIXES=true
+      - SONGS_TO_ADD=5
+      - MATCH_CURRENT_SONG=true
+      - UMASK=077
+    volumes:
+      - /volume2/docker/aonsoku/cache:/cache
+      - /volume2/docker/aonsoku/config/lastfm:/config/lastfm
+      - /volume2/docker/aonsoku/logs:/logs
+    ports:
+      - "127.0.0.1:9180:8080"
+    networks:
+      navidrome:
+        ipv4_address: 172.168.22.80
+
+networks:
+  navidrome:
+    external: true

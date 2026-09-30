@@ -1,0 +1,15 @@
+overrides:
+  brace-expansion: ^2.0.2
+  glob: ^11.0.0
+  tar: ^7.5.7
+  "minimatch@10": "10.1.1"
+
+blockExoticSubdeps: false
+
+allowBuilds:
+  bufferutil: set this to true or false
+  cypress: set this to true or false
+  electron: set this to true or false
+  electron-winstaller: set this to true or false
+  esbuild: true
+  utf-8-validate: set this to true or false

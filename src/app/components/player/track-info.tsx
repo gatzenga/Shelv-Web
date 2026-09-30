@@ -1,0 +1,199 @@
+import randomCSSHexColor from '@chriscodesthings/random-css-hex-color'
+import { AudioLines } from 'lucide-react'
+import { useCallback } from 'react'
+import { Fragment } from 'react/jsx-runtime'
+import { useTranslation } from 'react-i18next'
+import { LazyLoadImage } from 'react-lazy-load-image-component'
+import { Link } from 'react-router-dom'
+import { ImageLoader } from '@/app/components/image-loader'
+import { MarqueeTitle } from '@/app/components/marquee-title'
+import { cn } from '@/lib/utils'
+import { ROUTES } from '@/routes/routesList'
+import { useSongColor } from '@/store/player.store'
+import { ISong } from '@/types/responses/song'
+import { getAverageColor } from '@/utils/getAverageColor'
+import { logger } from '@/utils/logger'
+import { ALBUM_ARTISTS_MAX_NUMBER } from '@/utils/multipleArtists'
+
+export function TrackInfo({ song }: { song: ISong | undefined }) {
+  const { t } = useTranslation()
+  const { setCurrentSongColor, currentSongColor } = useSongColor()
+
+  const getImageElement = useCallback(() => {
+    return document.getElementById('track-song-image') as HTMLImageElement
+  }, [])
+
+  const getImageColor = useCallback(async () => {
+    const img = getImageElement()
+    if (!img) return
+
+    let color = randomCSSHexColor(true)
+
+    try {
+      color = (await getAverageColor(img)).hex
+      logger.info('[TrackInfo] - Getting Image Average Color', {
+        color,
+      })
+    } catch {
+      logger.error('[TrackInfo] - Unable to get image average color.')
+    }
+
+    if (color !== currentSongColor) {
+      setCurrentSongColor(color)
+    }
+  }, [currentSongColor, setCurrentSongColor, getImageElement])
+
+  function handleError() {
+    const img = getImageElement()
+    if (!img) return
+
+    img.crossOrigin = null
+  }
+
+  if (!song) {
+    return (
+      <Fragment>
+        <div className="w-[70px] h-[70px] flex justify-center items-center bg-muted rounded">
+          <AudioLines data-testid="song-no-playing-icon" />
+        </div>
+        <div className="flex flex-col justify-center">
+          <span
+            className="text-sm font-medium"
+            data-testid="song-no-playing-label"
+          >
+            {t('player.noSongPlaying')}
+          </span>
+        </div>
+      </Fragment>
+    )
+  }
+
+  return (
+    <Fragment>
+      <div className="group relative">
+        <div className="min-w-[70px] max-w-[70px] aspect-square bg-cover bg-center bg-skeleton rounded overflow-hidden shadow-md relative">
+          <ImageLoader id={song.coverArt} type="song" size={400}>
+            {(src) => (
+              <LazyLoadImage
+                key={song.id}
+                id="track-song-image"
+                src={src}
+                width="100%"
+                height="100%"
+                crossOrigin="anonymous"
+                effect="opacity"
+                className="aspect-square object-cover w-full h-full bg-skeleton text-transparent"
+                data-testid="track-image"
+                alt={`${song.artist} - ${song.title}`}
+                onLoad={getImageColor}
+                onError={handleError}
+              />
+            )}
+          </ImageLoader>
+        </div>
+      </div>
+      <div className="flex flex-col justify-center w-full overflow-hidden">
+        <MarqueeTitle gap="mr-2">
+          <Link to={ROUTES.ALBUM.PAGE(song.albumId)} tabIndex={-1}>
+            <span
+              className="text-sm font-medium hover:underline cursor-pointer"
+              data-testid="track-title"
+            >
+              {song.title}
+            </span>
+          </Link>
+        </MarqueeTitle>
+        <div className="flex items-center text-xs text-muted-foreground w-full overflow-hidden truncate">
+          <TrackInfoArtistsLinks song={song} />
+          {song.album && (
+            <>
+              {song.artist && (
+                <span className="mx-1 shrink-0 select-none">·</span>
+              )}
+              <AlbumLink id={song.albumId} name={song.album} />
+            </>
+          )}
+        </div>
+      </div>
+    </Fragment>
+  )
+}
+
+type TrackInfoArtistsLinksProps = {
+  song: ISong
+}
+
+function TrackInfoArtistsLinks({ song }: TrackInfoArtistsLinksProps) {
+  const { artists, artistId, artist } = song
+
+  if (artists && artists.length > 1) {
+    const reducedArtists = artists.slice(0, ALBUM_ARTISTS_MAX_NUMBER)
+
+    return (
+      <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+        {reducedArtists.map(({ id, name }, index) => (
+          <div key={id} className="flex items-center">
+            <ArtistLink id={id} name={name} />
+            {index < reducedArtists.length - 1 && ','}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return <ArtistLink id={artistId} name={artist} />
+}
+
+type ArtistLinkProps = {
+  id?: string
+  name: string
+}
+
+function ArtistLink({ id, name }: ArtistLinkProps) {
+  return (
+    <Link
+      to={ROUTES.ARTIST.PAGE(id ?? '')}
+      className={cn(
+        'inline-flex truncate shrink-0 max-w-[200px]',
+        !id && 'pointer-events-none',
+      )}
+      data-testid="track-artist-url"
+    >
+      <span
+        className={cn(
+          'text-xs text-muted-foreground text-nowrap truncate',
+          id && 'hover:underline hover:text-foreground',
+        )}
+      >
+        {name}
+      </span>
+    </Link>
+  )
+}
+
+type AlbumLinkProps = {
+  id?: string
+  name: string
+}
+
+function AlbumLink({ id, name }: AlbumLinkProps) {
+  return (
+    <Link
+      to={ROUTES.ALBUM.PAGE(id ?? '')}
+      className={cn(
+        'inline-flex truncate min-w-0',
+        !id && 'pointer-events-none',
+      )}
+      data-testid="track-album-url"
+    >
+      <span
+        className={cn(
+          'text-xs text-muted-foreground text-nowrap truncate',
+          id && 'hover:underline hover:text-foreground',
+        )}
+      >
+        {name}
+      </span>
+    </Link>
+  )
+}

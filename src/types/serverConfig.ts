@@ -1,0 +1,60 @@
+export enum AuthType {
+  PASSWORD,
+  TOKEN,
+}
+
+export interface IServerConfig {
+  url: string
+  username: string
+  password: string
+  protocolVersion?: string
+  serverType?: string
+  extensionsSupported?: Record<string, number[]>
+}
+
+export type PageViewType = 'grid' | 'table'
+
+interface IAppPages {
+  showInfoPanel: boolean
+  toggleShowInfoPanel: () => void
+  hideArtistsSection: boolean
+  hideSongsSection: boolean
+  hideAlbumsSection: boolean
+  hideGenresSection: boolean
+  hideFavoritesSection: boolean
+  hidePlaylistsSection: boolean
+  hideRadiosSection: boolean
+  artistsPageViewType: PageViewType
+  setArtistsPageViewType: (type: PageViewType) => void
+  isAllSectionsHidden: () => boolean
+}
+
+export interface IAppData extends IServerConfig {
+  authType: AuthType | null
+  isServerConfigured: boolean
+  osType: string
+  logoutDialogState: boolean
+  songCount: number | null
+}
+
+export interface IAppActions {
+  setOsType: (value: string) => void
+  setUrl: (value: string) => void
+  setUsername: (value: string) => void
+  setPassword: (value: string) => void
+  saveConfig: (data: IServerConfig) => Promise<boolean>
+  removeConfig: () => void
+  setLogoutDialogState: (value: boolean) => void
+}
+
+export interface IAppCommand {
+  open: boolean
+  setOpen: (value: boolean) => void
+}
+
+export interface IAppContext {
+  data: IAppData
+  pages: IAppPages
+  command: IAppCommand
+  actions: IAppActions
+}

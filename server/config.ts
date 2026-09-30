@@ -1,0 +1,173 @@
+import { join } from 'node:path'
+
+// Reads the container environment once at startup.
+// Everything under `client` is public and delivered to the browser,
+// everything else stays inside the backend.
+
+type Language = 'de' | 'en'
+
+export interface ClientConfig {
+  language: Language
+  lyrics: boolean
+  lastfm: boolean
+  lastfmDefaults: {
+    topSongs: boolean
+    mixes: boolean
+  }
+  sidebar: {
+    albums: boolean
+    songs: boolean
+    artists: boolean
+    genres: boolean
+    radios: boolean
+  }
+  features: {
+    favorites: boolean
+    playlists: boolean
+  }
+  infinityMix: {
+    songsToAdd: number
+    matchCurrentSong: boolean
+  }
+}
+
+export interface ServerConfig {
+  port: number
+  distDir: string
+  configDir: string
+  logsDir: string
+  navidromeUrl: string
+  lyricsServer: string | null
+  cache: {
+    dir: string
+    images: boolean
+    lyrics: boolean
+  }
+  lastfm: {
+    apiKey: string
+    sharedSecret: string
+    sessionFile: string
+  }
+  client: ClientConfig
+}
+
+function readString(name: string, fallback: string): string {
+  const value = process.env[name]?.trim()
+
+  return value ? value : fallback
+}
+
+function readUrl(name: string, fallback: string | null): string | null {
+  const value = process.env[name]?.trim()
+  if (!value) return fallback
+
+  try {
+    const url = new URL(value)
+    return url.toString().replace(/\/+$/, '')
+  } catch {
+    throw new Error(`${name} is not a valid URL: "${value}"`)
+  }
+}
+
+function readRequiredUrl(name: string): string {
+  const url = readUrl(name, null)
+  if (!url) throw new Error(`${name} is required`)
+
+  return url
+}
+
+function readBoolean(name: string, fallback: boolean): boolean {
+  const value = process.env[name]?.trim().toLowerCase()
+  if (!value) return fallback
+
+  if (value === 'true') return true
+  if (value === 'false') return false
+
+  throw new Error(`${name} must be "true" or "false", got "${value}"`)
+}
+
+function readLanguage(name: string, fallback: Language): Language {
+  const value = process.env[name]?.trim().toLowerCase()
+  if (!value) return fallback
+
+  if (value === 'de' || value === 'en') return value
+
+  throw new Error(`${name} must be "de" or "en", got "${value}"`)
+}
+
+function readInt(name: string, fallback: number, min = 1, max = 10): number {
+  const value = process.env[name]?.trim()
+  if (!value) return fallback
+
+  const num = Number(value)
+  if (!Number.isInteger(num)) return fallback
+
+  return Math.min(Math.max(num, min), max)
+}
+
+function readPort(name: string, fallback: number): number {
+  const value = process.env[name]?.trim()
+  if (!value) return fallback
+
+  const port = Number(value)
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`${name} must be a valid port, got "${value}"`)
+  }
+
+  return port
+}
+
+export function loadConfig(): ServerConfig {
+  const lyricsServer = readUrl('LYRICS_SERVER', null)
+  const lastfmApiKey =
+    readString('LASTFM_API', '') || readString('LASTFM_API_KEY', '')
+  const lastfmSecret = readString('LASTFM_SECRET', '')
+  const isLastfmConfigured = Boolean(lastfmApiKey && lastfmSecret)
+  const configDir = readString('CONFIG_DIR', '/config')
+
+  return {
+    port: readPort('PORT', 8080),
+    distDir: readString(
+      'DIST_DIR',
+      new URL('../dist', import.meta.url).pathname,
+    ),
+    configDir,
+    logsDir: readString('LOGS_DIR', '/logs'),
+    navidromeUrl: readRequiredUrl('NAVIDROME_URL'),
+    lyricsServer,
+    cache: {
+      dir: readString('CACHE_DIR', '/cache'),
+      images: readBoolean('CACHE_IMAGES', false),
+      lyrics: readBoolean('CACHE_LYRICS', false),
+    },
+    lastfm: {
+      apiKey: lastfmApiKey,
+      sharedSecret: lastfmSecret,
+      sessionFile: join(configDir, 'lastfm', 'session.json'),
+    },
+    client: {
+      language: readLanguage('LANGUAGE', 'de'),
+      lyrics: lyricsServer !== null,
+      lastfm: isLastfmConfigured,
+      lastfmDefaults: {
+        topSongs: readBoolean('LASTFM_TOP_SONGS', true),
+        mixes: readBoolean('LASTFM_MIXES', true),
+      },
+      sidebar: {
+        albums: readBoolean('SIDEBAR_ALBUMS', true),
+        songs: readBoolean('SIDEBAR_SONGS', true),
+        artists: readBoolean('SIDEBAR_ARTISTS', true),
+        genres: readBoolean('SIDEBAR_GENRES', true),
+        radios: readBoolean('SIDEBAR_RADIOS', true),
+      },
+      features: {
+        favorites: readBoolean('FEATURE_FAVORITES', true),
+        playlists: readBoolean('FEATURE_PLAYLISTS', true),
+      },
+      infinityMix: {
+        songsToAdd: readInt('SONGS_TO_ADD', 5, 1, 10),
+        matchCurrentSong: readBoolean('MATCH_CURRENT_SONG', true),
+      },
+    },
+  }
+}

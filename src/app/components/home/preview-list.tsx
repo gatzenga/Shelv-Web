@@ -1,0 +1,130 @@
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { AlbumGridCard } from '@/app/components/albums/album-grid-card'
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/app/components/ui/carousel'
+import { CarouselButton } from '@/app/components/ui/carousel-button'
+import { Albums } from '@/types/responses/album'
+
+interface PreviewListProps {
+  list: Albums[]
+  title: string
+  titleRoute?: string
+  showMore?: boolean
+  moreTitle?: string
+  moreRoute?: string
+  cardSize?: 'home' | 'compact' | 'artist'
+  subtitleType?: 'artist' | 'year'
+}
+
+export default function PreviewList({
+  list,
+  title,
+  titleRoute,
+  showMore = true,
+  moreTitle,
+  moreRoute,
+  cardSize = 'home',
+  subtitleType = 'artist',
+}: PreviewListProps) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [canScrollPrev, setCanScrollPrev] = useState<boolean>()
+  const [canScrollNext, setCanScrollNext] = useState<boolean>()
+  const { t } = useTranslation()
+
+  moreTitle = moreTitle || t('generic.seeMore')
+
+  if (list.length > 16) {
+    list = list.slice(0, 16)
+  }
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCanScrollPrev(api.canScrollPrev())
+    setCanScrollNext(api.canScrollNext())
+
+    api.on('select', () => {
+      setCanScrollPrev(api.canScrollPrev())
+      setCanScrollNext(api.canScrollNext())
+    })
+  }, [api])
+
+  return (
+    <div className="w-full flex flex-col mt-4">
+      <div className="my-4 flex justify-between items-center">
+        <h3
+          className="scroll-m-20 text-2xl font-semibold tracking-tight"
+          data-testid="preview-list-title"
+        >
+          {titleRoute ? (
+            <Link to={titleRoute} className="hover:underline">
+              {title}
+            </Link>
+          ) : (
+            title
+          )}
+        </h3>
+        <div className="flex items-center gap-4">
+          {showMore && moreRoute && (
+            <Link to={moreRoute} data-testid="preview-list-show-more">
+              <p className="leading-7 text-sm truncate hover:underline text-muted-foreground hover:text-primary">
+                {moreTitle}
+              </p>
+            </Link>
+          )}
+          <div className="flex gap-2">
+            <CarouselButton
+              direction="prev"
+              disabled={!canScrollPrev}
+              onClick={() => api?.scrollPrev()}
+              data-testid="preview-list-prev-button"
+            />
+            <CarouselButton
+              direction="next"
+              disabled={!canScrollNext}
+              onClick={() => api?.scrollNext()}
+              data-testid="preview-list-next-button"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="transform-gpu @container">
+        <Carousel
+          opts={{
+            align: 'start',
+            slidesToScroll: 'auto',
+          }}
+          setApi={setApi}
+          data-testid="preview-list-carousel"
+        >
+          <CarouselContent>
+            {list.map((album, index) => (
+              <CarouselItem
+                key={album.id}
+                className={
+                  cardSize === 'home'
+                    ? 'shrink-0 basis-[200px] max-w-[200px]'
+                    : cardSize === 'artist'
+                      ? 'shrink-0 basis-[176px] max-w-[176px]'
+                      : 'shrink-0 basis-[148px] max-w-[148px]'
+                }
+                data-testid={`preview-list-carousel-item-${index}`}
+              >
+                <AlbumGridCard album={album} subtitleType={subtitleType} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+    </div>
+  )
+}

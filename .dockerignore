@@ -1,0 +1,9 @@
+dist/
+node_modules/
+cache/
+.git/
+.husky/
+.vscode/
+.DS_Store
+.env
+.github/

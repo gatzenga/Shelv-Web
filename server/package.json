@@ -1,0 +1,12 @@
+{
+  "name": "shelv-web-server",
+  "private": true,
+  "type": "module",
+  "description": "Backend of Shelv Web: serves the frontend and proxies Navidrome, LRCLIB and radio streams",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node index.ts"
+  }
+}
