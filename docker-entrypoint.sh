@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-# Support custom UMASK (default 027) so created files never have open permissions
-umask "${UMASK:-027}"
+# Everything the player creates belongs to its user alone (default UMASK 077),
+# nobody else can read the settings, the Last.fm session or the cache
+umask "${UMASK:-077}"
 
 # Runs the player as PUID:PGID (like SUB/WAVE), so files in the mounted
 # cache folder belong to the NAS user. Without them the node user is used.
@@ -24,7 +25,13 @@ if [ "$(id -u)" = "0" ]; then
   mkdir -p "$CACHE_PATH" "$CONFIG_PATH" "$LOGS_PATH"
   chown -R "$USER_ID:$GROUP_ID" "$CACHE_PATH" "$CONFIG_PATH" "$LOGS_PATH" 2>/dev/null || true
 
+  # files from earlier versions were readable for the group
+  su-exec "$USER_ID:$GROUP_ID" chmod -R go-rwx "$CACHE_PATH" "$CONFIG_PATH" "$LOGS_PATH" 2>/dev/null || true
+
   exec su-exec "$USER_ID:$GROUP_ID" "$@"
 fi
+
+# Started with the user of the compose file (user: UID:GID)
+chmod -R go-rwx "${CACHE_DIR:-/cache}" "${CONFIG_DIR:-/config}" "${LOGS_DIR:-/logs}" 2>/dev/null || true
 
 exec "$@"

@@ -2,9 +2,9 @@
 // <config>/azuracast.json: whether the now playing data comes from the
 // AzuraCast API, where that API is and whether the song cover is shown.
 // The stations themselves stay in Navidrome, the file only refers to their id.
-import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
-import { dirname } from 'node:path'
+import { readFile, stat } from 'node:fs/promises'
 import { logger } from './logger.ts'
+import { writePrivateFile } from './private-file.ts'
 
 export interface RadioSettings {
   // only there to make the file readable, the station lives in Navidrome
@@ -104,10 +104,7 @@ export class RadioSettingsStore {
       if (settings) next[id] = settings
       else delete next[id]
 
-      await mkdir(dirname(this.file), { recursive: true })
-      const temporary = `${this.file}.tmp`
-      await writeFile(temporary, `${JSON.stringify(next, null, 2)}\n`, 'utf-8')
-      await rename(temporary, this.file)
+      await writePrivateFile(this.file, `${JSON.stringify(next, null, 2)}\n`)
 
       this.settings = next
       this.modifiedAt = (await stat(this.file)).mtimeMs

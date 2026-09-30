@@ -1,4 +1,4 @@
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, unlink } from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { dirname } from 'node:path'
 import type { ServerConfig } from './config.ts'
@@ -18,6 +18,7 @@ import {
   type LastFMTrack,
 } from './lastfm-types.ts'
 import { logger } from './logger.ts'
+import { writePrivateFile } from './private-file.ts'
 import type { SubsonicRequest } from './subsonic-client.ts'
 
 interface StoredSession {
@@ -138,12 +139,10 @@ export class LastFMService {
   private async saveSession(session: StoredSession | null): Promise<void> {
     this.session = session
     try {
-      await mkdir(dirname(this.sessionFile), { recursive: true })
       if (session) {
-        await writeFile(
+        await writePrivateFile(
           this.sessionFile,
           JSON.stringify(session, null, 2),
-          'utf-8',
         )
       } else {
         await unlink(this.sessionFile).catch(() => {})
