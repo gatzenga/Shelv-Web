@@ -1,17 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
 import { PlusIcon } from 'lucide-react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShadowHeader } from '@/app/components/album/shadow-header'
 import { EmptyWrapper } from '@/app/components/albums/empty-wrapper'
 import { SongListFallback } from '@/app/components/fallbacks/song-fallbacks'
 import { HeaderTitle } from '@/app/components/header-title'
+import { LibraryPage } from '@/app/components/library/page'
+import {
+  LibraryFilterInput,
+  LibraryToolbar,
+} from '@/app/components/library/toolbar'
 import ListWrapper from '@/app/components/list-wrapper'
 import { EmptyRadiosInfo } from '@/app/components/radios/empty-message'
 import { RadioFormDialog } from '@/app/components/radios/form-dialog'
 import { RemoveRadioDialog } from '@/app/components/radios/remove-dialog'
 import { Button } from '@/app/components/ui/button'
 import { DataTable } from '@/app/components/ui/data-table'
+import { useUrlParam } from '@/app/hooks/use-url-param'
 import { radiosColumns } from '@/app/tables/radios-columns'
 import { subsonic } from '@/service/subsonic'
 import { usePlayerActions } from '@/store/player.store'
@@ -30,6 +36,15 @@ export default function Radios() {
   })
 
   const columns = radiosColumns()
+  const [query, setQuery] = useUrlParam('query')
+
+  const filteredRadios = useMemo(() => {
+    const search = query.trim().toLowerCase()
+
+    return (radios ?? []).filter(
+      (radio) => !search || radio.name.toLowerCase().includes(search),
+    )
+  }, [radios, query])
 
   function handleAddRadio() {
     setData({} as Radio)
@@ -41,35 +56,40 @@ export default function Radios() {
   const showTable = radios && radios.length > 0
 
   return (
-    <div className={clsx('w-full', showTable ? 'h-full' : 'h-empty-content')}>
-      <ShadowHeader>
-        <div className="w-full flex items-center justify-between">
-          <HeaderTitle
-            title={t('sidebar.radios')}
-            count={radios?.length ?? 0}
-          />
+    <LibraryPage
+      header={
+        <>
+          <ShadowHeader fixed={false} showGlassEffect={false}>
+            <HeaderTitle
+              title={t('sidebar.radios')}
+              count={filteredRadios.length}
+            />
+          </ShadowHeader>
 
-          <Button
-            size="sm"
-            variant="default"
-            className="px-4"
-            onClick={handleAddRadio}
-          >
-            <PlusIcon className="w-5 h-5 -ml-[3px]" />
-            <span className="ml-2">{t('radios.addRadio')}</span>
-          </Button>
-        </div>
-      </ShadowHeader>
+          <LibraryToolbar>
+            <LibraryFilterInput value={query} onChange={setQuery} />
 
+            <Button
+              size="sm"
+              variant="default"
+              className="ml-auto px-4"
+              onClick={handleAddRadio}
+            >
+              <PlusIcon className="w-5 h-5 -ml-[3px]" />
+              <span className="ml-2">{t('radios.addRadio')}</span>
+            </Button>
+          </LibraryToolbar>
+        </>
+      }
+    >
       {showTable && (
         <ListWrapper>
           <DataTable
             columns={columns}
-            data={radios}
-            handlePlaySong={(row) => setPlayRadio(radios, row.index)}
+            data={filteredRadios}
+            handlePlaySong={(row) => setPlayRadio(filteredRadios, row.index)}
             showPagination={true}
-            showSearch={true}
-            searchColumn="name"
+            showSearch={false}
             allowRowSelection={false}
             dataType="radio"
           />
@@ -86,6 +106,6 @@ export default function Radios() {
 
       <RadioFormDialog />
       <RemoveRadioDialog />
-    </div>
+    </LibraryPage>
   )
 }
