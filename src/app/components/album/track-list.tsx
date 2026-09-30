@@ -1,8 +1,9 @@
-import { HeartIcon, PlayIcon } from 'lucide-react'
+import { HeartIcon } from 'lucide-react'
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { SongMenuOptions } from '@/app/components/song/menu-options'
+import { TableActionButton } from '@/app/components/table/action-button'
 import { ContextMenuProvider } from '@/app/components/table/context-menu'
 import { TableArtists } from '@/app/components/table/song-title'
 import { cn } from '@/lib/utils'
@@ -17,7 +18,7 @@ interface AlbumTrackListProps {
 }
 
 // The tracks like in the Shelv app: the number, the title with the artist
-// below and the time, nothing else
+// below, the duration, and action menu
 export function AlbumTrackList({ songs, onPlay }: AlbumTrackListProps) {
   const { t } = useTranslation()
 
@@ -74,51 +75,61 @@ function TrackRow({ song, index, onPlay }: TrackRowProps) {
     >
       <div
         className={cn(
-          'group flex items-center h-[52px] rounded-md select-none',
-          'hover:bg-foreground/10 transition-colors',
+          'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+          'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+          isCurrent && 'bg-accent/40',
         )}
-        onDoubleClick={onPlay}
+        onClick={onPlay}
         data-testid="album-track"
       >
-        <button
-          type="button"
-          onClick={onPlay}
-          className="w-12 shrink-0 flex items-center justify-center text-sm font-semibold text-muted-foreground"
-          aria-label={song.title}
-        >
-          <span className="group-hover:hidden">
+        <div className="flex items-center min-w-0 flex-1 mr-2">
+          {/* Track Number / Equalizer */}
+          <div className="w-6 shrink-0 flex items-center justify-center text-sm font-semibold text-muted-foreground mr-2">
             {isCurrent && isPlayerPlaying ? (
-              <EqualizerBars size={14} className="text-primary" />
+              <EqualizerBars size={14} className="text-primary mb-0.5" />
             ) : (
               <span className={cn(isCurrent && 'text-primary')}>
-                {song.track ?? ''}
+                {song.track ?? index + 1}
               </span>
             )}
-          </span>
-          <PlayIcon className="hidden group-hover:block size-4 fill-current text-foreground" />
-        </button>
+          </div>
 
-        <div className="flex flex-col min-w-0 flex-1 ml-2 justify-center">
-          <span
-            className={cn(
-              'truncate text-sm font-medium',
-              isCurrent && 'text-primary',
-            )}
-          >
-            {song.title}
-          </span>
-          <div className="flex items-center truncate">
-            <TableArtists song={song} />
+          {/* Title & Artist */}
+          <div className="flex flex-col min-w-0 flex-1 ml-1 justify-center">
+            <span
+              className={cn(
+                'text-sm font-medium truncate leading-tight',
+                isCurrent && 'text-primary',
+              )}
+            >
+              {song.title}
+            </span>
+            <div
+              className="text-xs text-muted-foreground truncate leading-normal mt-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TableArtists song={song} />
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pr-4 shrink-0">
+        {/* Duration & 3-dots Menu */}
+        <div
+          className="flex items-center gap-1.5 shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
           {isStarred && (
-            <HeartIcon className="size-3.5 fill-red-500 text-red-500" />
+            <HeartIcon className="size-3.5 fill-red-500 text-red-500 mr-1" />
           )}
           <span className="text-xs text-muted-foreground tabular-nums">
             {convertSecondsToTime(song.duration ?? 0)}
           </span>
+          <TableActionButton
+            alwaysVisible
+            optionsMenuItems={
+              <SongMenuOptions variant="dropdown" song={song} index={index} />
+            }
+          />
         </div>
       </div>
     </ContextMenuProvider>

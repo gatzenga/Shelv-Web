@@ -1,21 +1,19 @@
 import { PlayIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { type LyricsSearchResult } from '@/api/lyrics'
+import { AlbumOptions } from '@/app/components/album/options'
+import { ArtistOptions } from '@/app/components/artist/options'
 import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { SongMenuOptions } from '@/app/components/song/menu-options'
+import { TableActionButton } from '@/app/components/table/action-button'
 import { ContextMenuProvider } from '@/app/components/table/context-menu'
 import { CoverImage } from '@/app/components/table/cover-image'
 import { TableArtists } from '@/app/components/table/song-title'
 import { cn } from '@/lib/utils'
-import { ROUTES } from '@/routes/routesList'
 import { usePlayerCurrentSong, usePlayerIsPlaying } from '@/store/player.store'
 import { Albums } from '@/types/responses/album'
 import { ISimilarArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
-
-const rowClass =
-  'flex items-center gap-3 h-12 px-2.5 rounded-lg hover:bg-foreground/10 transition-colors'
 
 interface ArtistRowProps {
   artist: ISimilarArtist
@@ -29,25 +27,44 @@ export function SearchArtistRow({
   albumsLabel,
 }: ArtistRowProps) {
   return (
-    <Link
-      to={ROUTES.ARTIST.PAGE(artist.id)}
+    <div
+      className={cn(
+        'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+        'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+      )}
       onClick={onOpen}
-      className={rowClass}
       data-testid="search-artist"
     >
-      <CoverImage
-        coverArt={artist.coverArt}
-        coverArtType="artist"
-        altText={artist.name}
-        size={36}
-      />
-      <div className="flex flex-col min-w-0">
-        <span className="truncate text-sm font-medium">{artist.name}</span>
-        {albumsLabel && (
-          <span className="text-xs text-muted-foreground">{albumsLabel}</span>
-        )}
+      <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+        <div className="size-11 min-w-11 min-h-11 rounded-full overflow-hidden shrink-0 shadow-sm">
+          <CoverImage
+            coverArt={artist.coverArt}
+            coverArtType="artist"
+            altText={artist.name}
+            size={44}
+          />
+        </div>
+        <div className="flex flex-col min-w-0 flex-1 justify-center">
+          <span className="truncate text-sm font-medium leading-tight">
+            {artist.name}
+          </span>
+          {albumsLabel && (
+            <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
+              {albumsLabel}
+            </span>
+          )}
+        </div>
       </div>
-    </Link>
+      <div
+        className="flex items-center shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <TableActionButton
+          alwaysVisible
+          optionsMenuItems={<ArtistOptions artist={artist} />}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -62,27 +79,44 @@ export function SearchAlbumRow({ album, onOpen }: AlbumRowProps) {
     .join(' · ')
 
   return (
-    <Link
-      to={ROUTES.ALBUM.PAGE(album.id)}
+    <div
+      className={cn(
+        'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+        'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+      )}
       onClick={onOpen}
-      className={rowClass}
       data-testid="search-album"
     >
-      <CoverImage
-        coverArt={album.coverArt}
-        coverArtType="album"
-        altText={album.name}
-        size={36}
-      />
-      <div className="flex flex-col min-w-0">
-        <span className="truncate text-sm font-medium">{album.name}</span>
-        {details && (
-          <span className="text-xs text-muted-foreground truncate">
-            {details}
+      <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+        <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden shrink-0 shadow-sm">
+          <CoverImage
+            coverArt={album.coverArt}
+            coverArtType="album"
+            altText={album.name}
+            size={44}
+          />
+        </div>
+        <div className="flex flex-col min-w-0 flex-1 justify-center">
+          <span className="truncate text-sm font-medium leading-tight">
+            {album.name}
           </span>
-        )}
+          {details && (
+            <span className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
+              {details}
+            </span>
+          )}
+        </div>
       </div>
-    </Link>
+      <div
+        className="flex items-center shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <TableActionButton
+          alwaysVisible
+          optionsMenuItems={<AlbumOptions album={album} />}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -102,49 +136,64 @@ export function SearchSongRow({ song, index, onPlay }: SearchSongRowProps) {
       options={<SongMenuOptions variant="context" song={song} index={index} />}
     >
       <div
-        className="group flex items-center gap-3 h-12 px-2.5 rounded-lg select-none hover:bg-foreground/10 transition-colors"
-        onDoubleClick={onPlay}
+        className={cn(
+          'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+          'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+          isCurrent && 'bg-accent/40',
+        )}
+        onClick={onPlay}
         data-testid="search-song-row"
       >
-        <button
-          type="button"
-          onClick={onPlay}
-          className="relative size-9 min-w-9 rounded overflow-hidden"
-          aria-label={song.title}
-        >
-          <CoverImage
-            coverArt={song.coverArt}
-            coverArtType="song"
-            altText={song.title}
-            size={36}
-          />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlayIcon className="size-3.5 fill-white text-white" />
-          </span>
-        </button>
-
-        <div className="flex flex-col min-w-0 flex-1 justify-center">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {isCurrent && isPlayerPlaying && (
-              <EqualizerBars size={12} className="text-primary shrink-0" />
-            )}
-            <span
-              className={cn(
-                'truncate text-sm font-medium',
-                isCurrent && 'text-primary',
-              )}
-            >
-              {song.title}
-            </span>
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+          <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden relative shrink-0 shadow-sm">
+            <CoverImage
+              coverArt={song.coverArt}
+              coverArtType="song"
+              altText={song.title}
+              size={44}
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <PlayIcon className="w-4 h-4 text-white fill-white ml-0.5" />
+            </div>
           </div>
-          <div className="flex items-center truncate text-xs text-muted-foreground">
-            <TableArtists song={song} />
+
+          <div className="flex flex-col min-w-0 flex-1 justify-center">
+            <div className="flex items-center gap-1.5 min-w-0">
+              {isCurrent && isPlayerPlaying && (
+                <EqualizerBars size={12} className="text-primary shrink-0" />
+              )}
+              <span
+                className={cn(
+                  'truncate text-sm font-medium leading-tight',
+                  isCurrent && 'text-primary',
+                )}
+              >
+                {song.title}
+              </span>
+            </div>
+            <div
+              className="flex items-center truncate text-xs text-muted-foreground leading-normal mt-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TableArtists song={song} />
+            </div>
           </div>
         </div>
 
-        <span className="w-12 text-right text-xs text-muted-foreground tabular-nums">
-          {convertSecondsToTime(song.duration ?? 0)}
-        </span>
+        <div
+          className="flex items-center gap-1.5 shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {convertSecondsToTime(song.duration ?? 0)}
+          </span>
+          <TableActionButton
+            alwaysVisible
+            optionsMenuItems={
+              <SongMenuOptions variant="dropdown" song={song} index={index} />
+            }
+          />
+        </div>
       </div>
     </ContextMenuProvider>
   )
@@ -202,7 +251,7 @@ export function SearchLyricsRow({ item, query, onPlay }: SearchLyricsRowProps) {
   const isPlayerPlaying = usePlayerIsPlaying()
   const isCurrent = currentSong?.id === item.songId
 
-  // Mock an ISong object for the context menu
+  // Mock an ISong object for the context/dropdown menu
   const fallbackSong = {
     id: item.songId,
     title: item.songTitle ?? item.songId,
@@ -227,56 +276,72 @@ export function SearchLyricsRow({ item, query, onPlay }: SearchLyricsRowProps) {
       }
     >
       <div
-        className="group flex items-center gap-3 h-12 px-2.5 rounded-lg select-none hover:bg-foreground/10 transition-colors"
-        onDoubleClick={onPlay}
+        className={cn(
+          'group/tablerow group flex items-center justify-between p-2 rounded-lg',
+          'hover:bg-accent/60 transition-colors cursor-pointer select-none',
+          isCurrent && 'bg-accent/40',
+        )}
+        onClick={onPlay}
         data-testid="search-lyrics-row"
       >
-        <button
-          type="button"
-          onClick={onPlay}
-          className="relative size-9 min-w-9 rounded overflow-hidden"
-          aria-label={item.songTitle ?? 'Song'}
-        >
-          <CoverImage
-            coverArt={item.coverArt ?? ''}
-            coverArtType="song"
-            altText={item.songTitle ?? 'Song'}
-            size={36}
-          />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlayIcon className="size-3.5 fill-white text-white" />
-          </span>
-        </button>
-
-        <div className="flex flex-col min-w-0 flex-1 justify-center">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {isCurrent && isPlayerPlaying && (
-              <EqualizerBars size={12} className="text-primary shrink-0" />
-            )}
-            <span
-              className={cn(
-                'truncate text-sm font-medium',
-                isCurrent && 'text-primary',
-              )}
-            >
-              {item.songTitle ?? item.songId}
-            </span>
-            {item.artistName && (
-              <span className="text-xs text-muted-foreground truncate">
-                · {item.artistName}
-              </span>
-            )}
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+          <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden relative shrink-0 shadow-sm">
+            <CoverImage
+              coverArt={item.coverArt ?? ''}
+              coverArtType="song"
+              altText={item.songTitle ?? 'Song'}
+              size={44}
+            />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <PlayIcon className="w-4 h-4 text-white fill-white ml-0.5" />
+            </div>
           </div>
-          <div className="flex items-center truncate">
-            <HighlightedSnippet snippet={item.snippet} query={query} />
+
+          <div className="flex flex-col min-w-0 flex-1 justify-center">
+            <div className="flex items-center gap-1.5 min-w-0">
+              {isCurrent && isPlayerPlaying && (
+                <EqualizerBars size={12} className="text-primary shrink-0" />
+              )}
+              <span
+                className={cn(
+                  'truncate text-sm font-medium leading-tight',
+                  isCurrent && 'text-primary',
+                )}
+              >
+                {item.songTitle ?? item.songId}
+              </span>
+              {item.artistName && (
+                <span className="text-xs text-muted-foreground truncate">
+                  · {item.artistName}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center truncate leading-normal mt-0.5">
+              <HighlightedSnippet snippet={item.snippet} query={query} />
+            </div>
           </div>
         </div>
 
-        {item.duration !== null && item.duration !== undefined && (
-          <span className="w-12 text-right text-xs text-muted-foreground tabular-nums">
-            {convertSecondsToTime(item.duration)}
-          </span>
-        )}
+        <div
+          className="flex items-center gap-1.5 shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {item.duration !== null && item.duration !== undefined && (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {convertSecondsToTime(item.duration)}
+            </span>
+          )}
+          <TableActionButton
+            alwaysVisible
+            optionsMenuItems={
+              <SongMenuOptions
+                variant="dropdown"
+                song={fallbackSong}
+                index={0}
+              />
+            }
+          />
+        </div>
       </div>
     </ContextMenuProvider>
   )

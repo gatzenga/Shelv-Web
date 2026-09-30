@@ -1,20 +1,35 @@
 import { ArrowUpRightIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useGetArtistInfo } from '@/app/hooks/use-artist'
+import { Albums } from '@/types/responses/album'
 import { IArtist } from '@/types/responses/artist'
+import { ISong } from '@/types/responses/song'
 import { sanitizeLinks } from '@/utils/parseTexts'
 import { ArtistButtons } from './buttons'
 
 interface ArtistInfoProps {
   artist: IArtist
+  topSongs?: ISong[]
+  sortedAlbums?: Albums[]
 }
 
 // The buttons on top of the page
-export function ArtistInfo({ artist }: ArtistInfoProps) {
+export function ArtistInfo({
+  artist,
+  topSongs,
+  sortedAlbums,
+}: ArtistInfoProps) {
   const isArtistEmpty =
     artist.albumCount === undefined || artist.albumCount === 0
 
-  return <ArtistButtons artist={artist} isArtistEmpty={isArtistEmpty} />
+  return (
+    <ArtistButtons
+      artist={artist}
+      isArtistEmpty={isArtistEmpty}
+      topSongs={topSongs}
+      sortedAlbums={sortedAlbums}
+    />
+  )
 }
 
 const linkClasses =

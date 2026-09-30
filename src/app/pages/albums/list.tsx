@@ -61,7 +61,7 @@ const linkedSortOptions: Record<string, AlbumSortOption> = {
 
 export default function AlbumsList() {
   const { t } = useTranslation()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { getAlbumSongs } = useSongList()
   const { setSongList } = usePlayerActions()
   const { data: allAlbums, isLoading } = useAllAlbums()
@@ -70,12 +70,12 @@ export default function AlbumsList() {
   const linkedSort = linkedFilter ? linkedSortOptions[linkedFilter] : undefined
 
   const [sortOption, setSortOption] = usePersistedState<AlbumSortOption>(
-    'albums-page-sort',
+    'album-sort-option',
     'recentlyAdded',
     isSortOption,
   )
   const [direction, setDirection] = usePersistedState<SortDirection>(
-    'albums-page-direction',
+    'album-sort-direction',
     'desc',
     isDirection,
   )
@@ -121,6 +121,11 @@ export default function AlbumsList() {
   function changeSort(option: AlbumSortOption) {
     setSortOption(option)
     setDirection(naturalDirection(option))
+    if (searchParams.has(AlbumsSearchParams.MainFilter)) {
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete(AlbumsSearchParams.MainFilter)
+      setSearchParams(nextParams, { replace: true })
+    }
   }
 
   async function playAlbums(randomOrder: boolean) {

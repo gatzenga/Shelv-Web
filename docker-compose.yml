@@ -5,26 +5,38 @@ services:
     restart: unless-stopped
     user: UID:GID
     environment:
+      # --- Core & Server ---
       - NAVIDROME_URL=http://NAVIDROME_HOST:4533
+      - LANGUAGE=en
+
+      # --- Lyrics ---
       - LYRICS_NAVIDROME=true
       # - LYRICS_CUSTOM_SERVER=https://custom-lrclib.org
       - LYRICS_LRCLIB=true
-      - LANGUAGE=en
+
+      # --- Scrobbling & Playback ---
+      - SCROBBLE_COUNT=30 # 10, 20, 30, 40, 50 (%)
+      - SONGS_TO_ADD=5
+      - MATCH_CURRENT_SONG=true
+
+      # --- UI Customization ---
       - SIDEBAR_ARTISTS=true
       - SIDEBAR_ALBUMS=true
       - SIDEBAR_GENRES=true
       - SIDEBAR_RADIOS=true
       - FEATURE_FAVORITES=true
       - FEATURE_PLAYLISTS=true
-      - CACHE_IMAGES=true
-      - CACHE_LYRICS=true
+      - DISCOVER_SECTIONS=smart-mixes,recently-added,recently-played,frequently-played,random-albums
+
+      # --- Last.fm ---
       - LASTFM_API=YOUR_LASTFM_API_KEY
       - LASTFM_SECRET=YOUR_LASTFM_SECRET
       - LASTFM_TOP_SONGS=true
       - LASTFM_MIXES=true
-      - DISCOVER_SECTIONS=smart-mixes,recently-added,recently-played,frequently-played,random-albums
-      - SONGS_TO_ADD=5
-      - MATCH_CURRENT_SONG=true
+
+      # --- Cache ---
+      - CACHE_IMAGES=true
+      - CACHE_LYRICS=true
     volumes:
       - /path/to/shelv/cache:/cache
       - /path/to/shelv/config:/config

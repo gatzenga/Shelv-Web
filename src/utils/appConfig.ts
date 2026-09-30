@@ -33,6 +33,7 @@ export interface AppConfig {
     songsToAdd: number
     matchCurrentSong: boolean
   }
+  scrobbleCount: number
 }
 
 const defaultConfig: AppConfig = {
@@ -63,6 +64,7 @@ const defaultConfig: AppConfig = {
     songsToAdd: 5,
     matchCurrentSong: true,
   },
+  scrobbleCount: 30,
 }
 
 function loadAppConfig(): AppConfig {
@@ -80,6 +82,7 @@ function loadAppConfig(): AppConfig {
     sidebar: { ...defaultConfig.sidebar, ...config.sidebar },
     features: { ...defaultConfig.features, ...config.features },
     infinityMix: { ...defaultConfig.infinityMix, ...config.infinityMix },
+    scrobbleCount: config.scrobbleCount ?? defaultConfig.scrobbleCount,
   }
 }
 

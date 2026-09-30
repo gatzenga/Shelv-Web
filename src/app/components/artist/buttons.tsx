@@ -27,6 +27,7 @@ import {
   usePlayerActions,
   usePlayerStore,
 } from '@/store/player.store'
+import { Albums } from '@/types/responses/album'
 import { IArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
 import { queryKeys } from '@/utils/queryKeys'
@@ -38,13 +39,20 @@ const SpinnerIcon = ({ className }: { className?: string }) => (
 interface ArtistButtonsProps {
   artist: IArtist
   isArtistEmpty: boolean
+  topSongs?: ISong[]
+  sortedAlbums?: Albums[]
 }
 
 // The same buttons as on the album screen, for all songs of the artist
-export function ArtistButtons({ artist, isArtistEmpty }: ArtistButtonsProps) {
+export function ArtistButtons({
+  artist,
+  isArtistEmpty,
+  topSongs,
+  sortedAlbums,
+}: ArtistButtonsProps) {
   const { t } = useTranslation()
   const { setSongList, togglePlayPause, toggleShuffle } = usePlayerActions()
-  const { getArtistAllSongs } = useSongList()
+  const { getArtistPlayOrderSongs } = useSongList()
   const { playNext, playLast, startInstantMix } = useOptions()
   const { share } = useShare()
   const { isArtistActive, isArtistPlaying } = useIsArtistPlaying(artist.id)
@@ -69,7 +77,12 @@ export function ArtistButtons({ artist, isArtistEmpty }: ArtistButtonsProps) {
   async function loadSongs(): Promise<ISong[]> {
     setLoadingSongs(true)
     try {
-      return (await getArtistAllSongs(artist.name)) ?? []
+      return await getArtistPlayOrderSongs({
+        artistId: artist.id,
+        artistName: artist.name,
+        sortedAlbums,
+        topSongs,
+      })
     } finally {
       setLoadingSongs(false)
     }

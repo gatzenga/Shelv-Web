@@ -39,6 +39,7 @@ export interface ClientConfig {
     songsToAdd: number
     matchCurrentSong: boolean
   }
+  scrobbleCount: number
 }
 
 export interface ServerConfig {
@@ -162,6 +163,24 @@ function readPort(name: string, fallback: number): number {
   return port
 }
 
+function readScrobbleCount(fallback = 30): number {
+  const raw =
+    process.env.SCROBBLE_COUNT?.trim() ||
+    process.env.COUNT_FROM?.trim() ||
+    process.env.SCROBBLE_PERCENT?.trim()
+  if (!raw) return fallback
+
+  const num = Number(raw)
+  if (!Number.isFinite(num)) return fallback
+
+  const allowed = [10, 20, 30, 40, 50]
+  if (allowed.includes(num)) return num
+
+  if (Number.isInteger(num) && num >= 5 && num <= 95) return num
+
+  return fallback
+}
+
 export function loadConfig(): ServerConfig {
   const lyricsCustomServer =
     readUrl('LYRICS_CUSTOM_SERVER', null) ?? readUrl('LYRICS_SERVER', null)
@@ -229,6 +248,7 @@ export function loadConfig(): ServerConfig {
         songsToAdd: readInt('SONGS_TO_ADD', 5, 1, 10),
         matchCurrentSong: readBoolean('MATCH_CURRENT_SONG', true),
       },
+      scrobbleCount: readScrobbleCount(30),
     },
   }
 }

@@ -10,23 +10,26 @@ export function AlbumHeaderFallback({
 }: {
   isArtist?: boolean
 } = {}) {
+  if (isArtist) {
+    return (
+      <div className="w-full px-8 py-6 bg-muted-foreground flex flex-col items-center justify-center gap-2.5 bg-gradient-to-b from-background/50 to-background/50">
+        <Skeleton className="size-[140px] 2xl:size-[170px] rounded-full shadow-lg" />
+        <Skeleton className="h-9 w-[220px] mt-1" />
+        <Skeleton className="h-3.5 w-20" />
+      </div>
+    )
+  }
+
   return (
     <div className="w-full px-8 py-6 bg-muted-foreground flex gap-4 bg-gradient-to-b from-background/50 to-background/50">
       <Skeleton
         className={cn(
           'shadow-lg aspect-square',
-          isArtist
-            ? 'size-[160px] min-w-[160px] 2xl:size-[200px] 2xl:min-w-[200px] rounded-full'
-            : 'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px] rounded',
+          'w-[200px] h-[200px] min-w-[200px] min-h-[200px] 2xl:w-[250px] 2xl:h-[250px] 2xl:min-w-[250px] 2xl:min-h-[250px] rounded',
         )}
       />
-      <div
-        className={cn(
-          'flex flex-col',
-          isArtist ? 'justify-center' : 'justify-end',
-        )}
-      >
-        {!isArtist && <Skeleton className="h-[20px] w-16 mb-4" />}
+      <div className="flex flex-col justify-end">
+        <Skeleton className="h-[20px] w-16 mb-4" />
         <Skeleton className="h-12 w-[260px] mb-4" />
         <Skeleton className="h-5 w-[340px] mb-1" />
 

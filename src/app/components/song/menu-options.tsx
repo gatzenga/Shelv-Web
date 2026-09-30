@@ -1,6 +1,8 @@
 import { OptionsButtons } from '@/app/components/options/buttons'
 import { ContextMenuSeparator } from '@/app/components/ui/context-menu'
+import { DropdownMenuSeparator } from '@/app/components/ui/dropdown-menu'
 import { useOptions } from '@/app/hooks/use-options'
+import { useShare } from '@/app/hooks/use-share'
 import { useAppStore } from '@/store/app.store'
 import { ISong } from '@/types/responses/song'
 import { AddToPlaylistSubMenu } from './add-to-playlist'
@@ -26,8 +28,12 @@ export function SongMenuOptions({
     openSongInfo,
     isOnPlaylistPage,
   } = useOptions()
+  const { share } = useShare()
   const hidePlaylistsSection = useAppStore().pages.hidePlaylistsSection
   const songIndexes = [index.toString()]
+
+  const Separator =
+    variant === 'context' ? ContextMenuSeparator : DropdownMenuSeparator
 
   return (
     <>
@@ -45,6 +51,9 @@ export function SongMenuOptions({
           playLast([song])
         }}
       />
+
+      <Separator />
+
       <OptionsButtons.InstantMix
         variant={variant}
         onClick={(e) => {
@@ -52,9 +61,10 @@ export function SongMenuOptions({
           startInstantMix('song', song.id)
         }}
       />
+
       {!hidePlaylistsSection && (
         <>
-          <ContextMenuSeparator />
+          <Separator />
           <OptionsButtons.AddToPlaylistOption variant={variant}>
             <AddToPlaylistSubMenu
               type={variant}
@@ -73,7 +83,16 @@ export function SongMenuOptions({
           }}
         />
       )}
-      <ContextMenuSeparator />
+
+      <Separator />
+
+      <OptionsButtons.Share
+        variant={variant}
+        onClick={(e) => {
+          e.stopPropagation()
+          share(song.id)
+        }}
+      />
       <OptionsButtons.SongInfo
         variant={variant}
         onClick={(e) => {

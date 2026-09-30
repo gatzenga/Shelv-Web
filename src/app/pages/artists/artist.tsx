@@ -118,6 +118,11 @@ export default function Artist() {
       <ImageHeader
         type={t('artist.headline')}
         title={artist.name}
+        subtitle={
+          artist.albumCount !== undefined && artist.albumCount > 0
+            ? `${artist.albumCount} ${artist.albumCount === 1 ? 'ALBUM' : 'ALBUMS'}`
+            : undefined
+        }
         coverArtId={artist.coverArt}
         coverArtType="artist"
         coverArtSize="700"
@@ -126,7 +131,11 @@ export default function Artist() {
       />
 
       <ListWrapper>
-        <ArtistInfo artist={artist} />
+        <ArtistInfo
+          artist={artist}
+          topSongs={topSongs}
+          sortedAlbums={albumSort.sortedAlbums}
+        />
 
         {topSongsIsLoading && <TopSongsTableFallback />}
         {topSongs && !topSongsIsLoading && (

@@ -1651,9 +1651,10 @@ usePlayerStore.subscribe((state, prevState) => {
 
   const accumulatedTime = usePlayerStore.getState().listenTime.accumulated
 
-  const halfDuration = duration / 2
+  const scrobblePercent = appConfig.scrobbleCount ?? 30
+  const thresholdDuration = (duration * scrobblePercent) / 100
   const fourMinutesInSeconds = 60 * 4
-  const targetTime = Math.min(halfDuration, fourMinutesInSeconds)
+  const targetTime = Math.min(thresholdDuration, fourMinutesInSeconds)
 
   const hasScrobbled =
     usePlayerStore.getState().playerState.hasScrobbledTheCurrentTrack
