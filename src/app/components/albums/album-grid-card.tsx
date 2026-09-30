@@ -8,8 +8,7 @@ import {
   AlbumCardMenu,
 } from '@/app/components/preview-card/card-menu'
 import { ROUTES } from '@/routes/routesList'
-import { subsonic } from '@/service/subsonic'
-import { useIsAlbumPlaying, usePlayerActions } from '@/store/player.store'
+import { useIsAlbumPlaying } from '@/store/player.store'
 import { Albums } from '@/types/responses/album'
 
 type AlbumCardProps = {
@@ -18,20 +17,7 @@ type AlbumCardProps = {
 }
 
 function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
-  const { setSongList } = usePlayerActions()
   const { isAlbumPlaying } = useIsAlbumPlaying(album.id)
-
-  async function playCurrentAlbum() {
-    const response = await subsonic.albums.getOne(album.id)
-
-    if (response) {
-      setSongList(response.song, 0, false, {
-        id: response.id,
-        name: response.name,
-        type: 'album',
-      })
-    }
-  }
 
   return (
     <AlbumCardContextMenu albumId={album.id}>
@@ -40,7 +26,6 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
           <ImageLoader id={album.coverArt} type="album" size={300}>
             {(src) => <PreviewCard.Image src={src} alt={album.name} />}
           </ImageLoader>
-          <PreviewCard.PlayButton onClick={playCurrentAlbum} />
         </PreviewCard.ImageWrapper>
         <div className="flex items-start gap-1">
           <PreviewCard.InfoWrapper>

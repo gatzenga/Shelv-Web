@@ -4,7 +4,6 @@ import {
   ListEndIcon,
   ListPlusIcon,
   Loader2Icon,
-  PauseIcon,
   PlayIcon,
   Share2Icon,
   ShuffleIcon,
@@ -51,11 +50,11 @@ export function ArtistButtons({
   sortedAlbums,
 }: ArtistButtonsProps) {
   const { t } = useTranslation()
-  const { setSongList, togglePlayPause, toggleShuffle } = usePlayerActions()
+  const { setSongList, toggleShuffle } = usePlayerActions()
   const { getArtistPlayOrderSongs } = useSongList()
   const { playNext, playLast, startInstantMix } = useOptions()
   const { share } = useShare()
-  const { isArtistActive, isArtistPlaying } = useIsArtistPlaying(artist.id)
+  const { isArtistActive } = useIsArtistPlaying(artist.id)
   const isShuffleActive = usePlayerStore(
     (state) => state.playerState.isShuffleActive,
   )
@@ -99,14 +98,6 @@ export function ArtistButtons({
     })
   }
 
-  function handlePlayButton() {
-    if (isArtistActive) {
-      togglePlayPause()
-    } else {
-      playArtist()
-    }
-  }
-
   function handleShuffleButton() {
     if (isArtistActive) {
       toggleShuffle()
@@ -137,21 +128,15 @@ export function ArtistButtons({
     return <div className="h-8 w-full" />
   }
 
-  const PlayStateIcon = loadingSongs
-    ? SpinnerIcon
-    : isArtistPlaying
-      ? PauseIcon
-      : PlayIcon
+  const PlayStateIcon = loadingSongs ? SpinnerIcon : PlayIcon
 
   return (
     <div className="@container/actions w-full mb-6">
       <div className="flex flex-wrap items-center gap-1.5 @[28rem]/actions:gap-2.5">
         <Action
           icon={PlayStateIcon}
-          label={
-            isArtistPlaying ? t('player.tooltips.pause') : t('options.play')
-          }
-          onClick={handlePlayButton}
+          label={t('options.play')}
+          onClick={() => playArtist()}
           prominent
         />
 
