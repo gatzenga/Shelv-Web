@@ -33,7 +33,7 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
   subscribeWithSelector(
     persist(
       devtools(
-        immer((set, get) => ({
+        immer((set) => ({
           data: {
             isServerConfigured: false,
             osType: '',
