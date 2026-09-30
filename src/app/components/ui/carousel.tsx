@@ -155,7 +155,12 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden" style={props.style}>
+    // the padding gives the zoom of a hovered card room, the margin takes it back
+    <div
+      ref={carouselRef}
+      className="overflow-hidden py-2 -my-2"
+      style={props.style}
+    >
       <div
         ref={ref}
         className={cn(
