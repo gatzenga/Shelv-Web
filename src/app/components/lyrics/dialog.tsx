@@ -90,25 +90,20 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
     try {
       const res = await startLyricsDownload()
       if (res.started) {
-        toast.success(t('lyrics.downloadStarted', 'Download gestartet'))
+        toast.success(t('lyrics.downloadStarted'))
         loadStats()
       } else {
-        toast.error(
-          res.message ||
-            t('lyrics.downloadError', 'Download konnte nicht gestartet werden'),
-        )
+        toast.error(res.message || t('lyrics.downloadError'))
       }
     } catch {
-      toast.error(
-        t('lyrics.downloadError', 'Download konnte nicht gestartet werden'),
-      )
+      toast.error(t('lyrics.downloadError'))
     }
   }
 
   async function handleCancelDownload() {
     try {
       await cancelLyricsDownload()
-      toast.info(t('lyrics.downloadCancelled', 'Download abgebrochen'))
+      toast.info(t('lyrics.downloadCancelled'))
       loadStats()
     } catch {
       // ignore
@@ -120,19 +115,13 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
     try {
       const ok = await resetLyricsDb()
       if (ok) {
-        toast.success(
-          t('lyrics.resetSuccess', 'Datenbank erfolgreich zurückgesetzt'),
-        )
+        toast.success(t('lyrics.resetSuccess'))
         loadStats()
       } else {
-        toast.error(
-          t('lyrics.resetError', 'Fehler beim Zurücksetzen der Datenbank'),
-        )
+        toast.error(t('lyrics.resetError'))
       }
     } catch {
-      toast.error(
-        t('lyrics.resetError', 'Fehler beim Zurücksetzen der Datenbank'),
-      )
+      toast.error(t('lyrics.resetError'))
     } finally {
       setIsResetting(false)
       setShowResetConfirm(false)
@@ -149,20 +138,18 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
           className="p-0 overflow-hidden gap-0 cursor-default max-w-xl"
           aria-describedby={undefined}
         >
-          <DialogTitle className="sr-only">
-            {t('lyrics.title', 'Lyrics')}
-          </DialogTitle>
+          <DialogTitle className="sr-only">{t('lyrics.title')}</DialogTitle>
           <DialogHeader>
             <div className="flex gap-3 items-center justify-start w-full py-4 px-6 bg-background-foreground border-b border-border">
               <h1 className="font-semibold text-lg leading-tight">
-                {t('lyrics.title', 'Lyrics')}
+                {t('lyrics.title')}
               </h1>
             </div>
           </DialogHeader>
 
           <div className="w-full max-h-[70vh] overflow-y-auto p-6 flex flex-col gap-5">
-            <Section title={t('lyrics.stored', 'STORED')}>
-              <Row label={t('lyrics.tracks', 'Titel')}>
+            <Section title={t('lyrics.stored')}>
+              <Row label={t('lyrics.tracks')}>
                 {isLoading && !stats ? (
                   spinner
                 ) : isDownloading ? (
@@ -175,11 +162,11 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
                   </span>
                 )}
               </Row>
-              <Row label={t('lyrics.size', 'Größe')}>
+              <Row label={t('lyrics.size')}>
                 {isLoading && !stats ? (
                   spinner
                 ) : !stats || stats.count === 0 ? (
-                  t('lyrics.empty', 'Leer')
+                  t('lyrics.empty')
                 ) : (
                   <span className="font-mono">
                     {formatBytes(stats.sizeBytes)}
@@ -188,13 +175,13 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
               </Row>
             </Section>
 
-            <Section title={t('lyrics.database', 'DATABASE')}>
+            <Section title={t('lyrics.database')}>
               {isDownloading ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <Loader2 className="size-3.5 animate-spin" />
-                      {t('lyrics.downloading', 'Lade Songtexte herunter...')}
+                      {t('lyrics.downloading')}
                     </span>
                     <span className="font-mono">
                       {Math.round(
@@ -229,7 +216,7 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
                     className="self-start text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 h-7 text-xs px-2"
                   >
                     <XCircle className="size-3.5 mr-1" />
-                    {t('lyrics.cancelDownload', 'Download abbrechen')}
+                    {t('lyrics.cancelDownload')}
                   </Button>
                 </div>
               ) : (
@@ -242,7 +229,7 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
                     className="gap-2"
                   >
                     <ArrowDownCircle className="size-4" />
-                    {t('lyrics.downloadAll', 'Download all Lyrics')}
+                    {t('lyrics.downloadAll')}
                   </Button>
                 </div>
               )}
@@ -260,7 +247,7 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
                   ) : (
                     <Trash2 className="size-4" />
                   )}
-                  {t('lyrics.reset', 'Reset Lyrics Database')}
+                  {t('lyrics.reset')}
                 </Button>
               </div>
             </Section>
@@ -271,25 +258,18 @@ export function LyricsDialog({ open, onOpenChange }: LyricsDialogProps) {
       <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t('lyrics.resetConfirmTitle', 'Lyrics-Datenbank zurücksetzen?')}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t('lyrics.resetConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t(
-                'lyrics.resetConfirmDescription',
-                'Alle lokal gespeicherten Songtexte werden unwiderruflich gelöscht. Fortfahren?',
-              )}
+              {t('lyrics.resetConfirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('actions.cancel', 'Abbrechen')}
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t('lyrics.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReset}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {t('actions.confirm', 'Zurücksetzen')}
+              {t('lyrics.resetConfirmAction')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

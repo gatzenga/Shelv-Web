@@ -14,6 +14,7 @@
   "sidebar": {
     "home": "Discover",
     "search": "Search",
+    "lyrics": "Lyrics",
     "library": "Library",
     "artists": "Artists",
     "songs": "Songs",
@@ -51,7 +52,9 @@
     "resetSuccess": "Database reset successfully",
     "resetError": "Failed to reset database",
     "resetConfirmTitle": "Reset Lyrics Database?",
-    "resetConfirmDescription": "All locally stored lyrics for this server will be deleted."
+    "resetConfirmDescription": "All locally stored lyrics for this server will be deleted.",
+    "cancel": "Cancel",
+    "resetConfirmAction": "Reset"
   },
   "lastfm": {
     "title": "Last.fm",
@@ -179,6 +182,9 @@
     }
   },
   "album": {
+    "empty": {
+      "notFound": "No albums found."
+    },
     "disc": "Disc {{number}}",
     "summary": {
       "tracks_one": "{{count}} track",
@@ -601,6 +607,11 @@
     "seconds": "{{seconds}} s"
   },
   "server": {
+    "incompatible": {
+      "title": "Incompatible server",
+      "description": "This server uses an older version of the Subsonic protocol that is not fully supported. Please proceed with caution as you may have issues.",
+      "skip": "Continue anyway"
+    },
     "connected": "Connected Server",
     "user": "User",
     "library": "Library",

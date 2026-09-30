@@ -3,6 +3,7 @@
     "radios": "Radios",
     "home": "Entdecken",
     "search": "Suche",
+    "lyrics": "Lyrics",
     "library": "Bibliothek",
     "artists": "Künstler",
     "songs": "Lieder",
@@ -81,6 +82,9 @@
     "noSongList": "Diese Wiedergabeliste enthält keine Lieder!"
   },
   "album": {
+    "empty": {
+      "notFound": "Keine Alben gefunden."
+    },
     "disc": "Disc {{number}}",
     "summary": {
       "tracks_one": "{{count}} Titel",
@@ -333,22 +337,24 @@
   },
   "lyrics": {
     "title": "Lyrics",
-    "stored": "STORED",
-    "database": "DATABASE",
+    "stored": "GESPEICHERT",
+    "database": "DATENBANK",
     "tracks": "Titel",
     "size": "Größe",
     "empty": "Leer",
-    "downloadAll": "Download all Lyrics",
+    "downloadAll": "Alle Lyrics herunterladen",
     "downloading": "Lade Songtexte herunter...",
     "cancelDownload": "Download abbrechen",
-    "reset": "Reset Lyrics Database",
+    "reset": "Lyrics-Datenbank zurücksetzen",
     "downloadStarted": "Download gestartet",
     "downloadError": "Download konnte nicht gestartet werden",
     "downloadCancelled": "Download abgebrochen",
     "resetSuccess": "Datenbank erfolgreich zurückgesetzt",
     "resetError": "Fehler beim Zurücksetzen der Datenbank",
     "resetConfirmTitle": "Lyrics-Datenbank zurücksetzen?",
-    "resetConfirmDescription": "Alle lokal gespeicherten Songtexte für diesen Server werden gelöscht."
+    "resetConfirmDescription": "Alle lokal gespeicherten Songtexte für diesen Server werden gelöscht.",
+    "cancel": "Abbrechen",
+    "resetConfirmAction": "Zurücksetzen"
   },
   "lastfm": {
     "title": "Last.fm",
@@ -526,6 +532,11 @@
     "seconds": "{{seconds}} Sek"
   },
   "server": {
+    "incompatible": {
+      "title": "Inkompatibler Server",
+      "description": "Dieser Server verwendet eine ältere Version des Subsonic-Protokolls, die nicht vollständig unterstützt wird. Bitte seien Sie achtsam, es können Probleme auftreten.",
+      "skip": "Trotzdem fortfahren"
+    },
     "connected": "Verbundener Server",
     "user": "Benutzer",
     "library": "Bibliothek",
