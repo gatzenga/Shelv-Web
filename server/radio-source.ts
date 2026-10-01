@@ -2,6 +2,10 @@
 // what kind of stream it is, and where its now playing metadata comes from.
 // The metadata logic follows the Shelv player (RadioMetadataService.swift).
 import { TtlCache } from './ttl-cache.ts'
+import {
+  type RadioUpstreamResponse,
+  requestRadioUpstream,
+} from './radio-upstream.ts'
 
 export const userAgent = 'Shelv Web'
 
@@ -22,28 +26,24 @@ function timeout(ms: number, signal?: AbortSignal) {
 }
 
 async function readText(
-  response: Response,
+  response: RadioUpstreamResponse,
   maxBytes: number,
   maxChunks = Number.POSITIVE_INFINITY,
 ) {
-  if (!response.body) return ''
-
-  const reader = response.body.getReader()
-  const chunks: Uint8Array[] = []
+  const chunks: Buffer[] = []
   let size = 0
   let chunkCount = 0
 
-  try {
-    while (size < maxBytes && chunkCount < maxChunks) {
-      const { done, value } = await reader.read()
-      if (done) break
-      chunks.push(value)
-      size += value.length
-      chunkCount += 1
-    }
-  } finally {
-    reader.cancel().catch(() => {})
+  for await (const chunk of response.body) {
+    if (size >= maxBytes || chunkCount >= maxChunks) break
+
+    const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+    chunks.push(value)
+    size += value.length
+    chunkCount += 1
   }
+
+  response.body.destroy()
 
   return Buffer.concat(chunks).toString('utf8')
 }
@@ -69,12 +69,15 @@ async function detectStream(
 ): Promise<ResolvedStream> {
   if (depth > 3) return { kind: 'direct', url }
 
-  const response = await fetch(url, {
+  const response = await requestRadioUpstream(url, {
     headers: { 'icy-metadata': '0', 'user-agent': userAgent },
     signal: timeout(10000),
   })
-  const finalUrl = response.url || url
-  const contentType = response.headers.get('content-type')?.toLowerCase() ?? ''
+  const finalUrl = response.url
+  const rawContentType = response.headers['content-type']
+  const contentType =
+    (Array.isArray(rawContentType) ? rawContentType[0] : rawContentType)
+      ?.toLowerCase() ?? ''
   const pathname = new URL(finalUrl).pathname
   const isM3uPath = /\.m3u8?$/i.test(pathname)
   const isPlsPath = /\.pls$/i.test(pathname)
@@ -88,20 +91,20 @@ async function detectStream(
     contentType.startsWith('video/')
 
   if (!response.ok || looksLikeAudio) {
-    response.body?.cancel().catch(() => {})
-    return { kind: 'direct', url: finalUrl }
+    response.body.resume()
+    return { kind: 'direct', url }
   }
 
   if (!looksLikePlaylistPath && !looksLikeHlsType && !looksLikePlsType) {
-    response.body?.cancel().catch(() => {})
-    return { kind: 'direct', url: finalUrl }
+    response.body.resume()
+    return { kind: 'direct', url }
   }
 
   const text = (await readText(response, 64 * 1024, 4)).trim()
   const lines = text.split(/\r?\n/)
 
   if (text.startsWith('#EXTM3U') && text.includes('#EXT-X-')) {
-    return { kind: 'hls', url: finalUrl }
+    return { kind: 'hls', url }
   }
 
   if (
@@ -118,14 +121,13 @@ async function detectStream(
     if (next) return detectStream(next, depth + 1)
   }
 
-  return { kind: 'direct', url: finalUrl }
+  return { kind: 'direct', url }
 }
 
 export function resolveStream(url: string) {
   return resolvedStreams.getOrLoad(
     url,
-    (stream) =>
-      stream.kind === 'direct' && stream.url !== url ? 30 * 1000 : 10 * minute,
+    () => 10 * minute,
     () => detectStream(url, 0).catch(() => ({ kind: 'direct' as const, url })),
   )
 }
@@ -287,30 +289,32 @@ function splitStreamTitle(streamTitle: string) {
 async function fetchIcy(streamUrl: string): Promise<NowPlaying> {
   const result = emptyIcyNowPlaying()
 
-  const controller = new AbortController()
-  const signal = timeout(8000, controller.signal)
-
   try {
-    const response = await fetch(streamUrl, {
+    const response = await requestRadioUpstream(streamUrl, {
       headers: { 'icy-metadata': '1', 'user-agent': userAgent },
-      signal,
+      signal: timeout(8000),
     })
 
-    result.stationName = nonEmpty(response.headers.get('icy-name'))
-    const metaint = Number(response.headers.get('icy-metaint'))
+    result.stationName = nonEmpty(
+      Array.isArray(response.headers['icy-name'])
+        ? response.headers['icy-name'][0]
+        : response.headers['icy-name'],
+    )
+    const metaint = Number(
+      Array.isArray(response.headers['icy-metaint'])
+        ? response.headers['icy-metaint'][0]
+        : response.headers['icy-metaint'],
+    )
 
     if (!response.ok || !metaint || !response.body) {
       result.available = response.ok
       return result
     }
 
-    const reader = response.body.getReader()
     let buffer = Buffer.alloc(0)
 
-    while (buffer.length < icyMaxBytes) {
-      const { done, value } = await reader.read()
-      if (done) break
-
+    for await (const chunk of response.body) {
+      const value = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
       buffer = Buffer.concat([buffer, value])
       const streamTitle = parseStreamTitle(buffer, metaint)
 
@@ -320,14 +324,14 @@ async function fetchIcy(streamUrl: string): Promise<NowPlaying> {
         result.artist = nonEmpty(artist)
         break
       }
+
+      if (buffer.length >= icyMaxBytes) break
     }
 
     return result
   } catch {
     // A timeout without a title is not an error, the station just sent none yet
     return result
-  } finally {
-    controller.abort()
   }
 }
 
