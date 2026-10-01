@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs'
+import type { IncomingHttpHeaders } from 'node:http'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
@@ -61,6 +62,20 @@ export function copyUpstreamHeaders(res: ServerResponse, upstream: Response) {
   for (const name of forwardedResponseHeaders) {
     const value = upstream.headers.get(name)
     if (value !== null) res.setHeader(name, value)
+  }
+}
+
+export function copyNodeUpstreamHeaders(
+  res: ServerResponse,
+  upstream: IncomingHttpHeaders,
+) {
+  for (const name of forwardedResponseHeaders) {
+    const value = upstream[name]
+    if (Array.isArray(value)) {
+      if (value.length > 0) res.setHeader(name, value[0])
+      continue
+    }
+    if (typeof value === 'string') res.setHeader(name, value)
   }
 }
 

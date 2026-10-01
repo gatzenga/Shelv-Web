@@ -7,11 +7,18 @@ import { authParams, credentialsKey } from './auth.ts'
 import type { ServerConfig } from './config.ts'
 import {
   abortOnClose,
+  copyNodeUpstreamHeaders,
   pipeUpstream,
   readBody,
   sendJson,
   sendText,
 } from './http.ts'
+import { logger } from './logger.ts'
+import {
+  pipeRadioUpstream,
+  readRadioUpstreamText,
+  requestRadioUpstream,
+} from './radio-upstream.ts'
 import { parseRadioSettings, RadioSettingsStore } from './radio-settings.ts'
 import {
   azuraCastNowPlaying,
@@ -204,26 +211,34 @@ export function createRadioHandler(config: ServerConfig) {
     stationId: string,
     src: string,
   ) {
-    const upstream = await fetch(src, {
-      headers: {
-        'user-agent': browserUserAgent(req),
-        'accept-encoding': 'identity',
-      },
-      signal: abortOnClose(res),
-    })
-    const contentType =
-      upstream.headers.get('content-type')?.toLowerCase() ?? ''
+    try {
+      const upstream = await requestRadioUpstream(src, {
+        headers: {
+          'user-agent': browserUserAgent(req),
+          'accept-encoding': 'identity',
+        },
+        signal: abortOnClose(res),
+      })
+      const rawContentType = upstream.headers['content-type']
+      const contentType =
+        (Array.isArray(rawContentType) ? rawContentType[0] : rawContentType)
+          ?.toLowerCase() ?? ''
 
-    if (!upstream.ok || !isPlaylist(contentType, src)) {
-      await pipeUpstream(req, res, upstream)
-      return
+      if (!upstream.ok || !isPlaylist(contentType, src)) {
+        copyNodeUpstreamHeaders(res, upstream.headers)
+        await pipeRadioUpstream(req, res, upstream)
+        return
+      }
+
+      const text = await readRadioUpstreamText(upstream, 1024 * 1024)
+      const playlist = rewritePlaylist(text, upstream.url || src, stationId)
+
+      res.setHeader('cache-control', 'no-cache')
+      sendText(res, 200, playlist, 'application/vnd.apple.mpegurl')
+    } catch (error) {
+      logger.error(`GET /api/radio/hls upstream failed (${src})`, error)
+      throw error
     }
-
-    const text = await upstream.text()
-    const playlist = rewritePlaylist(text, upstream.url || src, stationId)
-
-    res.setHeader('cache-control', 'no-cache')
-    sendText(res, 200, playlist, 'application/vnd.apple.mpegurl')
   }
 
   async function handleStream(
@@ -241,17 +256,26 @@ export function createRadioHandler(config: ServerConfig) {
       return
     }
 
-    const upstream = await fetch(stream.url, {
-      headers: {
-        'icy-metadata': '0',
-        'user-agent': browserUserAgent(req),
-        'accept-encoding': 'identity',
-      },
-      signal: abortOnClose(res),
-    })
+    try {
+      const upstream = await requestRadioUpstream(stream.url, {
+        headers: {
+          'icy-metadata': '0',
+          'user-agent': browserUserAgent(req),
+          'accept-encoding': 'identity',
+        },
+        signal: abortOnClose(res),
+      })
 
-    res.setHeader('cache-control', 'no-store')
-    await pipeUpstream(req, res, upstream, { live: true })
+      res.setHeader('cache-control', 'no-store')
+      copyNodeUpstreamHeaders(res, upstream.headers)
+      await pipeRadioUpstream(req, res, upstream, { live: true })
+    } catch (error) {
+      logger.error(
+        `GET /api/radio/stream upstream failed (${stream.url}, station ${station.id})`,
+        error,
+      )
+      throw error
+    }
   }
 
   async function handleHls(
