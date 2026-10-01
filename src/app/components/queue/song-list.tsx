@@ -34,6 +34,7 @@ import {
 } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
+import { playOnClick } from '@/utils/rowClick'
 
 interface QueueRowProps {
   song: ISong
@@ -108,7 +109,7 @@ function QueueRow({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onDragEnd={handleDragEnd}
-        onDoubleClick={onPlay}
+        onClick={isEditing ? undefined : playOnClick(onPlay)}
         className={cn(
           'group relative flex items-center gap-3 px-3 py-1.5 rounded-lg select-none cursor-pointer transition-colors',
           'hover:bg-accent/60',

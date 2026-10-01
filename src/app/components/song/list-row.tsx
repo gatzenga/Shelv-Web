@@ -10,6 +10,7 @@ import { ROUTES } from '@/routes/routesList'
 import { usePlayerCurrentSong, usePlayerIsPlaying } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
+import { playOnClick } from '@/utils/rowClick'
 
 interface SongListRowProps {
   song: ISong
@@ -29,8 +30,8 @@ export function SongListRow({ song, index, onPlay }: SongListRowProps) {
       options={<SongMenuOptions variant="context" song={song} index={index} />}
     >
       <div
-        className="group flex items-center gap-3 h-16 px-3 rounded-lg select-none hover:bg-foreground/10 transition-colors"
-        onDoubleClick={onPlay}
+        className="group flex items-center gap-3 h-16 px-3 rounded-lg select-none hover:bg-foreground/10 transition-colors cursor-pointer"
+        onClick={playOnClick(onPlay)}
         data-testid="song-list-row"
       >
         <button

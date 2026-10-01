@@ -11,6 +11,7 @@ import { useAppStore } from '@/store/app.store'
 import { usePlayerCurrentSong, usePlayerIsPlaying } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
+import { playOnClick } from '@/utils/rowClick'
 
 interface AlbumTrackListProps {
   songs: ISong[]
@@ -91,7 +92,7 @@ function TrackRow({ song, index, position, onPlay }: TrackRowProps) {
           'hover:bg-accent/60 transition-colors cursor-pointer select-none',
           isCurrent && 'bg-accent/40',
         )}
-        onClick={onPlay}
+        onClick={playOnClick(onPlay)}
         data-testid="album-track"
       >
         <div className="flex items-center min-w-0 flex-1 mr-2">
@@ -116,20 +117,14 @@ function TrackRow({ song, index, position, onPlay }: TrackRowProps) {
             >
               {song.title}
             </span>
-            <div
-              className="text-xs text-muted-foreground truncate leading-normal mt-0.5"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="text-xs text-muted-foreground truncate leading-normal mt-0.5">
               <TableArtists song={song} />
             </div>
           </div>
         </div>
 
         {/* Duration & 3-dots Menu */}
-        <div
-          className="flex items-center gap-1.5 shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-1.5 shrink-0">
           {isStarred && (
             <HeartIcon className="size-3.5 fill-red-500 text-red-500 mr-1" />
           )}

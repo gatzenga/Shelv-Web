@@ -14,6 +14,7 @@ import { Albums } from '@/types/responses/album'
 import { ISimilarArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
 import { convertSecondsToTime } from '@/utils/convertSecondsToTime'
+import { playOnClick } from '@/utils/rowClick'
 
 interface ArtistRowProps {
   artist: ISimilarArtist
@@ -149,7 +150,7 @@ export function SearchSongRow({ song, index, onPlay }: SearchSongRowProps) {
           'hover:bg-accent/60 transition-colors cursor-pointer select-none',
           isCurrent && 'bg-accent/40',
         )}
-        onClick={onPlay}
+        onClick={playOnClick(onPlay)}
         data-testid="search-song-row"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
@@ -179,19 +180,13 @@ export function SearchSongRow({ song, index, onPlay }: SearchSongRowProps) {
                 {song.title}
               </span>
             </div>
-            <div
-              className="flex items-center truncate text-xs text-muted-foreground leading-normal mt-0.5"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="flex items-center truncate text-xs text-muted-foreground leading-normal mt-0.5">
               <TableArtists song={song} />
             </div>
           </div>
         </div>
 
-        <div
-          className="flex items-center gap-1.5 shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-xs text-muted-foreground tabular-nums">
             {convertSecondsToTime(song.duration ?? 0)}
           </span>
@@ -289,7 +284,7 @@ export function SearchLyricsRow({ item, query, onPlay }: SearchLyricsRowProps) {
           'hover:bg-accent/60 transition-colors cursor-pointer select-none',
           isCurrent && 'bg-accent/40',
         )}
-        onClick={onPlay}
+        onClick={playOnClick(onPlay)}
         data-testid="search-lyrics-row"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
@@ -330,10 +325,7 @@ export function SearchLyricsRow({ item, query, onPlay }: SearchLyricsRowProps) {
           </div>
         </div>
 
-        <div
-          className="flex items-center gap-1.5 shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-1.5 shrink-0">
           {item.duration !== null && item.duration !== undefined && (
             <span className="text-xs text-muted-foreground tabular-nums">
               {convertSecondsToTime(item.duration)}
