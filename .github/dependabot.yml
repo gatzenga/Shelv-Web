@@ -1,6 +1,8 @@
 version: 2
 updates:
-  # The actions that build the image, and the base image itself
+  # The actions that build the image, and the base image itself. The version of
+  # Node.js is chosen here (Dockerfile), only its updates and the newer image
+  # of the same version are proposed.
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -9,3 +11,6 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
