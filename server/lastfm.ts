@@ -312,7 +312,7 @@ export class LastFMService {
   ): Promise<LibrarySong[] | null> {
     return this.songs(
       'Frequently Played',
-      'top tracks',
+      `top tracks of the period ${this.config.lastfm.period}`,
       limit,
       3,
       request,
