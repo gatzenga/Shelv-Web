@@ -4,14 +4,16 @@ import { createHash } from 'node:crypto'
 // of such a request are checked once against Navidrome and then remembered.
 const verifiedTtl = 10 * 60 * 1000
 const maxEntries = 1000
+// Navidrome that does not answer must not hold the requests up for long
+const requestTimeout = 8000
 const verified = new Map<string, number>()
 
 export const authParams = ['u', 't', 's', 'p', 'apiKey']
 
 export function credentialsKey(params: URLSearchParams) {
-  const parts = authParams.map((name) => `${name}=${params.get(name) ?? ''}`)
+  const parts = authParams.map((name) => params.get(name) ?? '')
 
-  return createHash('sha256').update(parts.join('&')).digest('hex')
+  return createHash('sha256').update(JSON.stringify(parts)).digest('hex')
 }
 
 export async function verifyCredentials(
@@ -36,7 +38,9 @@ export async function verifyCredentials(
   ping.searchParams.set('f', 'json')
 
   try {
-    const response = await fetch(ping)
+    const response = await fetch(ping, {
+      signal: AbortSignal.timeout(requestTimeout),
+    })
     if (!response.ok) return false
 
     const body = (await response.json()) as {
@@ -83,7 +87,9 @@ export async function verifyAdmin(
   request.searchParams.set('f', 'json')
 
   try {
-    const response = await fetch(request)
+    const response = await fetch(request, {
+      signal: AbortSignal.timeout(requestTimeout),
+    })
     if (!response.ok) return false
 
     const body = (await response.json()) as {

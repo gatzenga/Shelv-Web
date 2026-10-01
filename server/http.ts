@@ -61,10 +61,23 @@ export function upstreamHeaders(req: IncomingMessage): Headers {
   return headers
 }
 
+// What comes from the upstream servers is only for the user who asked: the
+// URL does not name the user, so no cache in between may keep it for everyone
+export function privateCacheControl(value: string) {
+  return value.replace(/\bpublic\b/gi, 'private')
+}
+
+function setUpstreamHeader(res: ServerResponse, name: string, value: string) {
+  res.setHeader(
+    name,
+    name === 'cache-control' ? privateCacheControl(value) : value,
+  )
+}
+
 export function copyUpstreamHeaders(res: ServerResponse, upstream: Response) {
   for (const name of forwardedResponseHeaders) {
     const value = upstream.headers.get(name)
-    if (value !== null) res.setHeader(name, value)
+    if (value !== null) setUpstreamHeader(res, name, value)
   }
 }
 
@@ -75,10 +88,10 @@ export function copyNodeUpstreamHeaders(
   for (const name of forwardedResponseHeaders) {
     const value = upstream[name]
     if (Array.isArray(value)) {
-      if (value.length > 0) res.setHeader(name, value[0])
+      if (value.length > 0) setUpstreamHeader(res, name, value[0])
       continue
     }
-    if (typeof value === 'string') res.setHeader(name, value)
+    if (typeof value === 'string') setUpstreamHeader(res, name, value)
   }
 }
 

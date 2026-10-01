@@ -50,7 +50,9 @@ Running Shelv Web on another machine still works, `NAVIDROME_URL` can be any add
 
 ## Login
 
-You sign in with your Navidrome user. The server checks it with Navidrome and gives the browser a cookie (HttpOnly, SameSite Strict, 30 days). After that the browser sends only the cookie, the login itself is not sent with every request and does not show up in addresses or logs. Too many wrong logins from one address are stopped for a while. Use HTTPS, so the cookie cannot be read on its way.
+You sign in with your Navidrome user. The server checks it with Navidrome and gives the browser a cookie (HttpOnly, SameSite Strict, 30 days, `__Host-` and Secure over HTTPS). After that the browser sends only the cookie. The login itself is not sent again and does not show up in addresses or logs, and a login on the address of a request is ignored: the cookie is the only way in, so there is no second door for guessing passwords.
+
+Wrong logins are counted per address and per user, ten per address and fifty per user in ten minutes, then the login waits. The address of the visitor is the one Cloudflare names in `CF-Connecting-IP`, without Cloudflare the last entry of `X-Forwarded-For`, which your own reverse proxy adds. Use HTTPS, so the cookie cannot be read on its way.
 
 ## Settings are variables
 

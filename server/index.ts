@@ -7,7 +7,7 @@ import {
 } from 'node:http'
 import { join } from 'node:path'
 import { sendArtistTopSongs } from './artist-top-songs.ts'
-import { verifyAdmin, verifyCredentials } from './auth.ts'
+import { authParams, verifyAdmin, verifyCredentials } from './auth.ts'
 import { DiskCache } from './cache.ts'
 import { loadConfig } from './config.ts'
 import { isAbortError, readBody, sendJson, sendText } from './http.ts'
@@ -20,6 +20,7 @@ import { createLyricsHandler } from './lyrics.ts'
 import { LyricsDatabase } from './lyrics-db.ts'
 import { LyricsService } from './lyrics-service.ts'
 import { createRadioHandler } from './radio.ts'
+import { clientAddress, isHttps, mayUseSession } from './request.ts'
 import { sendServerInfo } from './server-info.ts'
 import {
   LoginLimiter,
@@ -72,11 +73,26 @@ const handleRadio = createRadioHandler(config)
 const envConfigScript = `window.APP_CONFIG = ${JSON.stringify(config.client)};\n`
 const handleStatic = createStaticHandler(config.distDir, envConfigScript)
 
-function setSecurityHeaders(res: ServerResponse) {
+function setSecurityHeaders(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('x-content-type-options', 'nosniff')
   res.setHeader('x-frame-options', 'SAMEORIGIN')
-  // Subsonic URLs carry auth tokens, never leak them to other sites
   res.setHeader('referrer-policy', 'same-origin')
+  // the popup of the Last.fm approval has to keep its link to the app
+  res.setHeader('cross-origin-opener-policy', 'same-origin-allow-popups')
+  res.setHeader(
+    'permissions-policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  )
+  if (isHttps(req)) {
+    res.setHeader('strict-transport-security', 'max-age=15552000')
+  }
+}
+
+// What the server answers belongs to the user who asked, no cache in between
+// may hand it to somebody else
+function setPrivateCaching(res: ServerResponse) {
+  res.setHeader('cache-control', 'private, no-store')
+  res.setHeader('vary', 'Cookie')
 }
 
 // The paths that work without credentials: the signed links of the radio
@@ -127,33 +143,25 @@ function needsLogin(pathname: string) {
   return loginPrefixes.some((prefix) => pathname.startsWith(prefix))
 }
 
-function clientAddress(req: IncomingMessage) {
-  // behind a reverse proxy the client is in the first entry of this header
-  const forwarded = req.headers['x-forwarded-for']
-  const first = (Array.isArray(forwarded) ? forwarded[0] : forwarded)
-    ?.split(',')[0]
-    ?.trim()
-
-  return first || req.socket.remoteAddress || 'unknown'
-}
-
-function sessionCookie(req: IncomingMessage, value: string, maxAgeMs: number) {
-  const forwardedProto = req.headers['x-forwarded-proto']
-  const isHttps =
-    'encrypted' in req.socket ||
-    (Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto)
-      ?.split(',')[0]
-      ?.trim() === 'https'
-
+function sessionCookie(
+  name: string,
+  value: string,
+  maxAgeMs: number,
+  secure: boolean,
+) {
   // Strict: the cookie is never sent along with a request from another site
   return [
-    `${sessionCookieName}=${value}`,
+    `${name}=${value}`,
     'Path=/',
     'HttpOnly',
     'SameSite=Strict',
     `Max-Age=${Math.floor(maxAgeMs / 1000)}`,
-    ...(isHttps ? ['Secure'] : []),
+    ...(secure ? ['Secure'] : []),
   ].join('; ')
+}
+
+function sessionIdOf(req: IncomingMessage) {
+  return parseCookies(req.headers.cookie).get(sessionCookieName(isHttps(req)))
 }
 
 async function handleLogin(req: IncomingMessage, res: ServerResponse) {
@@ -164,13 +172,15 @@ async function handleLogin(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
-  const address = clientAddress(req)
-  if (loginLimiter.isBlocked(address)) {
-    sendJson(res, 429, { error: 'too many attempts, try again later' })
+  // A form of another site can not send this type without asking first
+  if (
+    !req.headers['content-type']?.toLowerCase().startsWith('application/json')
+  ) {
+    sendJson(res, 415, { error: 'send json' })
     return
   }
 
-  let body: Record<string, unknown>
+  let body: unknown
   try {
     body = JSON.parse(await readBody(req, 4 * 1024))
   } catch {
@@ -178,7 +188,9 @@ async function handleLogin(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
-  const { u, t, s } = body
+  const { u, t, s } = (
+    typeof body === 'object' && body !== null ? body : {}
+  ) as Record<string, unknown>
   const isText = (value: unknown): value is string =>
     typeof value === 'string' && value.length > 0 && value.length < 256
 
@@ -187,19 +199,32 @@ async function handleLogin(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
+  const address = clientAddress(req)
+  if (!loginLimiter.start(address, u)) {
+    res.setHeader('retry-after', '600')
+    sendJson(res, 429, { error: 'too many attempts, try again later' })
+    return
+  }
+
   const isValid = await verifyCredentials(
     config.navidromeUrl,
     new URLSearchParams({ u, t, s }),
   )
   if (!isValid) {
-    loginLimiter.fail(address)
+    logger.warn(
+      `login of ${JSON.stringify(u.slice(0, 40))} failed (${address})`,
+    )
     sendJson(res, 401, { error: 'invalid credentials' })
     return
   }
 
-  loginLimiter.reset(address)
+  loginLimiter.succeed(address, u)
   const id = await sessions.create({ u, t, s })
-  res.setHeader('set-cookie', sessionCookie(req, id, sessionLifetime))
+  const https = isHttps(req)
+  res.setHeader(
+    'set-cookie',
+    sessionCookie(sessionCookieName(https), id, sessionLifetime, https),
+  )
   sendJson(res, 200, { ok: true })
 }
 
@@ -211,16 +236,38 @@ async function handleLogout(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
-  await sessions.delete(parseCookies(req.headers.cookie).get(sessionCookieName))
-  res.setHeader('set-cookie', sessionCookie(req, '', 0))
+  await sessions.delete(sessionIdOf(req))
+  // both names, so nothing stays behind after a change between http and https
+  res.setHeader('set-cookie', [
+    sessionCookie(sessionCookieName(false), '', 0, false),
+    sessionCookie(sessionCookieName(true), '', 0, true),
+  ])
   sendJson(res, 200, { ok: true })
 }
 
+// Without a login the app only asks what it needs to show the login page
+const publicRestPaths = /^\/rest\/(ping|getOpenSubsonicExtensions)(\.view)?$/
+
 async function route(req: IncomingMessage, res: ServerResponse) {
-  const url = new URL(req.url ?? '/', 'http://localhost')
+  setSecurityHeaders(req, res)
+
+  // "//host/path" would be read as an address with another host
+  const target = req.url ?? '/'
+  let url: URL
+  try {
+    if (!target.startsWith('/') || target.startsWith('//')) {
+      throw new Error('not a path')
+    }
+    url = new URL(target, 'http://localhost')
+  } catch {
+    sendJson(res, 400, { error: 'bad request' })
+    return
+  }
   const { pathname } = url
 
-  setSecurityHeaders(res)
+  if (pathname.startsWith('/api/') || pathname.startsWith('/rest/')) {
+    setPrivateCaching(res)
+  }
 
   if (pathname === '/api/login') {
     await handleLogin(req, res)
@@ -232,16 +279,15 @@ async function route(req: IncomingMessage, res: ServerResponse) {
     return
   }
 
-  // The credentials of the session are put on the request, so everything
-  // below works as if the browser had sent them
-  const credentials = sessions.get(
-    parseCookies(req.headers.cookie).get(sessionCookieName),
-  )
-  if (
-    credentials &&
-    !url.searchParams.has('u') &&
-    !url.searchParams.has('apiKey')
-  ) {
+  // The only way to be logged in is the session cookie. Whatever the browser
+  // put on the address is dropped, so the credentials of a user can neither be
+  // tried out here nor smuggled in: the session of the user is put on instead,
+  // and everything below works as if the browser had sent it
+  const credentials = mayUseSession(req, pathname)
+    ? sessions.get(sessionIdOf(req))
+    : undefined
+  for (const name of authParams) url.searchParams.delete(name)
+  if (credentials) {
     url.searchParams.set('u', credentials.u)
     url.searchParams.set('t', credentials.t)
     url.searchParams.set('s', credentials.s)
@@ -263,6 +309,19 @@ async function route(req: IncomingMessage, res: ServerResponse) {
       sendJson(res, 401, { error: 'invalid credentials' })
       return
     }
+  } else if (
+    pathname.startsWith('/rest/') &&
+    !credentials &&
+    !publicRestPaths.test(pathname)
+  ) {
+    sendJson(res, 401, {
+      'subsonic-response': {
+        status: 'failed',
+        version: '1.16.1',
+        error: { code: 40, message: 'Wrong username or password' },
+      },
+    })
+    return
   }
 
   if (pathname.startsWith('/rest/')) {
