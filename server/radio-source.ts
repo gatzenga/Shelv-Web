@@ -21,19 +21,25 @@ function timeout(ms: number, signal?: AbortSignal) {
   return signal ? AbortSignal.any([timer, signal]) : timer
 }
 
-async function readText(response: Response, maxBytes: number) {
+async function readText(
+  response: Response,
+  maxBytes: number,
+  maxChunks = Number.POSITIVE_INFINITY,
+) {
   if (!response.body) return ''
 
   const reader = response.body.getReader()
   const chunks: Uint8Array[] = []
   let size = 0
+  let chunkCount = 0
 
   try {
-    while (size < maxBytes) {
+    while (size < maxBytes && chunkCount < maxChunks) {
       const { done, value } = await reader.read()
       if (done) break
       chunks.push(value)
       size += value.length
+      chunkCount += 1
     }
   } finally {
     reader.cancel().catch(() => {})
@@ -69,44 +75,57 @@ async function detectStream(
   })
   const finalUrl = response.url || url
   const contentType = response.headers.get('content-type')?.toLowerCase() ?? ''
+  const pathname = new URL(finalUrl).pathname
+  const isM3uPath = /\.m3u8?$/i.test(pathname)
+  const isPlsPath = /\.pls$/i.test(pathname)
+  const looksLikePlaylistPath = isM3uPath || isPlsPath
+  const looksLikeHlsType = contentType.includes('mpegurl')
+  const looksLikePlsType = contentType.includes('scpls')
   const looksLikeAudio =
     (contentType.startsWith('audio/') &&
-      !contentType.includes('mpegurl') &&
-      !contentType.includes('scpls')) ||
+      !looksLikeHlsType &&
+      !looksLikePlsType) ||
     contentType.startsWith('video/')
 
   if (!response.ok || looksLikeAudio) {
     response.body?.cancel().catch(() => {})
-    return { kind: 'direct', url }
+    return { kind: 'direct', url: finalUrl }
   }
 
-  const text = (await readText(response, 64 * 1024)).trim()
+  if (!looksLikePlaylistPath && !looksLikeHlsType && !looksLikePlsType) {
+    response.body?.cancel().catch(() => {})
+    return { kind: 'direct', url: finalUrl }
+  }
+
+  const text = (await readText(response, 64 * 1024, 4)).trim()
   const lines = text.split(/\r?\n/)
 
   if (text.startsWith('#EXTM3U') && text.includes('#EXT-X-')) {
-    return { kind: 'hls', url }
+    return { kind: 'hls', url: finalUrl }
   }
 
   if (
-    contentType.includes('scpls') ||
+    looksLikePlsType ||
+    isPlsPath ||
     text.toLowerCase().startsWith('[playlist]')
   ) {
     const file = /^File\d+=(.+)$/im.exec(text)?.[1]?.trim()
     if (file) return detectStream(new URL(file, finalUrl).toString(), depth + 1)
   }
 
-  if (contentType.includes('mpegurl') || text.startsWith('#EXTM3U')) {
+  if (looksLikeHlsType || isM3uPath || text.startsWith('#EXTM3U')) {
     const next = firstUrl(lines, finalUrl)
     if (next) return detectStream(next, depth + 1)
   }
 
-  return { kind: 'direct', url }
+  return { kind: 'direct', url: finalUrl }
 }
 
 export function resolveStream(url: string) {
   return resolvedStreams.getOrLoad(
     url,
-    () => 10 * minute,
+    (stream) =>
+      stream.kind === 'direct' && stream.url !== url ? 30 * 1000 : 10 * minute,
     () => detectStream(url, 0).catch(() => ({ kind: 'direct' as const, url })),
   )
 }
