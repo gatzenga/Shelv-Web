@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { HistoryIcon, Loader2Icon, SearchIcon, XCircleIcon } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useDebounce } from 'use-debounce'
 import { type LyricsSearchResult, searchLyrics } from '@/api/lyrics'
 import { LibraryPage } from '@/app/components/library/page'
@@ -18,6 +19,7 @@ import { subsonic } from '@/service/subsonic'
 import { useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
+import { ROUTES } from '@/routes/routesList'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
 import { queryKeys } from '@/utils/queryKeys'
 import {
@@ -29,6 +31,7 @@ import {
 
 export default function Search() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { setSongList } = usePlayerActions()
   const hideFavorites = useAppStore().pages.hideFavoritesSection
 
@@ -171,6 +174,16 @@ export default function Search() {
     })
   }
 
+  function openArtist(artistId: string) {
+    commit()
+    navigate(ROUTES.ARTIST.PAGE(artistId))
+  }
+
+  function openAlbum(albumId: string) {
+    commit()
+    navigate(ROUTES.ALBUM.PAGE(albumId))
+  }
+
   function renderBody() {
     if (isSearching) {
       return (
@@ -236,7 +249,7 @@ export default function Search() {
               <SearchArtistRow
                 key={artist.id}
                 artist={artist}
-                onOpen={commit}
+                onOpen={() => openArtist(artist.id)}
               />
             ))}
           </Section>
@@ -245,7 +258,11 @@ export default function Search() {
         {albums.length > 0 && (
           <Section title={t('sidebar.albums')}>
             {albums.map((album) => (
-              <SearchAlbumRow key={album.id} album={album} onOpen={commit} />
+              <SearchAlbumRow
+                key={album.id}
+                album={album}
+                onOpen={() => openAlbum(album.id)}
+              />
             ))}
           </Section>
         )}
@@ -290,14 +307,14 @@ export default function Search() {
               <SearchArtistRow
                 key={`favorite-artist-${artist.id}`}
                 artist={artist}
-                onOpen={commit}
+                onOpen={() => openArtist(artist.id)}
               />
             ))}
             {favoriteAlbums.map((album) => (
               <SearchAlbumRow
                 key={`favorite-album-${album.id}`}
                 album={album}
-                onOpen={commit}
+                onOpen={() => openAlbum(album.id)}
               />
             ))}
           </Section>
