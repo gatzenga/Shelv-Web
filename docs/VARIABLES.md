@@ -13,6 +13,7 @@ error that names the variable.
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `NAVIDROME_URL` | required | Where Navidrome is reached from this container, e.g. `http://navidrome:4533` or `http://172.20.0.10:4533`. Use the address inside the Docker network, see [Run it next to Navidrome](../README.md#run-it-next-to-navidrome). |
+| `SHARE_BASE_URL` | empty | The address share links start with, e.g. `https://music.example.com`. Navidrome builds a link from the address it is reached on, and that is the internal one of the Docker network. Set the address that people outside can open. |
 | `PORT` | `8080` | Port inside the container. |
 
 ## Appearance and sections

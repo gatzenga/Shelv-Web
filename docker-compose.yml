@@ -7,6 +7,7 @@ services:
     environment:
       # --- Core & Server ---
       - NAVIDROME_URL=http://NAVIDROME_HOST:4533
+      # - SHARE_BASE_URL=https://music.example.com # address of share links
       - LANGUAGE=en
 
       # --- Lyrics ---

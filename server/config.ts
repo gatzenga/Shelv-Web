@@ -40,6 +40,8 @@ export interface ClientConfig {
     matchCurrentSong: boolean
   }
   scrobbleCount: number
+  // the address share links get, when it differs from the one Navidrome knows
+  shareBaseUrl: string | null
 }
 
 export interface ServerConfig {
@@ -275,6 +277,7 @@ export function loadConfig(): ServerConfig {
         matchCurrentSong: readBoolean('MATCH_CURRENT_SONG', true),
       },
       scrobbleCount: readScrobbleCount(30),
+      shareBaseUrl: readUrl('SHARE_BASE_URL', null),
     },
   }
 }

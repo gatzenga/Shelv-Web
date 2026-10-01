@@ -34,6 +34,7 @@ export interface AppConfig {
     matchCurrentSong: boolean
   }
   scrobbleCount: number
+  shareBaseUrl: string | null
 }
 
 const defaultConfig: AppConfig = {
@@ -65,6 +66,7 @@ const defaultConfig: AppConfig = {
     matchCurrentSong: true,
   },
   scrobbleCount: 30,
+  shareBaseUrl: null,
 }
 
 function loadAppConfig(): AppConfig {
