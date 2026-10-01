@@ -54,6 +54,21 @@ You sign in with your Navidrome user. The server checks it with Navidrome and gi
 
 Wrong logins are counted per address and per user, ten per address and fifty per user in ten minutes, then the login waits. The address of the visitor is the one Cloudflare names in `CF-Connecting-IP`, without Cloudflare the last entry of `X-Forwarded-For`, which your own reverse proxy adds. Use HTTPS, so the cookie cannot be read on its way.
 
+## Security
+
+Shelv Web is made to be reachable from the internet behind HTTPS, and a reverse proxy or Cloudflare in front of it. What it does about that:
+
+- **Nothing without a sign in.** Only the app, the health check and the signed radio links work without one. Everything that changes the server (lyrics database, Last.fm, radio settings) is for Navidrome administrators only.
+- **The cookie is the only way in.** A login on the address of a request is ignored, so passwords can only be tried at the login, where they are counted. A request of another site, or an `<img>` or link somebody planted, can not use the cookie for anything but pictures, songs and radio.
+- **The page runs only its own script** (Content-Security-Policy), and a biography from Last.fm keeps no pictures, no styles and only safe links.
+- **A foreign server is not a way in.** Radio streams, playlists and artwork from the internet can not lead the backend into your home network, and never reach the metadata service of a cloud. A station in your home network, like an AzuraCast next to Shelv Web, works as before. What a station sends is handed on as audio or picture, never as a page.
+- **Lyrics and covers** are looked up with what Navidrome knows of the song, and the cover cache is kept per user and limited in size.
+- **Pinned.** The base image and the GitHub actions are named by their digest and commit, Dependabot proposes the new ones. The backend runs without any package, only Node.js itself.
+
+In the compose file the container gets `no-new-privileges`, no capabilities, a read-only root filesystem (only `/tmp` and your three folders are writable) and a limit of processes. The `user:` is yours, never root.
+
+Behind Cloudflare: the address of the visitor is `CF-Connecting-IP`. The answers for a user are marked `private, no-store`, so do not turn on a rule that caches `/api/*` or `/rest/*` anyway. Changing from an older version asks you to sign in once more.
+
 ## Settings are variables
 
 There is no settings screen. Every setting is a variable, set once in `docker-compose.yml`. This is on purpose: a setting made in the browser lives in that browser. Clear the cookies or the site data, open a new session or use another device, and everything is back to the defaults and has to be set again. A variable applies to every browser and every device, and it stays.

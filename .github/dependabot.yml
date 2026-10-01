@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # The actions that build the image, and the base image itself
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: monthly
