@@ -15,11 +15,11 @@ import {
 } from '@/app/components/search/result-rows'
 import { Input } from '@/app/components/ui/input'
 import { useFavorites } from '@/app/hooks/use-favorites'
+import { ROUTES } from '@/routes/routesList'
 import { subsonic } from '@/service/subsonic'
 import { useAppStore } from '@/store/app.store'
 import { usePlayerActions } from '@/store/player.store'
 import { ISong } from '@/types/responses/song'
-import { ROUTES } from '@/routes/routesList'
 import { convertMinutesToMs } from '@/utils/convertSecondsToTime'
 import { queryKeys } from '@/utils/queryKeys'
 import {

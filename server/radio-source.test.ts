@@ -32,43 +32,49 @@ async function withServer(
 }
 
 test('resolveStream keeps original direct URL and follows redirects per request', async () => {
-  await withServer((req, res) => {
-    if (req.url?.startsWith('/direct')) {
-      res.statusCode = 302
-      res.setHeader('location', '/audio?token=dynamic')
-      res.end()
-      return
-    }
+  await withServer(
+    (req, res) => {
+      if (req.url?.startsWith('/direct')) {
+        res.statusCode = 302
+        res.setHeader('location', '/audio?token=dynamic')
+        res.end()
+        return
+      }
 
-    res.statusCode = 200
-    res.setHeader('content-type', 'audio/mpeg')
-    res.end('audio')
-  }, async (baseUrl) => {
-    const streamUrl = `${baseUrl}/direct?seed=1`
-    const stream = await resolveStream(streamUrl)
+      res.statusCode = 200
+      res.setHeader('content-type', 'audio/mpeg')
+      res.end('audio')
+    },
+    async (baseUrl) => {
+      const streamUrl = `${baseUrl}/direct?seed=1`
+      const stream = await resolveStream(streamUrl)
 
-    assert.equal(stream.kind, 'direct')
-    assert.equal(stream.url, streamUrl)
-  })
+      assert.equal(stream.kind, 'direct')
+      assert.equal(stream.url, streamUrl)
+    },
+  )
 })
 
 test('resolveStream keeps original HLS entry URL after redirect detection', async () => {
-  await withServer((req, res) => {
-    if (req.url?.startsWith('/entry')) {
-      res.statusCode = 302
-      res.setHeader('location', '/playlist.m3u8?token=dynamic')
-      res.end()
-      return
-    }
+  await withServer(
+    (req, res) => {
+      if (req.url?.startsWith('/entry')) {
+        res.statusCode = 302
+        res.setHeader('location', '/playlist.m3u8?token=dynamic')
+        res.end()
+        return
+      }
 
-    res.statusCode = 200
-    res.setHeader('content-type', 'application/vnd.apple.mpegurl')
-    res.end('#EXTM3U\n#EXT-X-VERSION:3\n#EXTINF:6,\nsegment.ts\n')
-  }, async (baseUrl) => {
-    const streamUrl = `${baseUrl}/entry?seed=2`
-    const stream = await resolveStream(streamUrl)
+      res.statusCode = 200
+      res.setHeader('content-type', 'application/vnd.apple.mpegurl')
+      res.end('#EXTM3U\n#EXT-X-VERSION:3\n#EXTINF:6,\nsegment.ts\n')
+    },
+    async (baseUrl) => {
+      const streamUrl = `${baseUrl}/entry?seed=2`
+      const stream = await resolveStream(streamUrl)
 
-    assert.equal(stream.kind, 'hls')
-    assert.equal(stream.url, streamUrl)
-  })
+      assert.equal(stream.kind, 'hls')
+      assert.equal(stream.url, streamUrl)
+    },
+  )
 })

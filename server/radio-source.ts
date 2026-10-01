@@ -1,11 +1,12 @@
 // Everything the backend has to find out about a radio stream:
 // what kind of stream it is, and where its now playing metadata comes from.
 // The metadata logic follows the Shelv player (RadioMetadataService.swift).
-import { TtlCache } from './ttl-cache.ts'
+
 import {
   type RadioUpstreamResponse,
   requestRadioUpstream,
 } from './radio-upstream.ts'
+import { TtlCache } from './ttl-cache.ts'
 
 export const userAgent = 'Shelv Web'
 
@@ -76,8 +77,10 @@ async function detectStream(
   const finalUrl = response.url
   const rawContentType = response.headers['content-type']
   const contentType =
-    (Array.isArray(rawContentType) ? rawContentType[0] : rawContentType)
-      ?.toLowerCase() ?? ''
+    (Array.isArray(rawContentType)
+      ? rawContentType[0]
+      : rawContentType
+    )?.toLowerCase() ?? ''
   const pathname = new URL(finalUrl).pathname
   const isM3uPath = /\.m3u8?$/i.test(pathname)
   const isPlsPath = /\.pls$/i.test(pathname)

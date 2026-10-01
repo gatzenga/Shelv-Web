@@ -14,11 +14,6 @@ import {
   sendText,
 } from './http.ts'
 import { logger } from './logger.ts'
-import {
-  pipeRadioUpstream,
-  readRadioUpstreamText,
-  requestRadioUpstream,
-} from './radio-upstream.ts'
 import { parseRadioSettings, RadioSettingsStore } from './radio-settings.ts'
 import {
   azuraCastNowPlaying,
@@ -28,6 +23,11 @@ import {
   resolveStream,
   userAgent,
 } from './radio-source.ts'
+import {
+  pipeRadioUpstream,
+  readRadioUpstreamText,
+  requestRadioUpstream,
+} from './radio-upstream.ts'
 import { TtlCache } from './ttl-cache.ts'
 
 interface Station {
@@ -221,8 +221,10 @@ export function createRadioHandler(config: ServerConfig) {
       })
       const rawContentType = upstream.headers['content-type']
       const contentType =
-        (Array.isArray(rawContentType) ? rawContentType[0] : rawContentType)
-          ?.toLowerCase() ?? ''
+        (Array.isArray(rawContentType)
+          ? rawContentType[0]
+          : rawContentType
+        )?.toLowerCase() ?? ''
 
       if (!upstream.ok || !isPlaylist(contentType, src)) {
         copyNodeUpstreamHeaders(res, upstream.headers)

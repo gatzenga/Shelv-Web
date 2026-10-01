@@ -1,6 +1,6 @@
+import type { IncomingMessage, RequestOptions, ServerResponse } from 'node:http'
 import { request as httpRequest, type IncomingHttpHeaders } from 'node:http'
 import { request as httpsRequest } from 'node:https'
-import type { IncomingMessage, RequestOptions, ServerResponse } from 'node:http'
 import { pipeline } from 'node:stream/promises'
 
 export interface RadioUpstreamResponse {
@@ -91,7 +91,11 @@ export async function requestRadioUpstream(
     ) {
       upstream.resume()
       currentUrl = new URL(location, currentUrl).toString()
-      if (status === 303 && currentMethod !== 'GET' && currentMethod !== 'HEAD') {
+      if (
+        status === 303 &&
+        currentMethod !== 'GET' &&
+        currentMethod !== 'HEAD'
+      ) {
         currentMethod = 'GET'
       }
       continue
