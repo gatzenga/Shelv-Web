@@ -144,6 +144,9 @@ export function LastFMDialog({ open, onOpenChange }: LastFMDialogProps) {
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
+      // only the page of this app, which the popup of Last.fm returns to
+      if (event.origin !== window.location.origin) return
+
       if (event.data?.type === 'lastfm-auth-result') {
         refreshData()
         updatePendingToken(null)

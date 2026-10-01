@@ -1,8 +1,3 @@
-export enum AuthType {
-  PASSWORD,
-  TOKEN,
-}
-
 export interface IServerConfig {
   url: string
   username: string
@@ -25,8 +20,8 @@ interface IAppPages {
   setArtistsPageViewType: (type: PageViewType) => void
 }
 
-export interface IAppData extends IServerConfig {
-  authType: AuthType | null
+// The password is only typed into the login form, it is never kept
+export interface IAppData extends Omit<IServerConfig, 'password'> {
   isServerConfigured: boolean
   osType: string
   logoutDialogState: boolean
@@ -37,7 +32,6 @@ export interface IAppActions {
   setOsType: (value: string) => void
   setUrl: (value: string) => void
   setUsername: (value: string) => void
-  setPassword: (value: string) => void
   saveConfig: (data: IServerConfig) => Promise<boolean>
   removeConfig: () => void
   setLogoutDialogState: (value: boolean) => void

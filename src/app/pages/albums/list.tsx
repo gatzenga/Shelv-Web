@@ -67,7 +67,10 @@ export default function AlbumsList() {
   const { data: allAlbums, isLoading } = useAllAlbums()
 
   const linkedFilter = searchParams.get(AlbumsSearchParams.MainFilter)
-  const linkedSort = linkedFilter ? linkedSortOptions[linkedFilter] : undefined
+  const linkedSort =
+    linkedFilter && Object.keys(linkedSortOptions).includes(linkedFilter)
+      ? linkedSortOptions[linkedFilter]
+      : undefined
 
   const [sortOption, setSortOption] = usePersistedState<AlbumSortOption>(
     'album-sort-option',

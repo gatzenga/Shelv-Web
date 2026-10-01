@@ -25,7 +25,10 @@ async function getNavidromeUrl() {
   })
   if (!response.ok) return null
 
-  const { navidromeUrl } = (await response.json()) as { navidromeUrl: string }
+  // only an administrator gets the address
+  const { navidromeUrl } = (await response.json()) as {
+    navidromeUrl: string | null
+  }
 
   return navidromeUrl
 }

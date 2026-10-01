@@ -6,14 +6,10 @@ import { shallow } from 'zustand/shallow'
 import { createWithEqualityFn } from 'zustand/traditional'
 import { login, logout } from '@/api/login'
 import { queryServerInfo } from '@/api/queryServerInfo'
-import {
-  AuthType,
-  IAppContext,
-  IServerConfig,
-  PageViewType,
-} from '@/types/serverConfig'
+import { IAppContext, IServerConfig, PageViewType } from '@/types/serverConfig'
 import { appConfig } from '@/utils/appConfig'
 import { logger } from '@/utils/logger'
+import { withoutStoredLogin } from './stored-login'
 
 // Navidrome is reached through the backend of this container (/rest/*)
 const serverUrl = window.location.origin
@@ -38,8 +34,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
             osType: '',
             url: serverUrl,
             username: '',
-            password: '',
-            authType: AuthType.TOKEN,
             protocolVersion: '1.16.0',
             serverType: 'subsonic',
             logoutDialogState: false,
@@ -68,11 +62,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
             setUsername: (value) => {
               set((state) => {
                 state.data.username = value
-              })
-            },
-            setPassword: (value) => {
-              set((state) => {
-                state.data.password = value
               })
             },
             saveConfig: async ({ url, username, password }: IServerConfig) => {
@@ -105,8 +94,6 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
                 state.data.osType = ''
                 state.data.url = serverUrl
                 state.data.username = ''
-                state.data.password = ''
-                state.data.authType = AuthType.TOKEN
                 state.data.protocolVersion = '1.16.0'
                 state.data.serverType = 'subsonic'
                 state.data.songCount = null
@@ -127,7 +114,9 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
       ),
       {
         name: 'app_store',
-        version: 1,
+        version: 2,
+        migrate: (persistedState) =>
+          withoutStoredLogin(persistedState as object),
         merge: (persistedState, currentState) => {
           try {
             // The container config always wins over values stored in the browser
@@ -144,7 +133,10 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
           }
         },
         partialize: (state) => {
-          const appStore = omit(state, 'data.logoutDialogState')
+          const appStore = omit(
+            withoutStoredLogin(state),
+            'data.logoutDialogState',
+          )
 
           return appStore
         },

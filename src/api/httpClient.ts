@@ -1,36 +1,12 @@
 import omit from 'lodash/omit'
 import { useAppStore } from '@/store/app.store'
 import { CoverArt } from '@/types/coverArtType'
-import { AuthType } from '@/types/serverConfig'
 import { appName } from '@/utils/appName'
-import { saltWord } from '@/utils/salt'
 
 export type QueryType = Record<string, string | number | undefined>
 
 export interface FetchOptions extends RequestInit {
   query?: QueryType
-}
-
-type AuthParams = { u: string; t: string; s: string } | { u: string; p: string }
-
-export function authQueryParams(
-  username: string,
-  password: string,
-  authType: AuthType | null,
-): AuthParams {
-  if (authType === AuthType.TOKEN) {
-    return {
-      u: username ?? '',
-      t: password ?? '',
-      s: saltWord,
-    }
-  } else if (authType === AuthType.PASSWORD) {
-    return {
-      u: username ?? '',
-      p: password ?? '',
-    }
-  }
-  throw new Error('Invalid/unspecified auth type')
 }
 
 // No credentials: the cookie of the login session carries them

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import path from 'node:path'
@@ -45,11 +46,41 @@ async function fileSize(filePath: string) {
 
 const configScriptTag = '<script src="./env-config.js"></script>'
 
+function escapeScript(configScript: string) {
+  return configScript.replace(/</g, '\\u003c')
+}
+
+// What the page may load and run. The only script of the page itself is the
+// config, named by its hash, anything else has to come from this server. So a
+// text that finds its way into the page can not run, call, or load anything.
+export function pageSecurityPolicy(configScript: string) {
+  const hash = createHash('sha256')
+    .update(escapeScript(configScript))
+    .digest('base64')
+
+  return [
+    "default-src 'none'",
+    `script-src 'self' 'sha256-${hash}'`,
+    // the components set their sizes and positions with style attributes
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "media-src 'self' blob:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "base-uri 'none'",
+    "form-action 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'self'",
+  ].join('; ')
+}
+
 // The config is written into the page itself instead of loading
 // /env-config.js: reverse proxies often cache every .js file for a while
 // (ignoring no-store), which kept browsers on an old config
 export function inlineConfig(html: string, configScript: string) {
-  const safeScript = configScript.replace(/</g, '\\u003c')
+  const safeScript = escapeScript(configScript)
 
   // a function, so that a $ in the config is not read as a pattern
   return html.replace(configScriptTag, () => `<script>${safeScript}</script>`)
@@ -58,6 +89,7 @@ export function inlineConfig(html: string, configScript: string) {
 export function createStaticHandler(distDir: string, configScript: string) {
   const root = path.resolve(distDir)
   const indexFile = path.join(root, 'index.html')
+  const policy = pageSecurityPolicy(configScript)
 
   async function sendIndex(req: IncomingMessage, res: ServerResponse) {
     let html: string
@@ -70,6 +102,7 @@ export function createStaticHandler(distDir: string, configScript: string) {
     }
 
     res.setHeader('cache-control', 'no-store')
+    res.setHeader('content-security-policy', policy)
     sendBuffer(
       req,
       res,

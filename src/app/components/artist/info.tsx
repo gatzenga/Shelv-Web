@@ -5,6 +5,7 @@ import { Albums } from '@/types/responses/album'
 import { IArtist } from '@/types/responses/artist'
 import { ISong } from '@/types/responses/song'
 import { sanitizeLinks } from '@/utils/parseTexts'
+import { isMusicBrainzId, safeUrl } from '@/utils/safeUrl'
 import { ArtistButtons } from './buttons'
 
 interface ArtistInfoProps {
@@ -61,7 +62,11 @@ export function ArtistBiography({ artist }: ArtistInfoProps) {
 
   if (!artistInfo?.biography) return null
 
-  const { lastFmUrl, musicBrainzId } = artistInfo
+  // both come from the server of the library, so they are checked
+  const lastFmUrl = safeUrl(artistInfo.lastFmUrl ?? '')
+  const musicBrainzId = isMusicBrainzId(artistInfo.musicBrainzId ?? '')
+    ? artistInfo.musicBrainzId
+    : null
 
   return (
     <div className="mt-8 mb-6" id="artist-biography">

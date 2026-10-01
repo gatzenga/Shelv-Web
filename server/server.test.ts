@@ -2,7 +2,8 @@
 // login, the session cookie and the protection of the routes.
 import { strict as assert } from 'node:assert'
 import { type ChildProcess, spawn } from 'node:child_process'
-import { mkdtemp, stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, mkdtemp, stat, writeFile } from 'node:fs/promises'
 import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -87,12 +88,18 @@ describe('server', () => {
     await new Promise<void>((resolve) => probe.close(() => resolve()))
 
     folder = await mkdtemp(join(tmpdir(), 'shelv-server-'))
+    await mkdir(join(folder, 'dist'))
+    await writeFile(
+      join(folder, 'dist', 'index.html'),
+      '<html><head><script src="./env-config.js"></script></head><body></body></html>',
+    )
     shelv = spawn('node', ['server/index.ts'], {
       env: {
         ...process.env,
         NAVIDROME_URL: `http://127.0.0.1:${navidromePort}`,
         LYRICS_CUSTOM_SERVER: `http://127.0.0.1:${lrclibPort}`,
         CACHE_IMAGES: 'true',
+        DIST_DIR: join(folder, 'dist'),
         PORT: String(port),
         CONFIG_DIR: join(folder, 'config'),
         LOGS_DIR: join(folder, 'logs'),
@@ -476,16 +483,25 @@ describe('server', () => {
     assert.equal((await cover(user, 'id=al-1&size=300')).status, 200)
     assert.equal(coverCalls, 1)
 
+    // the cover is written to the disk after the answer went out
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const calls: number = coverCalls
+      await cover(user, 'id=al-1&size=300')
+      if (coverCalls === calls) break
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    }
+    const kept = coverCalls
+
     // the same cover: more on the address makes no other file
     for (const extra of ['', '&junk=1', '&junk=2&v=1.16.0&c=x']) {
       const answer = await cover(user, `id=al-1&size=300${extra}`)
       assert.equal(await answer.text(), 'png')
     }
-    assert.equal(coverCalls, 1)
+    assert.equal(coverCalls, kept)
 
     // another user asks Navidrome himself, he may not be allowed to see it
     await cover(admin, 'id=al-1&size=300')
-    assert.equal(coverCalls, 2)
+    assert.equal(coverCalls, kept + 1)
   })
 
   test('a request that could fill the disk is not kept', async () => {
@@ -522,5 +538,23 @@ describe('server', () => {
 
     assert.equal(await info('vasco'), null)
     assert.match((await info('admin')) ?? '', /^http:\/\/127\.0\.0\.1:\d+$/)
+  })
+
+  test('the page only runs its own script', async () => {
+    const page = await fetch(`${base}/`)
+    const html = await page.text()
+    const policy = page.headers.get('content-security-policy') ?? ''
+
+    const inline = html.match(/<script>([\s\S]*?)<\/script>/)
+    assert.ok(inline)
+    const hash = createHash('sha256').update(inline[1]).digest('base64')
+
+    assert.ok(policy.includes(`script-src 'self' 'sha256-${hash}'`), policy)
+    assert.match(policy, /default-src 'none'/)
+    assert.equal(page.headers.get('cache-control'), 'no-store')
+
+    // the answers of the API are no pages
+    const api = await fetch(`${base}/api/health`)
+    assert.equal(api.headers.get('x-content-type-options'), 'nosniff')
   })
 })
