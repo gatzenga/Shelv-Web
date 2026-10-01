@@ -65,6 +65,8 @@ export interface ServerConfig {
     apiKey: string
     sharedSecret: string
     sessionFile: string
+    // the time span of the Frequently Played mix
+    period: LastFMPeriod
   }
   client: ClientConfig
 }
@@ -102,6 +104,29 @@ function readBoolean(name: string, fallback: boolean): boolean {
   if (value === 'false') return false
 
   throw new Error(`${name} must be "true" or "false", got "${value}"`)
+}
+
+const lastfmPeriods = [
+  '7day',
+  '1month',
+  '3month',
+  '6month',
+  '12month',
+  'overall',
+] as const
+
+export type LastFMPeriod = (typeof lastfmPeriods)[number]
+
+function readLastFMPeriod(name: string, fallback: LastFMPeriod): LastFMPeriod {
+  const value = process.env[name]?.trim().toLowerCase()
+  if (!value) return fallback
+
+  const period = lastfmPeriods.find((item) => item === value)
+  if (period) return period
+
+  throw new Error(
+    `${name} must be one of ${lastfmPeriods.join(', ')}, got "${value}"`,
+  )
 }
 
 function readLanguage(name: string, fallback: Language): Language {
@@ -222,6 +247,7 @@ export function loadConfig(): ServerConfig {
       apiKey: lastfmApiKey,
       sharedSecret: lastfmSecret,
       sessionFile: join(configDir, 'lastfm.json'),
+      period: readLastFMPeriod('LASTFM_PERIOD', '12month'),
     },
     client: {
       language: readLanguage('LANGUAGE', 'de'),

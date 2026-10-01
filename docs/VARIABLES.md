@@ -52,6 +52,7 @@ account is made in the app and kept in `config/lastfm.json`.
 | `LASTFM_API` | empty | The API key. `LASTFM_API_KEY` works as well. |
 | `LASTFM_SECRET` | empty | The shared secret. |
 | `LASTFM_TOP_SONGS` | `true` | The Top Songs of an artist come from Last.fm. Off: the songs you played most on your server. |
+| `LASTFM_PERIOD` | `12month` | The time span of the Frequently Played mix: `7day`, `1month`, `3month`, `6month`, `12month` or `overall`. A shorter span keeps the mix fresher and apart from Recently Played. |
 | `LASTFM_MIXES` | `true` | Frequently Played and Recently Played come from your Last.fm history. Off: from the play counts of your server. |
 
 ## Lyrics

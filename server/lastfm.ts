@@ -317,7 +317,12 @@ export class LastFMService {
       3,
       request,
       (client, session, page) =>
-        client.topTracks(session.username, session.sessionKey, page),
+        client.topTracks(
+          session.username,
+          session.sessionKey,
+          page,
+          this.config.lastfm.period,
+        ),
     )
   }
 

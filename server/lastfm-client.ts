@@ -119,6 +119,7 @@ export class LastFMClient {
     username: string,
     sessionKey: string,
     page: number,
+    period: string,
     limit = 100,
   ): Promise<{ tracks: LastFMTrack[]; totalPages: number }> {
     const response = await this.call<{
@@ -137,7 +138,7 @@ export class LastFMClient {
     }>('user.getTopTracks', {
       user: username,
       sk: sessionKey,
-      period: 'overall',
+      period,
       limit: String(limit),
       page: String(page),
     })
