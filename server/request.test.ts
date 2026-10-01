@@ -28,6 +28,24 @@ test('without a proxy the address of the connection counts', () => {
   assert.equal(clientAddress(request({})), '172.18.0.5')
 })
 
+test('the headers are not believed from somebody on the internet', () => {
+  const req = request(
+    { 'cf-connecting-ip': '1.1.1.1', 'x-forwarded-for': '2.2.2.2' },
+    { remoteAddress: '203.0.113.50' },
+  )
+
+  assert.equal(clientAddress(req), '203.0.113.50')
+  // a proxy on the machine itself or in the network of the containers is believed
+  for (const peer of ['127.0.0.1', '::ffff:127.0.0.1', '172.18.0.1', '::1']) {
+    const behindProxy = request(
+      { 'cf-connecting-ip': '1.1.1.1' },
+      { remoteAddress: peer },
+    )
+
+    assert.equal(clientAddress(behindProxy), '1.1.1.1', peer)
+  }
+})
+
 test('an address is cut short, whatever the visitor sends', () => {
   const req = request({ 'cf-connecting-ip': 'a'.repeat(5000) })
 

@@ -67,7 +67,7 @@ Shelv Web is made to be reachable from the internet behind HTTPS, and a reverse 
 
 In the compose file the container gets `no-new-privileges`, no capabilities, a read-only root filesystem (only `/tmp` and your three folders are writable) and a limit of processes. The `user:` is yours, never root.
 
-Behind Cloudflare: the address of the visitor is `CF-Connecting-IP`. The answers for a user are marked `private, no-store`, so do not turn on a rule that caches `/api/*` or `/rest/*` anyway. Changing from an older version asks you to sign in once more.
+Behind Cloudflare: the address of the visitor is `CF-Connecting-IP`, believed only when the connection comes from your home network, so from the proxy and not from the internet. The answers for a user are marked `private, no-store`, so do not turn on a rule that caches `/api/*` or `/rest/*` anyway. Changing from an older version asks you to sign in once more.
 
 ## Settings are variables
 

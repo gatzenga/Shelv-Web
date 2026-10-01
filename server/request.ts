@@ -1,4 +1,5 @@
 import type { IncomingMessage } from 'node:http'
+import { classifyAddress } from './network.ts'
 
 type RequestLike = Pick<IncomingMessage, 'headers' | 'socket'>
 
@@ -11,7 +12,14 @@ function header(req: RequestLike, name: string) {
 // Who is asking. Cloudflare names the visitor in CF-Connecting-IP. Any other
 // proxy adds the address it saw to the end of X-Forwarded-For, the first
 // entries are whatever the client wrote there, so only the last one counts.
+//
+// The headers are only believed when the connection comes from the home
+// network, where a proxy is. Somebody who reaches the server directly from the
+// internet can write anything into them.
 export function clientAddress(req: RequestLike) {
+  const peer = req.socket.remoteAddress
+  if (peer && classifyAddress(peer) === 'public') return peer.slice(0, 64)
+
   const address =
     header(req, 'cf-connecting-ip')?.trim() ||
     header(req, 'x-forwarded-for')?.split(',').at(-1)?.trim() ||
