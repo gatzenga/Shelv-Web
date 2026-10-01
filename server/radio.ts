@@ -38,6 +38,11 @@ interface StationsResponse {
   }
 }
 
+function browserUserAgent(req: IncomingMessage) {
+  const value = req.headers['user-agent']
+  return typeof value === 'string' && value ? value : userAgent
+}
+
 // --- signed URLs ----------------------------------------------------------
 // HLS segments and artwork are fetched by the browser without credentials.
 // Only URLs this backend wrote into a playlist or a now playing response are
@@ -200,7 +205,10 @@ export function createRadioHandler(config: ServerConfig) {
     src: string,
   ) {
     const upstream = await fetch(src, {
-      headers: { 'user-agent': userAgent, 'accept-encoding': 'identity' },
+      headers: {
+        'user-agent': browserUserAgent(req),
+        'accept-encoding': 'identity',
+      },
       signal: abortOnClose(res),
     })
     const contentType =
@@ -236,7 +244,7 @@ export function createRadioHandler(config: ServerConfig) {
     const upstream = await fetch(stream.url, {
       headers: {
         'icy-metadata': '0',
-        'user-agent': userAgent,
+        'user-agent': browserUserAgent(req),
         'accept-encoding': 'identity',
       },
       signal: abortOnClose(res),
@@ -374,7 +382,10 @@ export function createRadioHandler(config: ServerConfig) {
     }
 
     const upstream = await fetch(src, {
-      headers: { 'user-agent': userAgent, 'accept-encoding': 'identity' },
+      headers: {
+        'user-agent': browserUserAgent(req),
+        'accept-encoding': 'identity',
+      },
       signal: abortOnClose(res),
     })
     const contentType = upstream.headers.get('content-type') ?? ''
