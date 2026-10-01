@@ -247,7 +247,7 @@ export function loadConfig(): ServerConfig {
       apiKey: lastfmApiKey,
       sharedSecret: lastfmSecret,
       sessionFile: join(configDir, 'lastfm.json'),
-      period: readLastFMPeriod('LASTFM_PERIOD', '1month'),
+      period: readLastFMPeriod('LASTFM_PERIOD', '3month'),
     },
     client: {
       language: readLanguage('LANGUAGE', 'de'),
