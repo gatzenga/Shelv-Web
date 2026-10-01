@@ -48,6 +48,10 @@ Shelv Web does it differently. The browser only talks to Shelv Web, and Shelv We
 
 Running Shelv Web on another machine still works, `NAVIDROME_URL` can be any address that container can reach. Next to Navidrome is just what it is built for and what I recommend.
 
+## Login
+
+You sign in with your Navidrome user. The server checks it with Navidrome and gives the browser a cookie (HttpOnly, SameSite Strict, 30 days). After that the browser sends only the cookie, the login itself is not sent with every request and does not show up in addresses or logs. Too many wrong logins from one address are stopped for a while. Use HTTPS, so the cookie cannot be read on its way.
+
 ## Settings are variables
 
 There is no settings screen. Every setting is a variable, set once in `docker-compose.yml`. This is on purpose: a setting made in the browser lives in that browser. Clear the cookies or the site data, open a new session or use another device, and everything is back to the defaults and has to be set again. A variable applies to every browser and every device, and it stays.

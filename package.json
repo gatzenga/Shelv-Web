@@ -10,6 +10,8 @@
     "build": "tsc -p tsconfig.json && tsc -p server/tsconfig.json && vite build",
     "start": "node server/index.ts",
     "lint": "biome lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p server/tsconfig.json --noEmit",
+    "test": "node --test \"server/**/*.test.ts\"",
     "lint:fix": "biome lint --write",
     "lint:check": "biome check --write",
     "lint:format": "biome format --write",

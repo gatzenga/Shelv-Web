@@ -89,4 +89,5 @@ These are not variables. The app writes them, you can move or edit them.
 | File | Content |
 | --- | --- |
 | `lastfm.json` | The Last.fm session. |
+| `sessions.json` | The logged in sessions: the id from the cookie of the browser and the login it stands for. Delete the file to log everyone out. |
 | `azuracast.json` | Per radio station: use the AzuraCast API, its URL, show the song cover. Set in the dialog of a station. |

@@ -4,7 +4,7 @@ import { devtools, persist, subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { shallow } from 'zustand/shallow'
 import { createWithEqualityFn } from 'zustand/traditional'
-import { pingServer } from '@/api/pingServer'
+import { login, logout } from '@/api/login'
 import { queryServerInfo } from '@/api/queryServerInfo'
 import {
   AuthType,
@@ -14,7 +14,6 @@ import {
 } from '@/types/serverConfig'
 import { appConfig } from '@/utils/appConfig'
 import { logger } from '@/utils/logger'
-import { genEncodedPassword, genPasswordToken } from '@/utils/salt'
 
 // Navidrome is reached through the backend of this container (/rest/*)
 const serverUrl = window.location.origin
@@ -77,43 +76,30 @@ export const useAppStore = createWithEqualityFn<IAppContext>()(
               })
             },
             saveConfig: async ({ url, username, password }: IServerConfig) => {
-              // try both token and password methods
-              for (const authType of [AuthType.TOKEN, AuthType.PASSWORD]) {
-                const token =
-                  authType === AuthType.TOKEN
-                    ? genPasswordToken(password)
-                    : genEncodedPassword(password)
+              const canConnect = await login(url, username, password)
 
-                const canConnect = await pingServer(
-                  url,
-                  username,
-                  token,
-                  authType,
-                )
-
+              if (canConnect) {
                 const serverInfo = await queryServerInfo(url)
 
-                if (canConnect) {
-                  set((state) => {
-                    state.data.url = url
-                    state.data.username = username
-                    state.data.password = token
-                    state.data.authType = authType
-                    state.data.protocolVersion = serverInfo.protocolVersion
-                    state.data.serverType = serverInfo.serverType
-                    state.data.isServerConfigured = true
-                    state.data.extensionsSupported =
-                      serverInfo.extensionsSupported
-                  })
-                  return true
-                }
+                set((state) => {
+                  state.data.url = url
+                  state.data.username = username
+                  state.data.protocolVersion = serverInfo.protocolVersion
+                  state.data.serverType = serverInfo.serverType
+                  state.data.isServerConfigured = true
+                  state.data.extensionsSupported =
+                    serverInfo.extensionsSupported
+                })
+                return true
               }
+
               set((state) => {
                 state.data.isServerConfigured = false
               })
               return false
             },
             removeConfig: () => {
+              logout()
               set((state) => {
                 state.data.isServerConfigured = false
                 state.data.osType = ''

@@ -4,11 +4,11 @@ import { subsonic } from '@/service/subsonic'
 import { useAppStore } from '@/store/app.store'
 
 export async function protectedLoader() {
-  const { url, password, isServerConfigured } = useAppStore.getState().data
+  const { url, username, isServerConfigured } = useAppStore.getState().data
   const hasNoUrl = !url || url === ''
-  const hasNoToken = !password || password === ''
+  const hasNoUser = !username || username === ''
 
-  if (hasNoUrl || hasNoToken || !isServerConfigured)
+  if (hasNoUrl || hasNoUser || !isServerConfigured)
     return redirect(ROUTES.SERVER_CONFIG)
 
   const isServerUp = await subsonic.ping.pingView()

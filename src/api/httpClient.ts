@@ -33,12 +33,11 @@ export function authQueryParams(
   throw new Error('Invalid/unspecified auth type')
 }
 
+// No credentials: the cookie of the login session carries them
 function queryParams() {
-  const { username, password, authType, protocolVersion } =
-    useAppStore.getState().data
+  const { protocolVersion } = useAppStore.getState().data
 
   return {
-    ...authQueryParams(username, password, authType),
     v: protocolVersion || '1.16.0',
     c: appName,
     f: 'json',
