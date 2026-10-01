@@ -5,22 +5,22 @@ services:
     restart: unless-stopped
     user: UID:GID
     environment:
-      # --- Core & Server ---
+      # Server
       - NAVIDROME_URL=http://NAVIDROME_HOST:4533
       # - SHARE_BASE_URL=https://music.example.com # address of share links
       - LANGUAGE=en
 
-      # --- Lyrics ---
+      # Lyrics
       - LYRICS_NAVIDROME=true
       # - LYRICS_CUSTOM_SERVER=https://custom-lrclib.org
       - LYRICS_LRCLIB=true
 
-      # --- Scrobbling & Playback ---
+      # Playback
       - SCROBBLE_COUNT=30 # 10, 20, 30, 40, 50 (%)
       - SONGS_TO_ADD=5
       - MATCH_CURRENT_SONG=true
 
-      # --- UI Customization ---
+      # Interface
       - SIDEBAR_ARTISTS=true
       - SIDEBAR_ALBUMS=true
       - SIDEBAR_GENRES=true
@@ -29,14 +29,14 @@ services:
       - FEATURE_PLAYLISTS=true
       - DISCOVER_SECTIONS=smart-mixes,recently-added,recently-played,frequently-played,random-albums
 
-      # --- Last.fm ---
+      # Last.fm
       - LASTFM_API=YOUR_LASTFM_API_KEY
       - LASTFM_SECRET=YOUR_LASTFM_SECRET
       - LASTFM_TOP_SONGS=true
       - LASTFM_MIXES=true
       # - LASTFM_PERIOD=3month # 7day, 1month, 3month, 6month, 12month, overall
 
-      # --- Cache ---
+      # Cache
       - CACHE_IMAGES=true
       - CACHE_LYRICS=true
     volumes:
