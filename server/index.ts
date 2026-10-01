@@ -21,7 +21,7 @@ import { LyricsDatabase } from './lyrics-db.ts'
 import { LyricsService } from './lyrics-service.ts'
 import { createRadioHandler } from './radio.ts'
 import { clientAddress, isHttps, mayUseSession } from './request.ts'
-import { sendServerInfo } from './server-info.ts'
+import { sendServerInfo, withoutLogin } from './server-info.ts'
 import {
   LoginLimiter,
   parseCookies,
@@ -44,6 +44,10 @@ if (isCacheEnabled) {
     await mkdir(config.cache.dir, { recursive: true })
     await access(config.cache.dir, constants.W_OK)
     cache = new DiskCache(config.cache.dir)
+    // what an earlier run left behind may be over the limit
+    for (const kind of ['images', 'lyrics'] as const) {
+      cache.prune(kind).catch(() => {})
+    }
   } catch (error) {
     // The player keeps working without cache, e.g. when the volume is read-only
     logger.error(
@@ -434,7 +438,7 @@ server.listen(config.port, () => {
     .map(([name]) => name)
 
   logger.info(`listening on port ${config.port}`)
-  logger.info(`navidrome: ${config.navidromeUrl}`)
+  logger.info(`navidrome: ${withoutLogin(config.navidromeUrl)}`)
   logger.info(`lyrics server: ${config.lyricsServer ?? 'disabled'}`)
   logger.info(
     `cache: ${cache && enabledCaches.length > 0 ? `${enabledCaches.join(', ')} in ${config.cache.dir}` : 'disabled'}`,

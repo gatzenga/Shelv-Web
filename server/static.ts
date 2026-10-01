@@ -48,10 +48,11 @@ const configScriptTag = '<script src="./env-config.js"></script>'
 // The config is written into the page itself instead of loading
 // /env-config.js: reverse proxies often cache every .js file for a while
 // (ignoring no-store), which kept browsers on an old config
-function inlineConfig(html: string, configScript: string) {
+export function inlineConfig(html: string, configScript: string) {
   const safeScript = configScript.replace(/</g, '\\u003c')
 
-  return html.replace(configScriptTag, `<script>${safeScript}</script>`)
+  // a function, so that a $ in the config is not read as a pattern
+  return html.replace(configScriptTag, () => `<script>${safeScript}</script>`)
 }
 
 export function createStaticHandler(distDir: string, configScript: string) {

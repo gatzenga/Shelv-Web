@@ -9,6 +9,8 @@ import { join } from 'node:path'
 import { after, before, describe, test } from 'node:test'
 
 const seenByNavidrome: string[] = []
+const askedForLyrics: string[] = []
+let coverCalls = 0
 
 function listen(server: Server) {
   return new Promise<number>((resolve) => {
@@ -21,6 +23,7 @@ function listen(server: Server) {
 
 describe('server', () => {
   let navidrome: Server
+  let lrclib: Server
   let shelv: ChildProcess
   let base: string
   let folder: string
@@ -43,11 +46,40 @@ describe('server', () => {
       if (url.pathname.endsWith('getUser')) {
         body.user = { username: user, adminRole: user === 'admin' }
       }
+      if (url.pathname.endsWith('getSong')) {
+        if (url.searchParams.get('id') === 'real-1') {
+          body.song = {
+            id: 'real-1',
+            title: 'Real Title',
+            artist: 'Real Artist',
+            duration: 200,
+          }
+        } else {
+          body.status = 'failed'
+        }
+      }
+
+      if (url.pathname.endsWith('getCoverArt') && isKnown) {
+        coverCalls++
+        res.setHeader('content-type', 'image/png')
+        res.end('png')
+        return
+      }
 
       res.setHeader('content-type', 'application/json')
       res.end(JSON.stringify({ 'subsonic-response': body }))
     })
     const navidromePort = await listen(navidrome)
+
+    // a pretend LRCLIB, it is told what the server asks for
+    lrclib = createServer((req, res) => {
+      const url = new URL(req.url ?? '/', 'http://x')
+      askedForLyrics.push(url.searchParams.get('track_name') ?? '')
+
+      res.setHeader('content-type', 'application/json')
+      res.end(JSON.stringify({ plainLyrics: '50% of the words\nsecond line' }))
+    })
+    const lrclibPort = await listen(lrclib)
 
     // a free port for the server under test
     const probe = createServer()
@@ -59,6 +91,8 @@ describe('server', () => {
       env: {
         ...process.env,
         NAVIDROME_URL: `http://127.0.0.1:${navidromePort}`,
+        LYRICS_CUSTOM_SERVER: `http://127.0.0.1:${lrclibPort}`,
+        CACHE_IMAGES: 'true',
         PORT: String(port),
         CONFIG_DIR: join(folder, 'config'),
         LOGS_DIR: join(folder, 'logs'),
@@ -80,7 +114,12 @@ describe('server', () => {
 
   after(async () => {
     shelv.kill()
-    await new Promise<void>((resolve) => navidrome.close(() => resolve()))
+    await Promise.all(
+      [navidrome, lrclib].map(
+        (server) =>
+          new Promise<void>((resolve) => server.close(() => resolve())),
+      ),
+    )
   })
 
   // The address of the visitor comes from Cloudflare, like in production
@@ -381,5 +420,107 @@ describe('server', () => {
     const response = await fetch(`${base}//evil.example/api/health`)
 
     assert.equal(response.status, 400)
+  })
+
+  test('the lyrics of a song are looked up with what Navidrome knows of it', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const get = (query: string) =>
+      fetch(`${base}/api/lrclib/api/get?${query}`, { headers: { cookie } })
+    askedForLyrics.length = 0
+
+    assert.equal((await get('track_name=x')).status, 400)
+    assert.equal((await get('song_id=nothing&track_name=x')).status, 404)
+    assert.deepEqual(askedForLyrics, [])
+
+    // the title that comes along is not believed, an id could be given lyrics
+    // of another song for everybody otherwise
+    const answer = await get('song_id=real-1&track_name=Planted%20Title')
+    assert.equal(answer.status, 200)
+    assert.equal(
+      ((await answer.json()) as { trackName: string }).trackName,
+      'Real Title',
+    )
+    assert.deepEqual(askedForLyrics, ['Real Title'])
+
+    // the second time they come from the database
+    assert.equal(
+      (await get('song_id=real-1&track_name=Planted%20Title')).status,
+      200,
+    )
+    assert.deepEqual(askedForLyrics, ['Real Title'])
+  })
+
+  test('the lyrics search has a smallest word and takes % as a letter', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const search = async (query: string) => {
+      const response = await fetch(
+        `${base}/api/lyrics/search?q=${encodeURIComponent(query)}&limit=100000`,
+        { headers: { cookie } },
+      )
+
+      return ((await response.json()) as { results: unknown[] }).results
+    }
+
+    assert.equal((await search('5')).length, 0)
+    assert.equal((await search('%%')).length, 0)
+    assert.equal((await search('50%')).length, 1)
+  })
+
+  test('a cover is kept for the user who asked, once for any address', async () => {
+    const user = cookieOf(await login('vasco', 'good'))
+    const admin = cookieOf(await login('admin', 'good'))
+    const cover = (cookie: string, query: string) =>
+      fetch(`${base}/rest/getCoverArt?${query}`, { headers: { cookie } })
+    coverCalls = 0
+
+    assert.equal((await cover(user, 'id=al-1&size=300')).status, 200)
+    assert.equal(coverCalls, 1)
+
+    // the same cover: more on the address makes no other file
+    for (const extra of ['', '&junk=1', '&junk=2&v=1.16.0&c=x']) {
+      const answer = await cover(user, `id=al-1&size=300${extra}`)
+      assert.equal(await answer.text(), 'png')
+    }
+    assert.equal(coverCalls, 1)
+
+    // another user asks Navidrome himself, he may not be allowed to see it
+    await cover(admin, 'id=al-1&size=300')
+    assert.equal(coverCalls, 2)
+  })
+
+  test('a request that could fill the disk is not kept', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const cover = (query: string) =>
+      fetch(`${base}/rest/getCoverArt?${query}`, { headers: { cookie } })
+    coverCalls = 0
+
+    for (const query of [
+      'id=al-2&size=99999',
+      'id=al-2&size=-1',
+      'id=al-2&id=al-3',
+      `id=${'a'.repeat(300)}`,
+    ]) {
+      await cover(query)
+      await cover(query)
+    }
+
+    assert.equal(coverCalls, 8)
+  })
+
+  test('only an administrator gets the internal address of Navidrome', async () => {
+    const info = async (user: string) => {
+      const cookie = cookieOf(
+        await login(user, 'good', `10.4.${user.length}.1`),
+      )
+      const response = await fetch(`${base}/api/server-info`, {
+        headers: { cookie },
+      })
+
+      return ((await response.json()) as { navidromeUrl: string | null })
+        .navidromeUrl
+    }
+
+    assert.equal(await info('vasco'), null)
+    assert.match((await info('admin')) ?? '', /^http:\/\/127\.0\.0\.1:\d+$/)
   })
 })

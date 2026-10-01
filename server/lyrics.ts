@@ -5,6 +5,20 @@ import { sendJson } from './http.ts'
 import type { LyricsService, SongMetadata } from './lyrics-service.ts'
 import { createClient } from './subsonic-client.ts'
 
+const minimumSearchLength = 2
+
+interface SongOfNavidrome {
+  song?: {
+    id: string
+    title?: string
+    artist?: string
+    album?: string
+    albumId?: string
+    coverArt?: string
+    duration?: number
+  }
+}
+
 export function createLyricsHandler(
   config: ServerConfig,
   lyricsService: LyricsService,
@@ -26,9 +40,16 @@ export function createLyricsHandler(
     // 2. Search endpoint
     if (pathname === '/api/lyrics/search') {
       res.setHeader('cache-control', 'no-store')
-      const query = url.searchParams.get('q') ?? ''
-      const limit = Number(url.searchParams.get('limit')) || 40
-      const results = lyricsService.searchLyrics(query, 'default', limit)
+      const query = (url.searchParams.get('q') ?? '').trim()
+      // a search runs over every text of the database while the server waits
+      const limit = Math.min(
+        Math.max(Number(url.searchParams.get('limit')) || 40, 1),
+        100,
+      )
+      const results =
+        query.length >= minimumSearchLength
+          ? lyricsService.searchLyrics(query, 'default', limit)
+          : []
       sendJson(res, 200, { results })
       return
     }
@@ -88,34 +109,41 @@ export function createLyricsHandler(
         return
       }
 
-      const trackName = url.searchParams.get('track_name')?.trim()
-      const artistName = url.searchParams.get('artist_name')?.trim()
-      const albumName = url.searchParams.get('album_name')?.trim()
-      const durationStr = url.searchParams.get('duration')?.trim()
       const songId = url.searchParams.get('song_id')?.trim()
 
-      if (!trackName) {
-        sendJson(res, 400, { error: 'track_name is required' })
+      if (!songId) {
+        sendJson(res, 400, { error: 'song_id is required' })
         return
       }
 
-      const song: SongMetadata = {
-        id: songId || `title:${trackName}:${artistName || ''}`,
-        title: trackName,
-        artist: artistName || null,
-        album: albumName || null,
-        duration: durationStr ? Number(durationStr) : null,
-      }
+      // The lyrics are kept for everybody under the id of the song, so what
+      // belongs to that id comes from Navidrome and not from the browser
+      const navidrome = createClient(config, url.searchParams)
+      let song: SongMetadata
+      try {
+        const known = (
+          await navidrome<SongOfNavidrome>('getSong', { id: songId })
+        ).song
+        if (!known?.title) throw new Error('no title')
 
-      let navClient = null
-      if (config.lyrics.includeNavidrome && url.searchParams.has('u')) {
-        navClient = createClient(config, url.searchParams)
+        song = {
+          id: songId,
+          title: known.title,
+          artist: known.artist || null,
+          album: known.album || null,
+          albumId: known.albumId || null,
+          coverArt: known.coverArt || null,
+          duration: known.duration ?? null,
+        }
+      } catch {
+        sendJson(res, 404, { error: 'song not found' })
+        return
       }
 
       const record = await lyricsService.fetchAndSave(
         song,
         'default',
-        navClient,
+        config.lyrics.includeNavidrome ? navidrome : null,
       )
 
       if (!record || record.source === 'none') {
@@ -125,8 +153,8 @@ export function createLyricsHandler(
 
       sendJson(res, 200, {
         id: 0,
-        trackName: record.songTitle || trackName,
-        artistName: record.artistName || artistName || '',
+        trackName: record.songTitle || song.title,
+        artistName: record.artistName || song.artist || '',
         plainLyrics: record.plainText,
         syncedLyrics: record.syncedLrc,
         instrumental: record.isInstrumental,

@@ -8,8 +8,8 @@ import type { ServerConfig } from './config.ts'
 import {
   abortOnClose,
   copyNodeUpstreamHeaders,
-  pipeUpstream,
   readBody,
+  sendBuffer,
   sendJson,
   sendText,
 } from './http.ts'
@@ -25,6 +25,8 @@ import {
 } from './radio-source.ts'
 import {
   pipeRadioUpstream,
+  type RadioUpstreamResponse,
+  readRadioUpstreamBuffer,
   readRadioUpstreamText,
   requestRadioUpstream,
 } from './radio-upstream.ts'
@@ -42,6 +44,14 @@ interface StationsResponse {
     internetRadioStations?: {
       internetRadioStation?: { id: string; name: string; streamUrl: string }[]
     }
+  }
+}
+
+function hasSameHost(address: string, other: string | null | undefined) {
+  try {
+    return Boolean(other) && new URL(address).host === new URL(other ?? '').host
+  } catch {
+    return false
   }
 }
 
@@ -71,25 +81,66 @@ function hasValidSignature(value: string, signature: string | null) {
   return expected.length === actual.length && timingSafeEqual(expected, actual)
 }
 
-function hlsProxyUrl(stationId: string, src: string, expiresAt: number) {
+// lan: the playlist is in the home network, so what it names may be as well.
+// A playlist from the internet may never send the backend into the home network.
+function hlsProxyUrl(
+  stationId: string,
+  src: string,
+  expiresAt: number,
+  lan: boolean,
+) {
   const params = new URLSearchParams({
     id: stationId,
     src,
     exp: String(expiresAt),
-    sig: sign(`hls|${stationId}|${src}|${expiresAt}`),
+    lan: lan ? '1' : '0',
+    sig: sign(`hls|${stationId}|${src}|${expiresAt}|${lan ? 1 : 0}`),
   })
 
   return `/api/radio/hls?${params}`
 }
 
-function artworkProxyUrl(src: string, revision: string) {
+function artworkProxyUrl(src: string, revision: string, lan: boolean) {
   const params = new URLSearchParams({
     src,
-    sig: sign(`art|${src}`),
+    lan: lan ? '1' : '0',
+    sig: sign(`art|${src}|${lan ? 1 : 0}`),
     rev: revision,
   })
 
   return `/api/radio/art?${params}`
+}
+
+// --- what is passed on ------------------------------------------------------
+// The links of the segments and of the artwork work without a login, and what
+// comes back from a foreign server must not run as a page of this app. So only
+// audio and pictures keep their type, anything else is a plain download, and
+// the answer may not do anything on its own.
+
+const streamTypes =
+  /^(audio\/|video\/|application\/(ogg|mp4|octet-stream|vnd\.apple\.mpegurl|x-mpegurl|mpegurl)|binary\/octet-stream)/
+const pictureTypes = /^image\/(png|jpeg|jpg|gif|webp|avif|bmp)$/
+
+function safeType(value: string | string[] | undefined, allowed: RegExp) {
+  const type = (Array.isArray(value) ? value[0] : value)?.toLowerCase().trim()
+
+  return type && allowed.test(type) ? type : 'application/octet-stream'
+}
+
+function copyRadioHeaders(
+  res: ServerResponse,
+  upstream: RadioUpstreamResponse,
+) {
+  copyNodeUpstreamHeaders(res, upstream.headers)
+  res.setHeader(
+    'content-type',
+    safeType(upstream.headers['content-type'], streamTypes),
+  )
+  res.removeHeader('content-disposition')
+}
+
+function forbidActiveContent(res: ServerResponse) {
+  res.setHeader('content-security-policy', "default-src 'none'; sandbox")
 }
 
 // Shelv: RadioNowPlayingMetadata.artworkRevisionToken. The station art URL
@@ -118,10 +169,15 @@ function isPlaylist(contentType: string, url: string) {
   )
 }
 
-function rewritePlaylist(text: string, baseUrl: string, stationId: string) {
+function rewritePlaylist(
+  text: string,
+  baseUrl: string,
+  stationId: string,
+  lan: boolean,
+) {
   const expiresAt = Date.now() + hlsUrlLifetime
   const proxied = (uri: string) =>
-    hlsProxyUrl(stationId, new URL(uri, baseUrl).toString(), expiresAt)
+    hlsProxyUrl(stationId, new URL(uri, baseUrl).toString(), expiresAt, lan)
 
   return text
     .split(/\r?\n/)
@@ -210,6 +266,7 @@ export function createRadioHandler(config: ServerConfig) {
     res: ServerResponse,
     stationId: string,
     src: string,
+    allowPrivate?: boolean,
   ) {
     try {
       const upstream = await requestRadioUpstream(src, {
@@ -218,6 +275,7 @@ export function createRadioHandler(config: ServerConfig) {
           'accept-encoding': 'identity',
         },
         signal: abortOnClose(res),
+        allowPrivate,
       })
       const rawContentType = upstream.headers['content-type']
       const contentType =
@@ -227,13 +285,18 @@ export function createRadioHandler(config: ServerConfig) {
         )?.toLowerCase() ?? ''
 
       if (!upstream.ok || !isPlaylist(contentType, src)) {
-        copyNodeUpstreamHeaders(res, upstream.headers)
+        copyRadioHeaders(res, upstream)
         await pipeRadioUpstream(req, res, upstream)
         return
       }
 
       const text = await readRadioUpstreamText(upstream, 1024 * 1024)
-      const playlist = rewritePlaylist(text, upstream.url || src, stationId)
+      const playlist = rewritePlaylist(
+        text,
+        upstream.url || src,
+        stationId,
+        upstream.allowPrivate,
+      )
 
       res.setHeader('cache-control', 'no-cache')
       sendText(res, 200, playlist, 'application/vnd.apple.mpegurl')
@@ -269,7 +332,7 @@ export function createRadioHandler(config: ServerConfig) {
       })
 
       res.setHeader('cache-control', 'no-store')
-      copyNodeUpstreamHeaders(res, upstream.headers)
+      copyRadioHeaders(res, upstream)
       await pipeRadioUpstream(req, res, upstream, { live: true })
     } catch (error) {
       logger.error(
@@ -288,18 +351,22 @@ export function createRadioHandler(config: ServerConfig) {
     const stationId = url.searchParams.get('id') ?? ''
     const src = url.searchParams.get('src') ?? ''
     const expiresAt = Number(url.searchParams.get('exp'))
+    const lan = url.searchParams.get('lan') === '1'
     const signature = url.searchParams.get('sig')
 
     const isValid =
       expiresAt > Date.now() &&
-      hasValidSignature(`hls|${stationId}|${src}|${expiresAt}`, signature)
+      hasValidSignature(
+        `hls|${stationId}|${src}|${expiresAt}|${lan ? 1 : 0}`,
+        signature,
+      )
 
     if (!isValid) {
       sendJson(res, 403, { error: 'invalid or expired link' })
       return
     }
 
-    await serveHlsResource(req, res, stationId, src)
+    await serveHlsResource(req, res, stationId, src, lan)
   }
 
   async function handleProbe(res: ServerResponse, url: URL) {
@@ -333,9 +400,12 @@ export function createRadioHandler(config: ServerConfig) {
     }
 
     if (nowPlaying.artworkUrl) {
+      // the picture on the host of the AzuraCast API may be where that host is
+      const apiUrl = settings?.useAzuraCastApi ? settings.apiUrl : null
       nowPlaying.artworkUrl = artworkProxyUrl(
         nowPlaying.artworkUrl,
         artworkRevision(nowPlaying),
+        hasSameHost(nowPlaying.artworkUrl, apiUrl),
       )
     }
 
@@ -401,28 +471,43 @@ export function createRadioHandler(config: ServerConfig) {
     url: URL,
   ) {
     const src = url.searchParams.get('src') ?? ''
+    const lan = url.searchParams.get('lan') === '1'
 
-    if (!hasValidSignature(`art|${src}`, url.searchParams.get('sig'))) {
+    if (
+      !hasValidSignature(
+        `art|${src}|${lan ? 1 : 0}`,
+        url.searchParams.get('sig'),
+      )
+    ) {
       sendJson(res, 403, { error: 'invalid link' })
       return
     }
 
-    const upstream = await fetch(src, {
+    const upstream = await requestRadioUpstream(src, {
       headers: {
         'user-agent': browserUserAgent(req),
         'accept-encoding': 'identity',
       },
       signal: abortOnClose(res),
+      // the host of the AzuraCast API, is in the home network or not, and
+      // the picture may be where it is. Any other host: only the internet.
+      allowPrivate: lan ? undefined : false,
     })
-    const contentType = upstream.headers.get('content-type') ?? ''
+    const contentType = safeType(upstream.headers['content-type'], pictureTypes)
 
-    if (!upstream.ok || !contentType.startsWith('image/')) {
-      upstream.body?.cancel().catch(() => {})
+    if (!upstream.ok || !pictureTypes.test(contentType)) {
+      upstream.body.resume()
       sendJson(res, 404, { error: 'no artwork' })
       return
     }
 
-    await pipeUpstream(req, res, upstream)
+    // a picture is small, a server that never stops is not a picture
+    sendBuffer(
+      req,
+      res,
+      await readRadioUpstreamBuffer(upstream, 8 * 1024 * 1024),
+      contentType,
+    )
   }
 
   return async function handleRadio(
@@ -443,6 +528,9 @@ export function createRadioHandler(config: ServerConfig) {
       sendJson(res, 405, { error: 'method not allowed' })
       return
     }
+
+    // what is passed on from a foreign server can not run as a page of this app
+    forbidActiveContent(res)
 
     switch (url.pathname) {
       case '/api/radio/stream':

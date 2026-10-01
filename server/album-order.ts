@@ -2,7 +2,7 @@
 // first). With reverse=true the backend loads the whole list once, reverses
 // it and serves it page by page, so the player can sort both ways.
 import type { ServerResponse } from 'node:http'
-import { credentialsKey } from './auth.ts'
+import { authParams, credentialsKey } from './auth.ts'
 import type { ServerConfig } from './config.ts'
 import { sendJson } from './http.ts'
 import { TtlCache } from './ttl-cache.ts'
@@ -57,27 +57,44 @@ async function loadFullList(config: ServerConfig, params: URLSearchParams) {
   return envelope ? { envelope, albums } : null
 }
 
+// What makes a list another list. Anything else on the address is dropped, so
+// it can not be used to have the whole library loaded again and again.
+const listParams = [
+  ...authParams,
+  'type',
+  'genre',
+  'fromYear',
+  'toYear',
+  'musicFolderId',
+  'v',
+  'c',
+]
+
 export async function sendReversedAlbumList(
   config: ServerConfig,
   res: ServerResponse,
   searchParams: URLSearchParams,
 ) {
-  const params = new URLSearchParams(searchParams)
-  params.delete('reverse')
+  const params = new URLSearchParams()
+  for (const name of listParams) {
+    const value = searchParams.get(name)
+    if (value !== null) params.set(name, value)
+  }
 
-  const size = Math.min(Math.max(Number(params.get('size')) || 10, 1), 500)
-  const offset = Math.max(Number(params.get('offset')) || 0, 0)
-  params.delete('size')
-  params.delete('offset')
+  const size = Math.min(
+    Math.max(Number(searchParams.get('size')) || 10, 1),
+    500,
+  )
+  const offset = Math.max(Number(searchParams.get('offset')) || 0, 0)
 
-  const listParams = [...params.entries()]
-    .filter(([name]) => !['u', 't', 's', 'p', 'apiKey'].includes(name))
+  const listKey = [...params.entries()]
+    .filter(([name]) => !authParams.includes(name))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, value]) => `${name}=${value}`)
     .join('&')
 
   const list = await lists.getOrLoad(
-    `${credentialsKey(params)}|${listParams}`,
+    `${credentialsKey(params)}|${listKey}`,
     (value) => (value ? listLifetime : 0),
     () => loadFullList(config, params),
   )

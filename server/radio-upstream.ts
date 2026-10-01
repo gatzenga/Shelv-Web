@@ -1,12 +1,16 @@
 import type { IncomingMessage, RequestOptions, ServerResponse } from 'node:http'
 import { request as httpRequest, type IncomingHttpHeaders } from 'node:http'
 import { request as httpsRequest } from 'node:https'
+import { isIP } from 'node:net'
 import { pipeline } from 'node:stream/promises'
+import { guardedLookup, isAllowed, type Reach } from './network.ts'
 
 export interface RadioUpstreamResponse {
   ok: boolean
   status: number
   url: string
+  // whether the request was in the home network, see network.ts
+  allowPrivate: boolean
   headers: IncomingHttpHeaders
   body: IncomingMessage
 }
@@ -16,6 +20,8 @@ interface RadioUpstreamRequest {
   headers?: Record<string, string>
   signal?: AbortSignal
   maxRedirects?: number
+  // set for what a playlist names: it may only go where the playlist itself was
+  allowPrivate?: boolean
 }
 
 const redirectStatusCodes = new Set([301, 302, 303, 307, 308])
@@ -35,9 +41,22 @@ function performRequest(
   url: URL,
   method: string,
   headers: Record<string, string>,
+  reach: Reach,
   signal?: AbortSignal,
 ) {
   return new Promise<IncomingMessage>((resolve, reject) => {
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      reject(new Error(`${url.protocol} is not allowed`))
+      return
+    }
+
+    // A name is checked when it is looked up, an address is checked here
+    const host = url.hostname.replace(/^\[|\]$/g, '')
+    if (isIP(host) !== 0 && !isAllowed(reach, host)) {
+      reject(new Error(`${host} is not allowed`))
+      return
+    }
+
     const options: RequestOptions = {
       protocol: url.protocol,
       hostname: url.hostname,
@@ -45,6 +64,10 @@ function performRequest(
       path: `${url.pathname}${url.search}`,
       method,
       headers,
+      lookup: guardedLookup(reach),
+      // A connection that is kept for the next request would skip the check
+      agent: false,
+      // stations answer with "ICY 200 OK" and the like
       insecureHTTPParser: true,
     }
     const request = url.protocol === 'https:' ? httpsRequest : httpRequest
@@ -73,12 +96,14 @@ export async function requestRadioUpstream(
   let currentUrl = sourceUrl
   let currentMethod = method
   const maxRedirects = options.maxRedirects ?? 10
+  const reach: Reach = { allowPrivate: options.allowPrivate ?? null }
 
   for (let redirect = 0; redirect <= maxRedirects; redirect += 1) {
     const upstream = await performRequest(
       new URL(currentUrl),
       currentMethod,
       options.headers ?? {},
+      reach,
       options.signal,
     )
     const status = upstream.statusCode ?? 0
@@ -105,6 +130,7 @@ export async function requestRadioUpstream(
       ok: status >= 200 && status < 300,
       status,
       url: currentUrl,
+      allowPrivate: reach.allowPrivate ?? false,
       headers: upstream.headers,
       body: upstream,
     }
@@ -113,9 +139,9 @@ export async function requestRadioUpstream(
   throw new Error('too many redirects')
 }
 
-export async function readRadioUpstreamText(
+export async function readRadioUpstreamBuffer(
   upstream: RadioUpstreamResponse,
-  maxBytes = 1024 * 1024,
+  maxBytes: number,
 ) {
   let size = 0
   const chunks: Buffer[] = []
@@ -127,7 +153,14 @@ export async function readRadioUpstreamText(
     chunks.push(buffer)
   }
 
-  return Buffer.concat(chunks).toString('utf8')
+  return Buffer.concat(chunks)
+}
+
+export async function readRadioUpstreamText(
+  upstream: RadioUpstreamResponse,
+  maxBytes = 1024 * 1024,
+) {
+  return (await readRadioUpstreamBuffer(upstream, maxBytes)).toString('utf8')
 }
 
 export async function pipeRadioUpstream(

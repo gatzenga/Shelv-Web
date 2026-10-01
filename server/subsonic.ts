@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { isReversedAlbumList, sendReversedAlbumList } from './album-order.ts'
-import { authParams, verifyCredentials } from './auth.ts'
+import { verifyCredentials } from './auth.ts'
 import { type CacheKind, DiskCache } from './cache.ts'
 import type { ServerConfig } from './config.ts'
 import {
@@ -13,28 +13,51 @@ import {
 } from './http.ts'
 import { logger } from './logger.ts'
 
-// Params that do not change the response and therefore are not part of cache keys
-const volatileParams = new Set([...authParams, 'c', 'v'])
-
 const cacheableEndpoints: Record<string, CacheKind> = {
   getCoverArt: 'images',
   getLyrics: 'lyrics',
   getLyricsBySongId: 'lyrics',
 }
 
+// What decides the answer of an endpoint. Anything else on the address means
+// nothing to Navidrome, so it may not make another file on the disk either.
+const cacheParams: Record<string, string[]> = {
+  getCoverArt: ['id', 'size'],
+  getLyrics: ['artist', 'title'],
+  getLyricsBySongId: ['id'],
+}
+
+const idPattern = /^[\w.:-]{1,100}$/
+
+function isCacheable(name: string, value: string) {
+  if (name === 'id') return idPattern.test(value)
+  if (name === 'size') return value === '' || /^\d{1,4}$/.test(value)
+
+  return value.length <= 200
+}
+
+// null: this request is not cached. The cache is kept per user, because
+// Navidrome decides who may see a cover (a private playlist) or a song.
+function cacheKey(endpoint: string, params: URLSearchParams) {
+  const user = params.get('u')?.toLowerCase()
+  if (!user || !Object.hasOwn(cacheParams, endpoint)) return null
+
+  const parts: string[] = []
+  for (const name of cacheParams[endpoint]) {
+    const values = params.getAll(name)
+    const value = values[0] ?? ''
+    if (values.length > 1 || !isCacheable(name, value)) return null
+
+    parts.push(`${name}=${value}`)
+  }
+
+  return DiskCache.key(`${endpoint}|${user}|${parts.join('&')}`)
+}
+
 const cachedResponseMaxAge = 'private, max-age=86400'
 
 function endpointName(pathname: string) {
   return pathname.replace(/^\/rest\//, '').replace(/\.view$/, '')
-}
-
-function cacheKey(endpoint: string, params: URLSearchParams) {
-  const relevant = [...params.entries()]
-    .filter(([name]) => !volatileParams.has(name))
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([name, value]) => `${name}=${value}`)
-
-  return DiskCache.key(`${endpoint}?${relevant.join('&')}`)
 }
 
 interface LyricsResponse {
@@ -72,7 +95,10 @@ export function createSubsonicHandler(
     if (!cache) return null
     if (req.method !== 'GET' && req.method !== 'HEAD') return null
 
-    const kind = cacheableEndpoints[endpointName(url.pathname)]
+    const endpoint = endpointName(url.pathname)
+    const kind = Object.hasOwn(cacheableEndpoints, endpoint)
+      ? cacheableEndpoints[endpoint]
+      : undefined
     if (!kind || !enabledKinds[kind]) return null
 
     return kind
@@ -90,8 +116,8 @@ export function createSubsonicHandler(
       await sendReversedAlbumList(config, res, url.searchParams)
       return
     }
-    const kind = cacheKindFor(req, url)
-    const key = kind ? cacheKey(endpoint, url.searchParams) : null
+    const key = cacheKey(endpoint, url.searchParams)
+    const kind = key ? cacheKindFor(req, url) : null
 
     if (cache && kind && key) {
       const entry = await cache.get(kind, key)

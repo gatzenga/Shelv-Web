@@ -72,8 +72,8 @@ sources are asked. With none turned on, the public LRCLIB (lrclib.net) is used.
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `CACHE_IMAGES` | `false` | Keep cover images on disk. |
-| `CACHE_LYRICS` | `false` | Keep lyrics on disk. |
+| `CACHE_IMAGES` | `false` | Keep cover images on disk, per user, at most 2 GB. When it is full the oldest files go. |
+| `CACHE_LYRICS` | `false` | Keep lyrics on disk, per user, at most 256 MB. |
 | `CACHE_DIR` | `/cache` | Folder of the cache. |
 | `CONFIG_DIR` | `/config` | Folder of the files below. |
 | `LOGS_DIR` | `/logs` | Folder of the logs. |

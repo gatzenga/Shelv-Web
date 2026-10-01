@@ -1,8 +1,10 @@
+import { createHash } from 'node:crypto'
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { dirname } from 'node:path'
 import type { ServerConfig } from './config.ts'
 import { sendJson } from './http.ts'
+import { PendingApproval } from './lastfm-approval.ts'
 import { LastFMClient } from './lastfm-client.ts'
 import { lastfmLog } from './lastfm-log.ts'
 import {
@@ -84,6 +86,7 @@ export class LastFMService {
   private problem: LastFMConnectionProblem | null = null
   private lastChecked: string | null = null
 
+  private approval = new PendingApproval()
   private matchCache = new Map<string, CachedMatch>()
   private artistTracksCache = new Map<
     string,
@@ -140,11 +143,11 @@ export class LastFMService {
     try {
       await mkdir(dirname(this.sessionFile), { recursive: true })
       if (session) {
-        await writeFile(
-          this.sessionFile,
-          JSON.stringify(session, null, 2),
-          'utf-8',
-        )
+        // the session key is a login to the account of the user
+        await writeFile(this.sessionFile, JSON.stringify(session, null, 2), {
+          encoding: 'utf-8',
+          mode: 0o600,
+        })
       } else {
         await unlink(this.sessionFile).catch(() => {})
       }
@@ -231,6 +234,7 @@ export class LastFMService {
     }
     try {
       const token = await this.client.requestToken()
+      this.approval.start(token)
       const authUrl = LastFMClient.authorizationURL(
         this.client.apiKey,
         token,
@@ -251,6 +255,13 @@ export class LastFMService {
 
   async completeAuthorization(token: string): Promise<boolean> {
     if (!this.client) return false
+
+    // Nobody but the administrator who started it may bring a token: nothing
+    // else is passed on to Last.fm, noted in the log or changes the status
+    const approval = this.approval.check(token)
+    if (approval === 'unknown') return false
+    if (approval === 'done') return true
+
     try {
       const session = await this.client.requestSession(token)
       await this.saveSession({
@@ -258,6 +269,7 @@ export class LastFMService {
         username: session.username,
         isEnabled: true,
       })
+      this.approval.finish()
       this.matchCache.clear()
       lastfmLog.success(`Connected as ${session.username}`)
       this.state = 'connected'
@@ -555,9 +567,31 @@ export function createLastFMHandler(service: LastFMService) {
         success = await service.completeAuthorization(token)
       }
 
+      // Only this page, with only this script: nothing else may run on it
+      const script = `
+    document.getElementById('close').addEventListener('click', function() {
+      window.close();
+    });
+    if (window.opener) {
+      window.opener.postMessage({ type: 'lastfm-auth-result', success: ${success} }, window.location.origin);
+    }${
+      success
+        ? `
+    setTimeout(function() {
+      window.close();
+    }, 1200);`
+        : ''
+    }
+  `
+      const scriptHash = createHash('sha256').update(script).digest('base64')
+
       res.statusCode = 200
       res.setHeader('content-type', 'text/html; charset=utf-8')
       res.setHeader('cache-control', 'no-store')
+      res.setHeader(
+        'content-security-policy',
+        `default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-${scriptHash}'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
+      )
       res.end(`<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -631,20 +665,9 @@ export function createLastFMHandler(service: LastFMService) {
       <p>Die Freigabe konnte nicht abgeschlossen werden. Du kannst das Fenster schließen und es erneut versuchen.</p>
     `
     }
-    <button class="btn" onclick="window.close()">Fenster schließen</button>
+    <button class="btn" id="close">Fenster schließen</button>
   </div>
-  <script>
-    if (window.opener) {
-      window.opener.postMessage({ type: 'lastfm-auth-result', success: ${success} }, '*');
-    }
-    ${
-      success
-        ? `setTimeout(function() {
-      window.close();
-    }, 1200);`
-        : ''
-    }
-  </script>
+  <script>${script}</script>
 </body>
 </html>`)
       return

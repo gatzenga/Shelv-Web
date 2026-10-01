@@ -271,7 +271,8 @@ export class LyricsDatabase {
     const trimmed = text.trim()
     if (!this.db || !trimmed) return []
 
-    const pattern = `%${trimmed}%`
+    // % and _ are letters here, not wildcards
+    const pattern = `%${trimmed.replace(/[\\%_]/g, '\\$&')}%`
     try {
       const stmt = this.db.prepare(`
         SELECT songId, songTitle, artistName, albumId, coverArt, plainText, songDuration
@@ -279,7 +280,7 @@ export class LyricsDatabase {
         WHERE serverId = ?
           AND source != 'none'
           AND isInstrumental = 0
-          AND plainText LIKE ? COLLATE NOCASE
+          AND plainText LIKE ? COLLATE NOCASE ESCAPE '\\'
         ORDER BY COALESCE(songTitle, songId)
         LIMIT ?
       `)
