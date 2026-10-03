@@ -64,8 +64,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ghcr.io/gatzenga/shelv-web:latest
-            ghcr.io/gatzenga/shelv-web:${{ github.sha }}
+          # Only latest: with a second tag GitHub shows that one in "Install from the command line"
+          tags: ghcr.io/gatzenga/shelv-web:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
