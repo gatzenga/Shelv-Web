@@ -74,12 +74,12 @@ export default function AlbumsList() {
 
   const [sortOption, setSortOption] = usePersistedState<AlbumSortOption>(
     'album-sort-option',
-    'recentlyAdded',
+    'name',
     isSortOption,
   )
   const [direction, setDirection] = usePersistedState<SortDirection>(
     'album-sort-direction',
-    'desc',
+    'asc',
     isDirection,
   )
   const [viewType, setViewType] = usePersistedState<PageViewType>(

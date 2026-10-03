@@ -37,18 +37,24 @@ export function getLatestRelease(albums: Albums[]) {
   }, undefined)
 }
 
+// The albums of an artist keep their own sort, separate from the Library's list.
+// It is one setting for every artist, on the artist page and on its album list.
+const ARTIST_SORT_OPTION_KEY = 'artist-album-sort-option'
+const ARTIST_SORT_DIRECTION_KEY = 'artist-album-sort-direction'
+const DEFAULT_ARTIST_SORT: AlbumSortOption = 'name'
+
 export function getPersistedAlbumSort(): {
   sortOption: AlbumSortOption
   direction: SortDirection
 } {
   try {
-    const rawOption = localStorage.getItem('album-sort-option')
-    const option = rawOption ? JSON.parse(rawOption) : 'recentlyAdded'
+    const rawOption = localStorage.getItem(ARTIST_SORT_OPTION_KEY)
+    const option = rawOption ? JSON.parse(rawOption) : DEFAULT_ARTIST_SORT
     const validOption: AlbumSortOption = isSortOption(option)
       ? option
-      : 'recentlyAdded'
+      : DEFAULT_ARTIST_SORT
 
-    const rawDir = localStorage.getItem('album-sort-direction')
+    const rawDir = localStorage.getItem(ARTIST_SORT_DIRECTION_KEY)
     const dir = rawDir ? JSON.parse(rawDir) : naturalDirection(validOption)
     const validDir: SortDirection = isDirection(dir)
       ? dir
@@ -56,21 +62,24 @@ export function getPersistedAlbumSort(): {
 
     return { sortOption: validOption, direction: validDir }
   } catch {
-    return { sortOption: 'recentlyAdded', direction: 'desc' }
+    return {
+      sortOption: DEFAULT_ARTIST_SORT,
+      direction: naturalDirection(DEFAULT_ARTIST_SORT),
+    }
   }
 }
 
 export function useAlbumSort(
   albums: Albums[] | undefined,
-  initialOption: AlbumSortOption = 'recentlyAdded',
+  initialOption: AlbumSortOption = DEFAULT_ARTIST_SORT,
 ) {
   const [sortOption, setSortOption] = usePersistedState<AlbumSortOption>(
-    'album-sort-option',
+    ARTIST_SORT_OPTION_KEY,
     initialOption,
     isSortOption,
   )
   const [direction, setDirection] = usePersistedState<SortDirection>(
-    'album-sort-direction',
+    ARTIST_SORT_DIRECTION_KEY,
     naturalDirection(sortOption),
     isDirection,
   )
