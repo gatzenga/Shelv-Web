@@ -24,6 +24,9 @@ interface RadioUpstreamRequest {
   allowPrivate?: boolean
 }
 
+// no data at all for this long: the stream is dead
+const liveIdleTimeout = 20_000
+
 const redirectStatusCodes = new Set([301, 302, 303, 307, 308])
 
 function createAbortError() {
@@ -167,11 +170,19 @@ export async function pipeRadioUpstream(
   req: IncomingMessage,
   res: ServerResponse,
   upstream: RadioUpstreamResponse,
-  options: { live?: boolean } = {},
+  options: { live?: boolean; idleTimeout?: number } = {},
 ) {
   res.statusCode = upstream.status
 
-  if (options.live) res.removeHeader('content-length')
+  if (options.live) {
+    res.removeHeader('content-length')
+
+    // A station that stops sending without closing the connection would leave
+    // the player silent for good. Ending it lets the player reconnect.
+    upstream.body.setTimeout(options.idleTimeout ?? liveIdleTimeout, () => {
+      upstream.body.destroy(new Error('the station stopped sending'))
+    })
+  }
 
   if (req.method === 'HEAD') {
     upstream.body.resume()

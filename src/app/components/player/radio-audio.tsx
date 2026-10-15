@@ -25,6 +25,9 @@ type RadioAudioProps = Omit<ComponentPropsWithoutRef<'audio'>, 'src'> & {
 const maxReconnectAttempts = 5
 // Buffering longer than this counts as a dead stream
 const stallTimeout = 15000
+// A stream that is playing but whose time does not move for this long is dead
+// as well, even when the browser reports neither buffering nor an error
+const frozenTimeout = 8000
 
 // Safari on macOS and every browser on iOS play HLS with Apple's own player,
 // the reference implementation. Everywhere else hls.js is used, because the
@@ -119,6 +122,26 @@ export function RadioAudio({ radio, audioRef, ...props }: RadioAudioProps) {
       clearStall()
       setBuffering(false)
     }
+
+    // Looks every few seconds whether the audio still moves
+    let lastTime = -1
+    let frozenSince = 0
+    const watchdog = setInterval(() => {
+      if (audio.paused || audio.ended || reconnectTimerRef.current) {
+        lastTime = -1
+        return
+      }
+      if (audio.currentTime !== lastTime) {
+        lastTime = audio.currentTime
+        frozenSince = Date.now()
+        return
+      }
+      if (lastTime > 0 && Date.now() - frozenSince >= frozenTimeout) {
+        logger.info('[Radio] audio stopped without a message, reconnecting')
+        lastTime = -1
+        scheduleReconnect()
+      }
+    }, 2000)
     // audio keeps moving, so any pending stall is over
     const onProgress = () => {
       if (audio.paused) return
@@ -224,6 +247,7 @@ export function RadioAudio({ radio, audioRef, ...props }: RadioAudioProps) {
     return () => {
       isActive = false
       clearStall()
+      clearInterval(watchdog)
       audio.removeEventListener('playing', onPlaying)
       audio.removeEventListener('waiting', onWaiting)
       audio.removeEventListener('timeupdate', onProgress)

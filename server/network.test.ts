@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert'
 import { createServer, type Server } from 'node:http'
 import { after, before, describe, test } from 'node:test'
 import { classifyAddress, isAllowed } from './network.ts'
-import { requestRadioUpstream } from './radio-upstream.ts'
+import { pipeRadioUpstream, requestRadioUpstream } from './radio-upstream.ts'
 
 test('addresses are told apart', () => {
   const kinds: Record<string, string> = {
@@ -134,5 +134,48 @@ describe('requests to foreign servers', () => {
       requestRadioUpstream('file:///etc/passwd'),
       /not allowed/,
     )
+  })
+})
+
+describe('a station that stops sending', () => {
+  test('is cut off, so the player can reconnect', async () => {
+    const station = createServer((_req, res) => {
+      res.writeHead(200, { 'content-type': 'audio/mpeg' })
+      res.write('some music')
+      // and then nothing, the connection stays open
+    })
+    await new Promise<void>((resolve) =>
+      station.listen(0, '127.0.0.1', () => resolve()),
+    )
+    const address = station.address()
+    const port = typeof address === 'object' && address ? address.port : 0
+
+    const upstream = await requestRadioUpstream(`http://127.0.0.1:${port}/`)
+    const listener = createServer((req, res) => {
+      pipeRadioUpstream(req, res, upstream, {
+        live: true,
+        idleTimeout: 150,
+      }).catch(() => res.destroy())
+    })
+    await new Promise<void>((resolve) =>
+      listener.listen(0, '127.0.0.1', () => resolve()),
+    )
+    const listenerAddress = listener.address()
+    const listenerPort =
+      typeof listenerAddress === 'object' && listenerAddress
+        ? listenerAddress.port
+        : 0
+
+    const started = Date.now()
+    const answer = await fetch(`http://127.0.0.1:${listenerPort}/`)
+    await assert.rejects(answer.arrayBuffer())
+
+    assert.ok(Date.now() - started < 3000)
+    station.closeAllConnections()
+    listener.closeAllConnections()
+    await Promise.all([
+      new Promise<void>((resolve) => station.close(() => resolve())),
+      new Promise<void>((resolve) => listener.close(() => resolve())),
+    ])
   })
 })
