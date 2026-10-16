@@ -34,11 +34,17 @@ export function useOptions() {
   }
 
   function playNext(list: ISong[]) {
+    if (list.length === 0) return
+
     setNextOnQueue(list)
+    toast.success(t('album.actions.addedToPlayNext'))
   }
 
   function playLast(list: ISong[]) {
+    if (list.length === 0) return
+
     setLastOnQueue(list)
+    toast.success(t('album.actions.addedToQueue'))
   }
 
   // Built by the backend like in the Shelv player (server/instant-mix.ts)
@@ -93,10 +99,16 @@ export function useOptions() {
   })
 
   async function addToPlaylist(id: string, songIdToAdd: SongIdToAdd) {
-    await updateMutation.mutateAsync({
-      playlistId: id,
-      songIdToAdd,
-    })
+    try {
+      await updateMutation.mutateAsync({
+        playlistId: id,
+        songIdToAdd,
+      })
+      toast.success(t('options.playlist.added'))
+    } catch (error) {
+      logger.error('[Playlist] adding songs failed', error)
+      toast.error(t('options.playlist.addFailed'))
+    }
   }
 
   const createMutation = useMutation({
@@ -109,12 +121,18 @@ export function useOptions() {
   })
 
   async function createNewPlaylist(name: string, songIdToAdd: SongIdToAdd) {
-    await createMutation.mutateAsync({
-      name,
-      comment: '',
-      isPublic: 'false',
-      songIdToAdd,
-    })
+    try {
+      await createMutation.mutateAsync({
+        name,
+        comment: '',
+        isPublic: 'false',
+        songIdToAdd,
+      })
+      toast.success(t('options.playlist.created', { name }))
+    } catch (error) {
+      logger.error('[Playlist] creating failed', error)
+      toast.error(t('options.playlist.addFailed'))
+    }
   }
 
   function removeSongFromPlaylist(songIndexes: string[]) {

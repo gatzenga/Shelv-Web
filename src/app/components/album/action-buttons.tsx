@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'react-toastify'
 import { AddToPlaylistSubMenu } from '@/app/components/song/add-to-playlist'
 import { Button } from '@/app/components/ui/button'
 import {
@@ -164,7 +163,6 @@ export function AlbumActionButtons({
               label={t('options.playNext')}
               onClick={() => {
                 playNext(album.song)
-                toast.success(t('album.actions.addedToPlayNext'))
               }}
             />
             <Action
@@ -172,7 +170,6 @@ export function AlbumActionButtons({
               label={t('options.addLast')}
               onClick={() => {
                 playLast(album.song)
-                toast.success(t('album.actions.addedToQueue'))
               }}
             />
           </>

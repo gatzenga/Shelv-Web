@@ -516,6 +516,9 @@
     "addLast": "Add to Queue",
     "download": "Download",
     "playlist": {
+      "added": "Added to playlist",
+      "created": "Playlist \"{{name}}\" created",
+      "addFailed": "Could not add the songs",
       "add": "Add to playlist",
       "edit": "Edit playlist",
       "delete": "Delete playlist",

@@ -11,7 +11,6 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'react-toastify'
 import { Action, PlaylistAction } from '@/app/components/album/action-buttons'
 import { Button } from '@/app/components/ui/button'
 import { SimpleTooltip } from '@/app/components/ui/simple-tooltip'
@@ -106,15 +105,8 @@ export function ArtistButtons({
     }
   }
 
-  async function addToQueue(
-    add: (songs: ISong[]) => void,
-    messageKey: 'addedToPlayNext' | 'addedToQueue',
-  ) {
-    const songs = await loadSongs()
-    if (songs.length === 0) return
-
-    add(songs)
-    toast.success(t(`album.actions.${messageKey}`))
+  async function addToQueue(add: (songs: ISong[]) => void) {
+    add(await loadSongs())
   }
 
   function handleLikeButton() {
@@ -156,12 +148,12 @@ export function ArtistButtons({
         <Action
           icon={ListPlusIcon}
           label={t('options.playNext')}
-          onClick={() => addToQueue(playNext, 'addedToPlayNext')}
+          onClick={() => addToQueue(playNext)}
         />
         <Action
           icon={ListEndIcon}
           label={t('options.addLast')}
-          onClick={() => addToQueue(playLast, 'addedToQueue')}
+          onClick={() => addToQueue(playLast)}
         />
 
         {!pages.hidePlaylistsSection && (

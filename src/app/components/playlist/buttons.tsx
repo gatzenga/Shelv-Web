@@ -6,7 +6,6 @@ import {
   ShuffleIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'react-toastify'
 import { Action, plainButton } from '@/app/components/album/action-buttons'
 import { Button } from '@/app/components/ui/button'
 import {
@@ -80,7 +79,6 @@ export function PlaylistButtons({ playlist }: PlaylistButtonsProps) {
               label={t('options.playNext')}
               onClick={() => {
                 playNext(playlist.entry)
-                toast.success(t('album.actions.addedToPlayNext'))
               }}
             />
             <Action
@@ -88,7 +86,6 @@ export function PlaylistButtons({ playlist }: PlaylistButtonsProps) {
               label={t('options.addLast')}
               onClick={() => {
                 playLast(playlist.entry)
-                toast.success(t('album.actions.addedToQueue'))
               }}
             />
           </>

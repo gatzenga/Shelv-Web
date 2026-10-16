@@ -507,6 +507,9 @@
     "addLast": "Zur Warteschlange",
     "download": "Herunterladen",
     "playlist": {
+      "added": "Zur Playlist hinzugefügt",
+      "created": "Playlist \"{{name}}\" erstellt",
+      "addFailed": "Songs konnten nicht hinzugefügt werden",
       "add": "Zur Playlist hinzufügen",
       "edit": "Playlist bearbeiten",
       "search": "Eine Playlist suchen",
