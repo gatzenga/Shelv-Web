@@ -52,7 +52,8 @@ function cacheKey(endpoint: string, params: URLSearchParams) {
     parts.push(`${name}=${value}`)
   }
 
-  return DiskCache.key(`${endpoint}|${user}|${parts.join('&')}`)
+  // v2: what an earlier version kept, among it placeholders, is not used any more
+  return DiskCache.key(`v2|${endpoint}|${user}|${parts.join('&')}`)
 }
 
 // Navidrome gives a cover ten seconds, and makes a large one the first time it
@@ -174,8 +175,15 @@ export function createSubsonicHandler(
     }
 
     const body = Buffer.from(await upstream.arrayBuffer())
+    // Navidrome marks the placeholder it sends for a cover it can not find
+    // right now as no-store. Kept, it would stay for good.
+    const isPlaceholder = /no-store/i.test(
+      upstream.headers.get('cache-control') ?? '',
+    )
     const isCacheable =
-      kind === 'images' ? contentType.startsWith('image/') : hasLyrics(body)
+      kind === 'images'
+        ? contentType.startsWith('image/') && !isPlaceholder
+        : hasLyrics(body)
 
     if (isCacheable) {
       cache.put(kind, key, body, contentType).catch((error) => {

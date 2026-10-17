@@ -79,6 +79,10 @@ describe('server', () => {
       if (url.pathname.endsWith('getCoverArt') && isKnown) {
         coverCalls++
         res.setHeader('content-type', 'image/png')
+        // Navidrome sends this for the placeholder of a cover it can not find
+        if (url.searchParams.get('id') === 'al-placeholder') {
+          res.setHeader('cache-control', 'no-store')
+        }
         res.end('png')
         return
       }
@@ -593,5 +597,25 @@ describe('server', () => {
       counts,
       [...counts].sort((a, b) => b - a),
     )
+  })
+
+  test('the placeholder of Navidrome is not kept', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const cover = (id: string) =>
+      fetch(`${base}/rest/getCoverArt?id=${id}&size=300`, {
+        headers: { cookie },
+      })
+    coverCalls = 0
+
+    await (await cover('al-placeholder')).arrayBuffer()
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await (await cover('al-placeholder')).arrayBuffer()
+    assert.equal(coverCalls, 2)
+
+    // a real cover is kept
+    await (await cover('al-real')).arrayBuffer()
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await (await cover('al-real')).arrayBuffer()
+    assert.equal(coverCalls, 3)
   })
 })
