@@ -91,6 +91,8 @@ export async function httpClient<T>(
   }
 }
 
+const coverVersion = '3'
+
 export function getSimpleCoverArtUrl(
   id?: string,
   type: CoverArt = 'album',
@@ -102,7 +104,9 @@ export function getSimpleCoverArtUrl(
     return `/default_${resolvedType}_art.png`
   }
 
-  return getUrl('getCoverArt', { id, size })
+  // cv: a browser keeps a picture under its address, and older versions let it
+  // keep a placeholder for a day. A new address asks again.
+  return getUrl('getCoverArt', { id, size, cv: coverVersion })
 }
 
 export async function getCoverArtUrl(

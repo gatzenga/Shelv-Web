@@ -85,6 +85,7 @@ describe('server', () => {
         const size = Number(url.searchParams.get('size') || 0)
         if (
           id === 'al-placeholder' ||
+          id === 'placeholder' ||
           (id === 'al-picky' && size > 0 && size < 600)
         ) {
           res.setHeader('cache-control', 'no-store')

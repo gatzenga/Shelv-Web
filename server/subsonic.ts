@@ -136,7 +136,9 @@ async function realCover(
   return fallback
 }
 
-const cachedResponseMaxAge = 'private, max-age=86400'
+// no max-age: a browser keeps a picture for that long, whatever it is. Without
+// it the browser asks again, which costs nothing on the same machine.
+const cachedResponseMaxAge = 'private, no-cache'
 
 function endpointName(pathname: string) {
   return pathname.replace(/^\/rest\//, '').replace(/\.view$/, '')
