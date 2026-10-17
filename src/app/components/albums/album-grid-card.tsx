@@ -20,7 +20,7 @@ function AlbumCard({ album, subtitleType = 'artist' }: AlbumCardProps) {
     <AlbumCardContextMenu albumId={album.id}>
       <PreviewCard.Root>
         <PreviewCard.ImageWrapper link={ROUTES.ALBUM.PAGE(album.id)}>
-          <ImageLoader id={album.coverArt} type="album" size={300}>
+          <ImageLoader id={album.coverArt || album.id} type="album" size={300}>
             {(src) => <PreviewCard.Image src={src} alt={album.name} />}
           </ImageLoader>
         </PreviewCard.ImageWrapper>

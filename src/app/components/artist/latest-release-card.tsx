@@ -22,7 +22,7 @@ export function LatestReleaseCard({ album }: LatestReleaseCardProps) {
         data-testid="artist-latest-release"
       >
         <div className="w-[88px] h-[88px] min-w-[88px] rounded-lg overflow-hidden bg-skeleton shadow-sm">
-          <ImageLoader id={album.coverArt} type="album" size="300">
+          <ImageLoader id={album.coverArt || album.id} type="album" size="300">
             {(src) => (
               <RetryLazyImage
                 src={src}

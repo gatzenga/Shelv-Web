@@ -649,4 +649,17 @@ describe('server', () => {
     assert.equal(response.status, 200)
     assert.equal(await response.text(), 'png')
   })
+
+  test('a cover is found by the id of the album when its own id gives the placeholder', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const response = await fetch(
+      `${base}/rest/getCoverArt?id=al-stale_ab12&size=300`,
+      {
+        headers: { cookie },
+      },
+    )
+
+    // al-stale_ab12 only gives the placeholder, the album id "stale" the cover
+    assert.equal(await response.text(), 'png')
+  })
 })

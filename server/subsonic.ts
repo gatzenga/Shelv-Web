@@ -90,6 +90,17 @@ async function realCover(
   const same = new URL(target)
   variants.push({ label: 'again', url: same, wait: placeholderRetryDelay })
 
+  // Navidrome also takes the id of the album itself, without the version that
+  // the id of a cover carries (al-<id>_<version>), and finds the cover from it
+  const album = /^al-(.+?)(?:_[0-9a-f]+)?$/i.exec(
+    target.searchParams.get('id') ?? '',
+  )
+  if (album) {
+    const byAlbum = new URL(target)
+    byAlbum.searchParams.set('id', album[1])
+    variants.push({ label: 'by the id of the album', url: byAlbum, wait: 0 })
+  }
+
   if (size > 0) {
     const larger = new URL(target)
     larger.searchParams.set('size', String(Math.min(size * 2, 1200)))

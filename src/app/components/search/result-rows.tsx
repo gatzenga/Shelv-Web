@@ -98,7 +98,7 @@ export function SearchAlbumRow({ album, onOpen }: AlbumRowProps) {
         <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
           <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden shrink-0 shadow-sm">
             <CoverImage
-              coverArt={album.coverArt}
+              coverArt={album.coverArt || album.id}
               coverArtType="album"
               altText={album.name}
               size={44}

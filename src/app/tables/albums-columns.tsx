@@ -54,7 +54,7 @@ export function albumsColumns(): ColumnDefType<Albums>[] {
       cell: ({ row }) => (
         <div className="flex gap-2 items-center min-w-[200px] 2xl:min-w-[350px]">
           <CoverImage
-            coverArt={row.original.coverArt}
+            coverArt={row.original.coverArt || row.original.id}
             coverArtType="album"
             altText={row.original.name}
           />
