@@ -1,7 +1,7 @@
 import { Play } from 'lucide-react'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { Link } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { cn } from '@/lib/utils'
 import { CoverArt } from '@/types/coverArtType'
 
@@ -49,7 +49,7 @@ export function RankRow({
       >
         <ImageLoader id={coverArtId} type={coverArtType} size="100">
           {(src) => (
-            <LazyLoadImage
+            <RetryLazyImage
               src={src}
               alt={title}
               effect="opacity"

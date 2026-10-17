@@ -1,7 +1,7 @@
 import { Play } from 'lucide-react'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { EqualizerBars } from '@/app/components/icons/equalizer-bars'
 import { ImageLoader } from '@/app/components/image-loader'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { SongMenuOptions } from '@/app/components/song/menu-options'
 import { TableActionButton } from '@/app/components/table/action-button'
 import { ContextMenuProvider } from '@/app/components/table/context-menu'
@@ -54,7 +54,7 @@ export function TopSongRow({ song, index, onPlay }: TopSongRowProps) {
           <div className="w-11 h-11 min-w-11 min-h-11 rounded-md overflow-hidden relative bg-skeleton shadow-sm shrink-0">
             <ImageLoader id={song.coverArt} type="album" size="80">
               {(src) => (
-                <LazyLoadImage
+                <RetryLazyImage
                   src={src}
                   alt={song.title}
                   effect="opacity"

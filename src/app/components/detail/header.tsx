@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { ImageLoader } from '@/app/components/image-loader'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { cn } from '@/lib/utils'
 import { CoverArt } from '@/types/coverArtType'
 
@@ -37,7 +37,7 @@ export function DetailHeader({
         >
           <ImageLoader id={coverArtId} type={coverArtType} size="700">
             {(src) => (
-              <LazyLoadImage
+              <RetryLazyImage
                 key={coverArtId}
                 effect="opacity"
                 src={src}

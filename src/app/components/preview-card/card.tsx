@@ -1,7 +1,7 @@
 import { Pause, Play } from 'lucide-react'
 import React, { ComponentPropsWithoutRef } from 'react'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { Link } from 'react-router-dom'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { Button } from '@/app/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -54,7 +54,7 @@ interface ImageProps {
 
 function Image({ src, alt }: ImageProps) {
   return (
-    <LazyLoadImage
+    <RetryLazyImage
       src={src}
       alt={alt}
       effect="opacity"

@@ -12,6 +12,7 @@ import {
   upstreamHeaders,
 } from './http.ts'
 import { logger } from './logger.ts'
+import { Semaphore } from './semaphore.ts'
 
 const cacheableEndpoints: Record<string, CacheKind> = {
   getCoverArt: 'images',
@@ -53,6 +54,11 @@ function cacheKey(endpoint: string, params: URLSearchParams) {
 
   return DiskCache.key(`${endpoint}|${user}|${parts.join('&')}`)
 }
+
+// Navidrome gives a cover ten seconds, and makes a large one the first time it
+// is asked for. Thirty at once, as a page of albums asks, make each other slow
+// enough to fail. A few at a time is faster in the end.
+const coverRequests = new Semaphore(6)
 
 const cachedResponseMaxAge = 'private, max-age=86400'
 
@@ -132,6 +138,17 @@ export function createSubsonicHandler(
         })
         return
       }
+    }
+
+    if (endpoint === 'getCoverArt') {
+      const release = await coverRequests.acquire()
+
+      // the browser may have gone while it waited for its turn
+      if (res.destroyed) {
+        release()
+        return
+      }
+      res.once('close', release)
     }
 
     const upstream = await fetch(target, {

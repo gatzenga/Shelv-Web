@@ -1,5 +1,5 @@
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { ImageLoader } from '@/app/components/image-loader'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { cn } from '@/lib/utils'
 import { CoverArt } from '@/types/coverArtType'
 
@@ -36,7 +36,7 @@ export function CoverImage({
     >
       <ImageLoader id={coverArt} type={coverArtType} size={coverArtSize}>
         {(src) => (
-          <LazyLoadImage
+          <RetryLazyImage
             src={src}
             alt={altText}
             effect="opacity"

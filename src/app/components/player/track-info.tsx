@@ -3,10 +3,10 @@ import { AudioLines } from 'lucide-react'
 import { useCallback } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { useTranslation } from 'react-i18next'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { Link } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
 import { MarqueeTitle } from '@/app/components/marquee-title'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/routes/routesList'
 import { useSongColor } from '@/store/player.store'
@@ -74,7 +74,7 @@ export function TrackInfo({ song }: { song: ISong | undefined }) {
         <div className="min-w-[70px] max-w-[70px] aspect-square bg-cover bg-center bg-skeleton rounded overflow-hidden shadow-md relative">
           <ImageLoader id={song.coverArt} type="song" size={400}>
             {(src) => (
-              <LazyLoadImage
+              <RetryLazyImage
                 key={song.id}
                 id="track-song-image"
                 src={src}

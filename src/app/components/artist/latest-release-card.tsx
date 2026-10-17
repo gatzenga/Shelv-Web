@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { LazyLoadImage } from 'react-lazy-load-image-component'
 import { Link } from 'react-router-dom'
 import { ImageLoader } from '@/app/components/image-loader'
 import { AlbumCardContextMenu } from '@/app/components/preview-card/card-menu'
+import { RetryLazyImage } from '@/app/components/retry-lazy-image'
 import { ROUTES } from '@/routes/routesList'
 import { Albums } from '@/types/responses/album'
 
@@ -24,7 +24,7 @@ export function LatestReleaseCard({ album }: LatestReleaseCardProps) {
         <div className="w-[88px] h-[88px] min-w-[88px] rounded-lg overflow-hidden bg-skeleton shadow-sm">
           <ImageLoader id={album.coverArt} type="album" size="300">
             {(src) => (
-              <LazyLoadImage
+              <RetryLazyImage
                 src={src}
                 alt={album.name}
                 effect="opacity"
