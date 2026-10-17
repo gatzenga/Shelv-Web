@@ -25,6 +25,8 @@ const Album = lazy(() => import('@/app/pages/albums/album'))
 const AlbumsList = lazy(() => import('@/app/pages/albums/list'))
 const Artist = lazy(() => import('@/app/pages/artists/artist'))
 const ArtistDiscography = lazy(() => import('@/app/pages/artists/discography'))
+const ArtistTopSongsPage = lazy(() => import('@/app/pages/artists/top-songs'))
+const DiscoverListPage = lazy(() => import('@/app/pages/discover/list'))
 const ArtistsList = lazy(() => import('@/app/pages/artists/list'))
 const ErrorPage = lazy(() => import('@/app/pages/error-page'))
 const Search = lazy(() => import('@/app/pages/search/search'))
@@ -140,6 +142,26 @@ export const router = createHashRouter([
         element: (
           <Suspense fallback={<AlbumsFallback />}>
             <ArtistDiscography />
+          </Suspense>
+        ),
+      },
+      {
+        id: 'artist-top-songs',
+        path: ROUTES.ARTIST.TOP_SONGS_PATH,
+        errorElement: <ErrorPage />,
+        element: (
+          <Suspense fallback={<SongListFallback />}>
+            <ArtistTopSongsPage />
+          </Suspense>
+        ),
+      },
+      {
+        id: 'discover-list',
+        path: ROUTES.DISCOVER.PATH,
+        errorElement: <ErrorPage />,
+        element: (
+          <Suspense fallback={<AlbumsFallback />}>
+            <DiscoverListPage />
           </Suspense>
         ),
       },

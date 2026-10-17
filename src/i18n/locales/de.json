@@ -435,6 +435,7 @@
       "albumsCount_other": "{{count}} Veröffentlichungen"
     },
     "topSongs": "Top-Titel",
+    "topSongsOf": "Top-Titel von {{artist}}",
     "albums": "Alben",
     "discography": "Diskografie",
     "latestRelease": "Neueste Veröffentlichung",

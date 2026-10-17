@@ -47,6 +47,22 @@ describe('server', () => {
       if (url.pathname.endsWith('getUser')) {
         body.user = { username: user, adminRole: user === 'admin' }
       }
+      if (url.pathname.endsWith('getArtist')) {
+        body.artist = {
+          name: 'Artist',
+          album: ['al-1', 'al-2', 'al-3'].map((id) => ({ id })),
+        }
+      }
+      if (url.pathname.endsWith('getAlbum')) {
+        const album = url.searchParams.get('id') ?? ''
+        body.album = {
+          song: Array.from({ length: 10 }, (_, i) => ({
+            id: `${album}-${i}`,
+            title: `Song ${album}-${i}`,
+            playCount: (album === 'al-1' ? 100 : 50) - i,
+          })),
+        }
+      }
       if (url.pathname.endsWith('getSong')) {
         if (url.searchParams.get('id') === 'real-1') {
           body.song = {
@@ -556,5 +572,26 @@ describe('server', () => {
     // the answers of the API are no pages
     const api = await fetch(`${base}/api/health`)
     assert.equal(api.headers.get('x-content-type-options'), 'nosniff')
+  })
+
+  test('the top songs of an artist are twenty, the most played first', async () => {
+    const cookie = cookieOf(await login('vasco', 'good'))
+    const response = await fetch(
+      `${base}/api/artist-top-songs?artistId=ar1&topSongs=false`,
+      {
+        headers: { cookie },
+      },
+    )
+    const { songs } = (await response.json()) as {
+      songs: { title: string; playCount: number }[]
+    }
+
+    assert.equal(songs.length, 20)
+    assert.equal(songs[0].title, 'Song al-1-0')
+    const counts = songs.map((song) => song.playCount)
+    assert.deepEqual(
+      counts,
+      [...counts].sort((a, b) => b - a),
+    )
   })
 })

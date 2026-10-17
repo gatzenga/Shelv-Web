@@ -124,7 +124,10 @@ export default function Artist() {
       <ListWrapper>
         {topSongsIsLoading && <TopSongsTableFallback />}
         {topSongs && !topSongsIsLoading && (
-          <ArtistTopSongs topSongs={topSongs} />
+          <ArtistTopSongs
+            topSongs={topSongs}
+            titleRoute={ROUTES.ARTIST.TOP_SONGS(artist.id)}
+          />
         )}
 
         {albumSort.sortedAlbums.length > 0 && (

@@ -274,6 +274,7 @@
       "albumsCount_other": "{{count}} releases"
     },
     "topSongs": "Top Songs",
+    "topSongsOf": "Top Songs of {{artist}}",
     "albums": "Albums",
     "discography": "Discography",
     "latestRelease": "Latest Release",

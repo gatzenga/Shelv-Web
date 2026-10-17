@@ -18,6 +18,22 @@ const ARTIST = {
   DISCOGRAPHY: (artistId: string) =>
     `${LIBRARY.ARTISTS}/${artistId}/discography`,
   DISCOGRAPHY_PATH: `${LIBRARY.ARTISTS}/:artistId/discography`,
+  TOP_SONGS: (artistId: string) => `${LIBRARY.ARTISTS}/${artistId}/top-songs`,
+  TOP_SONGS_PATH: `${LIBRARY.ARTISTS}/:artistId/top-songs`,
+}
+
+// The lists of the Discover page, each with its own page
+export const discoverLists = [
+  'recently-added',
+  'recently-played',
+  'frequently-played',
+  'random-albums',
+] as const
+export type DiscoverList = (typeof discoverLists)[number]
+
+const DISCOVER = {
+  PAGE: (list: DiscoverList) => `/discover/${list}`,
+  PATH: '/discover/:list',
 }
 
 const ALBUM = {
@@ -63,6 +79,7 @@ const SERVER_CONFIG = '/server-config'
 export const ROUTES = {
   LIBRARY,
   ARTIST,
+  DISCOVER,
   ALBUM,
   ALBUMS,
   FAVORITES,

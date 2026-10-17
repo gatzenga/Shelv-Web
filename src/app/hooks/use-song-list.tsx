@@ -4,6 +4,7 @@ import { subsonic } from '@/service/subsonic'
 import { getLastFMOptions } from '@/store/lastfm-options.store'
 import { Albums } from '@/types/responses/album'
 import { ISong } from '@/types/responses/song'
+import { topSongsShown } from '@/utils/listSizes'
 
 export function buildArtistPlayOrder(
   topSongs: ISong[],
@@ -12,8 +13,8 @@ export function buildArtistPlayOrder(
   const seenIds = new Set<string>()
   const result: ISong[] = []
 
-  // 1. First 8 top songs
-  for (const song of topSongs.slice(0, 8)) {
+  // 1. The top songs shown on the artist page
+  for (const song of topSongs.slice(0, topSongsShown)) {
     if (!seenIds.has(song.id)) {
       seenIds.add(song.id)
       result.push(song)

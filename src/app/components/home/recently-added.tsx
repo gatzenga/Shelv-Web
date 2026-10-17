@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { useGetRecentlyAdded } from '@/app/hooks/use-home'
+import { ROUTES } from '@/routes/routesList'
 import PreviewList from './preview-list'
 
 export function RecentlyAdded() {
@@ -13,5 +14,11 @@ export function RecentlyAdded() {
 
   if (!data || !data.list || data.list.length === 0) return null
 
-  return <PreviewList title={t('home.recentlyAdded')} list={data.list} />
+  return (
+    <PreviewList
+      title={t('home.recentlyAdded')}
+      titleRoute={ROUTES.DISCOVER.PAGE('recently-added')}
+      list={data.list}
+    />
+  )
 }

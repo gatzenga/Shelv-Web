@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { PreviewListFallback } from '@/app/components/fallbacks/home-fallbacks'
 import { useGetRandomAlbums } from '@/app/hooks/use-home'
+import { ROUTES } from '@/routes/routesList'
 import PreviewList from './preview-list'
 
 export function Explore() {
@@ -16,6 +17,7 @@ export function Explore() {
   return (
     <PreviewList
       title={t('home.explore')}
+      titleRoute={ROUTES.DISCOVER.PAGE('random-albums')}
       list={data.list}
       onRefresh={() => refetch()}
       isRefreshing={isFetching}

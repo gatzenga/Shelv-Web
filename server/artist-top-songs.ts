@@ -20,7 +20,7 @@ import {
   type SubsonicRequest,
 } from './subsonic-client.ts'
 
-const songLimit = 10
+const songLimit = 20
 const playCountAlbumLimit = 25
 const lastfmAlbumLimit = 40
 

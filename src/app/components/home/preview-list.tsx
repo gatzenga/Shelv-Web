@@ -1,4 +1,4 @@
-import { RefreshCwIcon } from 'lucide-react'
+import { ChevronRightIcon, RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -12,6 +12,7 @@ import {
 } from '@/app/components/ui/carousel'
 import { CarouselButton } from '@/app/components/ui/carousel-button'
 import { Albums } from '@/types/responses/album'
+import { discoverPreviewSize } from '@/utils/listSizes'
 
 interface PreviewListProps {
   list: Albums[]
@@ -45,8 +46,8 @@ export default function PreviewList({
 
   moreTitle = moreTitle || t('generic.seeMore')
 
-  if (list.length > 16) {
-    list = list.slice(0, 16)
+  if (list.length > discoverPreviewSize) {
+    list = list.slice(0, discoverPreviewSize)
   }
 
   useEffect(() => {
@@ -71,8 +72,12 @@ export default function PreviewList({
           data-testid="preview-list-title"
         >
           {titleRoute ? (
-            <Link to={titleRoute} className="hover:underline">
+            <Link
+              to={titleRoute}
+              className="flex items-center gap-1 w-fit hover:text-primary transition-colors"
+            >
               {title}
+              <ChevronRightIcon className="size-6 text-muted-foreground" />
             </Link>
           ) : (
             title
