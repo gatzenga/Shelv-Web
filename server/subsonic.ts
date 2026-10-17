@@ -61,6 +61,70 @@ function cacheKey(endpoint: string, params: URLSearchParams) {
 // enough to fail. A few at a time is faster in the end.
 const coverRequests = new Semaphore(6)
 
+// What Navidrome sends for a cover it can not give right now: a picture of its
+// own, marked no-store. It looks like a cover, so it has to be told by that.
+function isPlaceholder(response: Response) {
+  return (
+    response.status === 200 &&
+    (response.headers.get('content-type') ?? '').startsWith('image/') &&
+    /no-store/i.test(response.headers.get('cache-control') ?? '')
+  )
+}
+
+const placeholderRetryDelay = 700
+
+// Another client gets the cover where this one gets the placeholder, so the
+// placeholder is not taken for an answer: the same cover is asked for again,
+// then in a larger size, then in full size. What is left is the placeholder.
+async function realCover(
+  first: Response,
+  target: URL,
+  ask: (url: URL) => Promise<Response>,
+) {
+  if (!isPlaceholder(first)) return first
+
+  const fallback = new Response(await first.arrayBuffer(), first)
+  const size = Number(target.searchParams.get('size')) || 0
+  const variants: { label: string; url: URL; wait: number }[] = []
+
+  const same = new URL(target)
+  variants.push({ label: 'again', url: same, wait: placeholderRetryDelay })
+
+  if (size > 0) {
+    const larger = new URL(target)
+    larger.searchParams.set('size', String(Math.min(size * 2, 1200)))
+    variants.push({
+      label: `size ${Math.min(size * 2, 1200)}`,
+      url: larger,
+      wait: 0,
+    })
+
+    const full = new URL(target)
+    full.searchParams.delete('size')
+    variants.push({ label: 'full size', url: full, wait: 0 })
+  }
+
+  for (const { label, url, wait } of variants) {
+    if (wait) await new Promise((resolve) => setTimeout(resolve, wait))
+
+    const next = await ask(url)
+    if (!isPlaceholder(next)) {
+      logger.info(
+        `cover ${target.searchParams.get('id')}: Navidrome sent its placeholder for size ${size || 'full'}, the cover came ${label}`,
+      )
+      await fallback.body?.cancel()
+      return next
+    }
+    await next.body?.cancel()
+  }
+
+  logger.warn(
+    `cover ${target.searchParams.get('id')}: Navidrome only has its placeholder for it`,
+  )
+
+  return fallback
+}
+
 const cachedResponseMaxAge = 'private, max-age=86400'
 
 function endpointName(pathname: string) {
@@ -152,14 +216,21 @@ export function createSubsonicHandler(
       res.once('close', release)
     }
 
-    const upstream = await fetch(target, {
-      method: req.method,
-      headers: upstreamHeaders(req),
-      body: requestBody(req),
-      signal: abortOnClose(res),
-      // required by Node.js to stream a request body
-      duplex: 'half',
-    })
+    const signal = abortOnClose(res)
+    const ask = (url: URL) =>
+      fetch(url, {
+        method: req.method,
+        headers: upstreamHeaders(req),
+        body: requestBody(req),
+        signal,
+        // required by Node.js to stream a request body
+        duplex: 'half',
+      })
+
+    let upstream = await ask(target)
+    if (endpoint === 'getCoverArt' && req.method === 'GET') {
+      upstream = await realCover(upstream, target, ask)
+    }
 
     if (!cache || !kind || !key) {
       await pipeUpstream(req, res, upstream)
