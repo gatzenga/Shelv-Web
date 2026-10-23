@@ -9,13 +9,38 @@ permissions:
   contents: read
   packages: write
 
+# One build after the other, so two pushes never get the same version
+concurrency:
+  group: docker-image
+  cancel-in-progress: false
+
 # The actions are named by their commit, a changed tag can not change what runs here
 # with the right to write the image. Dependabot proposes new ones.
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Every build is the next patch version: the major and minor version come
+      # from package.json, the patch is one more than the last tag of that
+      # series. A new major or minor version is written into package.json, its
+      # first build gets the patch written there (1.1.0).
+      - name: Version
+        id: version
+        run: |
+          base=$(jq -r .version package.json)
+          series=${base%.*}
+          patch=${base##*.}
+          last=$(git ls-remote --tags --refs origin "refs/tags/v$series.*" \
+            | sed 's|.*refs/tags/v||' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | cut -d. -f3 | sort -n | tail -1)
+          if [ -n "$last" ] && [ "$((last + 1))" -gt "$patch" ]; then
+            patch=$((last + 1))
+          fi
+          echo "version=$series.$patch" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
 
@@ -34,6 +59,7 @@ jobs:
           context: .
           load: true
           tags: shelv-web:test
+          build-args: APP_VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
 
       - name: Start the image like the compose file and ask it
@@ -66,5 +92,23 @@ jobs:
           push: true
           # Only latest: with a second tag GitHub shows that one in "Install from the command line"
           tags: ghcr.io/gatzenga/shelv-web:latest
+          build-args: APP_VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Only a published image gets its version as a tag, a failed build gives its
+  # number to the next one
+  tag:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Tag the version
+        env:
+          VERSION: v${{ needs.build.outputs.version }}
+        run: |
+          git tag "$VERSION"
+          git push origin "$VERSION"

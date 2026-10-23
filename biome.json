@@ -17,7 +17,7 @@
       "semicolons": "asNeeded",
       "arrowParentheses": "always"
     },
-    "globals": ["navigator", "window", "document"]
+    "globals": ["navigator", "window", "document", "__APP_VERSION__"]
   },
   "json": {
     "formatter": {

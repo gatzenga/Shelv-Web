@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { GlobeIcon, MailIcon } from 'lucide-react'
 import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,8 +12,10 @@ import {
   DialogTitle,
 } from '@/app/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { getServerInfo } from '@/service/server-overview'
 import { AboutLink, aboutLinks } from '@/utils/appLinks'
 import { getAppInfo } from '@/utils/appName'
+import { queryKeys } from '@/utils/queryKeys'
 
 interface AboutDialogProps {
   open: boolean
@@ -46,6 +49,11 @@ const linkStyles: Record<AboutLink, { className: string; icon: ReactNode }> = {
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const { t } = useTranslation()
   const { name, version } = getAppInfo()
+  const { data: serverInfo } = useQuery({
+    queryKey: [queryKeys.update.serverInfo],
+    queryFn: getServerInfo,
+    enabled: open,
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,11 +70,19 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
         </DialogHeader>
 
         <div className="w-full p-6 gap-6 flex flex-col">
-          <div className="flex flex-col gap-2 text-sm">
-            <span className="text-xs font-medium">{t('about.client')}</span>
-            <div className="flex gap-2">
+          <div className="flex gap-8 text-sm">
+            <div className="flex flex-col items-start gap-2">
+              <span className="text-xs font-medium">{t('about.client')}</span>
               <MultiBadge label={t('about.version')}>{version}</MultiBadge>
             </div>
+            {serverInfo?.nodeVersion && (
+              <div className="flex flex-col items-start gap-2">
+                <span className="text-xs font-medium">Node.js</span>
+                <MultiBadge label={t('about.version')}>
+                  {serverInfo.nodeVersion}
+                </MultiBadge>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2.5">

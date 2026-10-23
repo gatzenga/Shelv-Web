@@ -12,6 +12,8 @@ RUN corepack install
 ENV PNPM_CONFIG_IGNORE_SCRIPTS=true
 RUN pnpm install --ignore-scripts
 COPY . .
+# The version the workflow gives this build (.github/workflows/docker.yml)
+ARG APP_VERSION
 RUN pnpm run build
 
 # Final stage: one Node.js process serves the frontend and runs the backend.

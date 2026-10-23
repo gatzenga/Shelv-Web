@@ -18,7 +18,8 @@ export function withoutLogin(address: string) {
 }
 
 // The address of Navidrome as the backend reaches it. It is an internal
-// address, so only an administrator gets it.
+// address, so only an administrator gets it. The version of Node.js is for
+// the About screen.
 export async function sendServerInfo(
   config: ServerConfig,
   res: ServerResponse,
@@ -29,5 +30,6 @@ export async function sendServerInfo(
   res.setHeader('cache-control', 'no-store')
   sendJson(res, 200, {
     navidromeUrl: isAdmin ? withoutLogin(config.navidromeUrl) : null,
+    nodeVersion: process.versions.node,
   })
 }

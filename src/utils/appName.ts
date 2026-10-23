@@ -1,4 +1,5 @@
-import { version } from '@/../package.json'
+// Set by Vite (vite.config.ts)
+const version = __APP_VERSION__
 
 export const appName = 'Shelv Web'
 

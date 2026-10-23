@@ -569,6 +569,16 @@ describe('server', () => {
     assert.match((await info('admin')) ?? '', /^http:\/\/127\.0\.0\.1:\d+$/)
   })
 
+  test('everybody who is logged in gets the version of Node.js', async () => {
+    const cookie = cookieOf(await login('vasco', 'good', '10.5.0.1'))
+    const response = await fetch(`${base}/api/server-info`, {
+      headers: { cookie },
+    })
+    const { nodeVersion } = (await response.json()) as { nodeVersion: string }
+
+    assert.equal(nodeVersion, process.versions.node)
+  })
+
   test('the page only runs its own script', async () => {
     const page = await fetch(`${base}/`)
     const html = await page.text()

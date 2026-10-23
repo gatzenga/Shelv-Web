@@ -19,18 +19,21 @@ async function countAlbums() {
   }
 }
 
-async function getNavidromeUrl() {
+export async function getServerInfo() {
   const response = await fetch(getBackendUrl('/api/server-info'), {
     cache: 'no-store',
   })
   if (!response.ok) return null
 
   // only an administrator gets the address
-  const { navidromeUrl } = (await response.json()) as {
+  return (await response.json()) as {
     navidromeUrl: string | null
+    nodeVersion: string
   }
+}
 
-  return navidromeUrl
+async function getNavidromeUrl() {
+  return (await getServerInfo())?.navidromeUrl ?? null
 }
 
 // The data of the Manage Servers sheet, like the server screen of the Shelv app
